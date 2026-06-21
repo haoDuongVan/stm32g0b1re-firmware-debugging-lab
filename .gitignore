@@ -1,0 +1,52 @@
+# STM32CubeIDE workspace metadata
+.metadata/
+.recommenders/
+
+# Keep .project and .cproject for easier STM32CubeIDE import
+# Do not ignore .project
+# Do not ignore .cproject
+
+# Build outputs
+Debug/
+Release/
+build/
+*.elf
+*.bin
+*.hex
+*.map
+*.list
+*.o
+*.d
+*.su
+*.cyclo
+
+# Temporary files
+*.log
+*.tmp
+*.bak
+*.orig
+*.swp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# VS Code
+.vscode/
+
+# STM32Cube generated backup files
+*.ioc.bak
+
+# Local notes
+local/
+notes.local.md
