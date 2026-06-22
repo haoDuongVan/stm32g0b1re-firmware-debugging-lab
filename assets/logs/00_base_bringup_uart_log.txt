@@ -1,0 +1,18 @@
+App initialized
+[BOOT] STM32G0B1RE Firmware Debugging Lab
+[BOOT] Project: 00_base_bringup
+[BOOT] UART debug initialized
+[BOOT] Starting main loop
+[MAIN] tick=1000
+[MAIN] tick=2000
+[MAIN] tick=3000
+[MAIN] tick=4000
+[MAIN] tick=5000
+[MAIN] tick=6000
+[MAIN] tick=7000
+[MAIN] tick=8000
+[MAIN] tick=9000
+[MAIN] tick=10000
+[MAIN] tick=11000
+[MAIN] tick=12000
+[MAIN] tick=13000
