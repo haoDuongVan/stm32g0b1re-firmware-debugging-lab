@@ -1,0 +1,38 @@
+[BOOT] STM32G0B1RE Firmware Debugging Lab
+[BOOT] Project: 01_uart_dma_ring_logger
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 48 MHz
+[BOOT] UART DMA logger initialized
+[BOOT] Test mode: normal
+[MAIN] tick=1000 dropped=0 buffered=0
+[MAIN] tick=2000 dropped=0 buffered=0
+[MAIN] tick=3000 dropped=0 buffered=0
+[MAIN] tick=4000 dropped=0 buffered=0
+[MAIN] tick=5000 dropped=0 buffered=0
+[MAIN] tick=6000 dropped=0 buffered=0
+[MAIN] tick=7000 dropped=0 buffered=0
+[MAIN] tick=8000 dropped=0 buffered=0
+[MAIN] tick=9000 dropped=0 buffered=0
+[MAIN] tick=10000 dropped=0 buffered=0
+[MAIN] tick=11000 dropped=0 buffered=0
+[MAIN] tick=12000 dropped=0 buffered=0
+[MAIN] tick=13000 dropped=0 buffered=0
+[MAIN] tick=14000 dropped=0 buffered=0
+[MAIN] tick=15000 dropped=0 buffered=0
+[MAIN] tick=16000 dropped=0 buffered=0
+[MAIN] tick=17000 dropped=0 buffered=0
+[MAIN] tick=18000 dropped=0 buffered=0
+[MAIN] tick=19000 dropped=0 buffered=0
+[MAIN] tick=20000 dropped=0 buffered=0
+[MAIN] tick=21000 dropped=0 buffered=0
+[MAIN] tick=22000 dropped=0 buffered=0
+[MAIN] tick=23000 dropped=0 buffered=0
+[MAIN] tick=24000 dropped=0 buffered=0
+[MAIN] tick=25000 dropped=0 buffered=0
+[MAIN] tick=26000 dropped=0 buffered=0
+[MAIN] tick=27000 dropped=0 buffered=0
+[MAIN] tick=28000 dropped=0 buffered=0
+[MAIN] tick=29000 dropped=0 buffered=0
+[MAIN] tick=30000 dropped=0 buffered=0
+[MAIN] tick=31000 dropped=0 buffered=0
+[MAIN] tick=32000 dropped=0 buffered=0

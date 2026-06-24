@@ -1,0 +1,100 @@
+[BOOT] STM32G0B1RE Firmware Debugging Lab
+[BOOT] Project: 01_uart_dma_ring_logger
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 48 MHz
+[BOOT] UART DMA logger initialized
+[BOOT] Test mode: spam
+[MAIN] tick=1000 dropped=0 buffered=0
+[TEST] spam log start
+[SPAM] index=0 tick=2000
+[SPAM] index=1 tick=2000
+[SPAM] index=2 tick=2000
+[SPAM] index=3 tick=2000
+[SPAM] index=4 tick=2000
+[SPAM] index=5 tick=2000
+[SPAM] index=6 tick=2000
+[SPAM] index=7 tick=2000
+[SPAM] index=8 tick=2000
+[SPAM] index=9 tick=2000
+[SPAM] index=10 tick=2000
+[SPAM] index=11 tick=2000
+[SPAM] index=12 tick=2000
+[SPAM] index=13 tick=2000
+[SPAM] index=14 tick=2001
+[SPAM] index=15 tick=2001
+[SPAM] index=16 tick=2001
+[SPAM] index=17 tick=2001
+[SPAM] index=18 tick=2001
+[SPAM] index=19 tick=2001
+[SPAM] index=20 tick=2001
+[SPAM] index=21 tick=2001
+[SPAM] index=22 tick=2001
+[SPAM] index=23 tick=2001
+[SPAM] index=24 tick=2001
+[SPAM] index=25 tick=2001
+[SPAM] index=26 tick=2001
+[SPAM] index=27 tick=2001
+[SPAM] index=28 tick=2002
+[SPAM] index=29 tick=2002
+[SPAM] index=30 tick=2002
+[SPAM] index=31 tick=2002
+[SPAM] index=32 tick=2002
+[SPAM] index=33 tick=2002
+[SPAM] index=34 tick=2002
+[SPAM] index=35 tick=2002
+[SPAM] index=36 tick=2002
+[SPAM] index=37 tick=2002
+[SPAM] index=38 tick=2002
+[SPAM] index=39 tick=2002
+[SPAM] index=40 tick=2002
+[SPAM] index=41 tick=2003
+[SPAM] index=42 tick=2003
+[SPAM] index=43 tick=2003
+[SPAM] index=44 tick=2003
+[SPAM] index=45 tick=2003
+[SPAM] index=46 tick=2003
+[SPAM] index=47 tick=2003
+[SPAM] index=48 tick=2003
+[SPAM] index=49 tick=2003
+[SPAM] index=50 tick=2003
+[SPAM] index=51 tick=2003
+[SPAM] index=52 tick=2003
+[SPAM] index=53 tick=2003
+[SPAM] index=54 tick=2003
+[SPAM] index=55 tick=2004
+[SPAM] index=56 tick=2004
+[SPAM] index=57 tick=2004
+[SPAM] index=58 tick=2004
+[SPAM] index=59 tick=2004
+[SPAM] index=60 tick=2004
+[SPAM] index=61 tick=2004
+[SPAM] index=62 tick=2004
+[SPAM] index=63 tick=2004
+[SPAM] index=64 tick=2004
+[SPAM] index=65 tick=2004
+[SPAM] index=66 tick=2004
+[SPAM] index=67 tick=2004
+[SPAM] index=68 tick=2005
+[SPAM] index=69 tick=2005
+[SPAM] index=70 tick=2005
+[SPAM] index=71 tick=2005
+[SPAM] index=72 tick=2005
+[SPAM] index=73 tick=2005
+[SPAM] index=74 tick=2005
+[SPAM] index=75 tick=2005
+[MAIN] tick=3000 dropped=26 buffered=0
+[MAIN] tick=4000 dropped=26 buffered=0
+[MAIN] tick=5000 dropped=26 buffered=0
+[MAIN] tick=6000 dropped=26 buffered=0
+[MAIN] tick=7000 dropped=26 buffered=0
+[MAIN] tick=8000 dropped=26 buffered=0
+[MAIN] tick=9000 dropped=26 buffered=0
+[MAIN] tick=10000 dropped=26 buffered=0
+[MAIN] tick=11000 dropped=26 buffered=0
+[MAIN] tick=12000 dropped=26 buffered=0
+[MAIN] tick=13000 dropped=26 buffered=0
+[MAIN] tick=14000 dropped=26 buffered=0
+[MAIN] tick=15000 dropped=26 buffered=0
+[MAIN] tick=16000 dropped=26 buffered=0
+[MAIN] tick=17000 dropped=26 buffered=0
+[MAIN] tick=18000 dropped=26 buffered=0
