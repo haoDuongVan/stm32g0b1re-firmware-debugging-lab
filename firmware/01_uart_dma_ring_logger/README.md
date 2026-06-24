@@ -321,8 +321,6 @@ The data remains queued and may be retried by a later transfer start attempt.
 
 ## Evidence
 
-Recommended evidence files:
-
 ```txt
 assets/reports/01_uart_dma_ring_logger.pdf
 assets/reports/01_uart_dma_ring_logger.txt
@@ -337,11 +335,6 @@ assets/logs/01_uart_dma_ring_logger_normal_log.txt
 assets/logs/01_uart_dma_ring_logger_blocking_test.txt
 assets/logs/01_uart_dma_ring_logger_spam_test.txt
 assets/logs/01_uart_dma_ring_logger_buffer_full.txt
-```
-
-Optional analysis note:
-
-```txt
 assets/logs/01_uart_dma_ring_logger_spam_analysis.md
 ```
 
