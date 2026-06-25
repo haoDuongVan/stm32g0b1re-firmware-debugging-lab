@@ -18,13 +18,15 @@
 #define APP_TEST_MODE_APPEND_LATEST           3
 #define APP_TEST_MODE_REBOOT_READBACK         4
 #define APP_TEST_MODE_PAGE_TRANSFER           5
-#define APP_TEST_MODE_FAULT_AFTER_RECEIVE     6
-#define APP_TEST_MODE_FAULT_AFTER_COPY        7
-#define APP_TEST_MODE_CORRUPT_RECORD          8
-#define APP_TEST_MODE_FAULT_AFTER_PROGRAM     9
+#define APP_TEST_MODE_PAGE_TRANSFER_REBOOT    6
+#define APP_TEST_MODE_FAULT_AFTER_RECEIVE     7
+#define APP_TEST_MODE_FAULT_AFTER_COPY        8
+#define APP_TEST_MODE_CORRUPT_RECORD          9
+#define APP_TEST_MODE_FAULT_AFTER_PROGRAM     10
 
 // Set default test mode
-#define APP_TEST_MODE                         APP_TEST_MODE_PAGE_TRANSFER
+#define APP_TEST_MODE                         APP_TEST_MODE_PAGE_TRANSFER_REBOOT
+
 
 // Define reboot readback test phase values
 #define APP_TEST_PHASE_AFTER_RESET            1U
@@ -32,6 +34,21 @@
 
 // Define reboot readback test value
 #define APP_TEST_REBOOT_BAUD_RATE             230400UL
+
+// Define page transfer reboot test phase values
+#define APP_TEST6_PHASE_AFTER_RESET           0x00000601UL
+#define APP_TEST6_PHASE_DONE                  0x00000602UL
+
+// Define page transfer reboot test values
+#define APP_TEST6_FINAL_BAUD                  230400UL
+#define APP_TEST6_TIMEOUT                     1000UL
+#define APP_TEST6_MODE                        3UL
+
+/*
+ * TEST6 writes TEST_PHASE + TIMEOUT + MODE first.
+ * Therefore baud fill count must leave exactly one slot for trigger write.
+ */
+#define APP_TEST6_FILL_COUNT                  (EE_RECORDS_PER_PAGE - 3U)
 
 // Define page transfer test values
 #define APP_TEST_PAGE_TRANSFER_FILL_COUNT     (EE_RECORDS_PER_PAGE - 2U)
@@ -54,6 +71,7 @@ static uint8_t write_readback_test_done = 0U;
 static uint8_t append_latest_test_done = 0U;
 static uint8_t reboot_readback_test_done = 0U;
 static uint8_t page_transfer_test_done = 0U;
+static uint8_t page_transfer_reboot_test_done = 0U;
 static uint8_t not_implemented_log_done = 0U;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -65,6 +83,7 @@ static void App_RunWriteReadback(void);
 static void App_RunAppendLatest(void);
 static void App_RunRebootReadback(void);
 static void App_RunPageTransfer(void);
+static void App_RunPageTransferReboot(void);
 static void App_RunNotImplemented(void);
 static void App_UpdateHeartbeat(void);
 
@@ -92,6 +111,9 @@ static const char *App_GetTestModeName(uint32_t test_mode)
 
     case APP_TEST_MODE_PAGE_TRANSFER:
       return "page_transfer";
+
+    case APP_TEST_MODE_PAGE_TRANSFER_REBOOT:
+      return "page_transfer_reboot";
 
     case APP_TEST_MODE_FAULT_AFTER_RECEIVE:
       return "fault_after_receive";
@@ -517,7 +539,6 @@ static void App_RunRebootReadback(void)
 // Run page transfer test
 static void App_RunPageTransfer(void)
 {
-  static uint8_t page_transfer_test_done = 0U;
   EeStatus_t status;
   uint32_t read_baud = 0U;
   uint32_t read_timeout = 0U;
@@ -691,6 +712,235 @@ static void App_RunPageTransfer(void)
   UartLog_Printf("[TEST5] PASS\r\n");
 }
 
+// Run page transfer reboot test
+static void App_RunPageTransferReboot(void)
+{
+  EeStatus_t status;
+  uint32_t phase = 0U;
+  uint32_t read_baud = 0U;
+  uint32_t read_timeout = 0U;
+  uint32_t read_mode = 0U;
+
+  // Run this test only once per boot
+  if (page_transfer_reboot_test_done != 0U) {
+    return;
+  }
+
+  // Mark test as done for this boot
+  page_transfer_reboot_test_done = 1U;
+
+  // Initialize EEPROM module from current Flash state
+  status = Ee_Init();
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST6] init=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST6] FAIL\r\n");
+    return;
+  }
+
+  // Read test phase
+  status = Ee_Read(EE_VAR_ID_TEST_PHASE, &phase);
+
+  // Verify completed test state on later boots
+  if ((status == EE_OK) && (phase == APP_TEST6_PHASE_DONE)) {
+    UartLog_Printf("[TEST6] phase=done\r\n");
+
+    // Read baud rate after completed state
+    status = Ee_Read(CFG_BAUD_RATE, &read_baud);
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST6] read CFG_BAUD_RATE=NG status=%s\r\n", Ee_StatusToString(status));
+      UartLog_Printf("[TEST6] FAIL\r\n");
+      return;
+    }
+
+    // Check baud rate value
+    if (read_baud != APP_TEST6_FINAL_BAUD) {
+      UartLog_Printf("[TEST6] value_check=NG expected=%lu actual=%lu\r\n",
+                     (unsigned long)APP_TEST6_FINAL_BAUD,
+                     (unsigned long)read_baud);
+      UartLog_Printf("[TEST6] FAIL\r\n");
+      return;
+    }
+
+    // Print completed test result
+    UartLog_Printf("[TEST6] active_page=0x%08lX\r\n", (unsigned long)Ee_GetActivePageAddr());
+    UartLog_Printf("[TEST6] write_offset=%lu\r\n", (unsigned long)Ee_GetWriteOffset());
+    UartLog_Printf("[TEST6] read CFG_BAUD_RATE=%lu OK\r\n", (unsigned long)read_baud);
+    UartLog_Printf("[TEST6] PASS\r\n");
+    return;
+  }
+
+  // Prepare page transfer when phase is not after-reset
+  if ((status != EE_OK) || (phase != APP_TEST6_PHASE_AFTER_RESET)) {
+    UartLog_Printf("[TEST6] phase=prepare\r\n");
+
+    // Format EEPROM area for deterministic test
+    status = Ee_Format();
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST6] format=NG status=%s\r\n", Ee_StatusToString(status));
+      UartLog_Printf("[TEST6] FAIL\r\n");
+      return;
+    }
+
+    // Write phase marker before transfer
+    status = Ee_Write(EE_VAR_ID_TEST_PHASE, APP_TEST6_PHASE_AFTER_RESET);
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST6] write TEST_PHASE=NG status=%s\r\n", Ee_StatusToString(status));
+      UartLog_Printf("[TEST6] FAIL\r\n");
+      return;
+    }
+    UartLog_Printf("[TEST6] write TEST_PHASE=after_reset OK\r\n");
+
+    // Write timeout config
+    status = Ee_Write(CFG_TIMEOUT_MS, APP_TEST6_TIMEOUT);
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST6] write CFG_TIMEOUT_MS=NG status=%s\r\n", Ee_StatusToString(status));
+      UartLog_Printf("[TEST6] FAIL\r\n");
+      return;
+    }
+
+    // Write mode config
+    status = Ee_Write(CFG_MODE, APP_TEST6_MODE);
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST6] write CFG_MODE=NG status=%s\r\n", Ee_StatusToString(status));
+      UartLog_Printf("[TEST6] FAIL\r\n");
+      return;
+    }
+
+    // Print seed config result
+    UartLog_Printf("[TEST6] write seed configs OK\r\n");
+
+    // Fill active page with repeated baud rate records
+    for (uint32_t idx = 0U; idx < APP_TEST6_FILL_COUNT; idx++) {
+      status = Ee_Write(CFG_BAUD_RATE, 9600UL + idx);
+      if (status != EE_OK) {
+        UartLog_Printf("[TEST6] fill failed idx=%lu status=%s\r\n",
+                       (unsigned long)idx,
+                       Ee_StatusToString(status));
+        UartLog_Printf("[TEST6] FAIL\r\n");
+        return;
+      }
+    }
+
+    // Print fill result
+    UartLog_Printf("[TEST6] fill_records=%lu OK\r\n", (unsigned long)APP_TEST6_FILL_COUNT);
+    UartLog_Printf("[TEST6] write_offset_before_transfer=%lu\r\n",
+                   (unsigned long)Ee_GetWriteOffset());
+
+    // Check active page is full before transfer
+    if (Ee_GetWriteOffset() != EE_PAGE_SIZE) {
+      UartLog_Printf("[TEST6] full_page_check=NG expected=%lu actual=%lu\r\n",
+                     (unsigned long)EE_PAGE_SIZE,
+                     (unsigned long)Ee_GetWriteOffset());
+      UartLog_Printf("[TEST6] FAIL\r\n");
+      return;
+    }
+
+    // Write final baud rate to trigger page transfer
+    status = Ee_Write(CFG_BAUD_RATE, APP_TEST6_FINAL_BAUD);
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST6] trigger write=NG status=%s\r\n", Ee_StatusToString(status));
+      UartLog_Printf("[TEST6] FAIL\r\n");
+      return;
+    }
+    UartLog_Printf("[TEST6] write final CFG_BAUD_RATE=%lu OK\r\n",
+                   (unsigned long)APP_TEST6_FINAL_BAUD);
+
+    // Print state before reset
+    UartLog_Printf("[TEST6] active_page_before_reset=0x%08lX\r\n",
+                   (unsigned long)Ee_GetActivePageAddr());
+    UartLog_Printf("[TEST6] write_offset_before_reset=%lu\r\n",
+                   (unsigned long)Ee_GetWriteOffset());
+
+    // Trigger software reset
+    UartLog_Printf("[TEST6] trigger software reset\r\n");
+    HAL_Delay(100);
+    NVIC_SystemReset();
+
+    return;
+  }
+
+  // Continue test after software reset
+  UartLog_Printf("[TEST6] phase=after_reset\r\n");
+
+  // Print restored runtime state
+  UartLog_Printf("[TEST6] active_page_after_reset=0x%08lX\r\n",
+                 (unsigned long)Ee_GetActivePageAddr());
+  UartLog_Printf("[TEST6] write_offset_after_reset=%lu\r\n",
+                 (unsigned long)Ee_GetWriteOffset());
+
+  // Check restored active page
+  if (Ee_GetActivePageAddr() != EE_PAGE_B_ADDR) {
+    UartLog_Printf("[TEST6] active_page_check=NG expected=0x%08lX actual=0x%08lX\r\n",
+                   (unsigned long)EE_PAGE_B_ADDR,
+                   (unsigned long)Ee_GetActivePageAddr());
+    UartLog_Printf("[TEST6] FAIL\r\n");
+    return;
+  }
+
+  // Check restored write offset
+  if (Ee_GetWriteOffset() != (EE_HEADER_SIZE + (4U * EE_RECORD_SIZE))) {
+    UartLog_Printf("[TEST6] write_offset_check=NG expected=%lu actual=%lu\r\n",
+                   (unsigned long)(EE_HEADER_SIZE + (4U * EE_RECORD_SIZE)),
+                   (unsigned long)Ee_GetWriteOffset());
+    UartLog_Printf("[TEST6] FAIL\r\n");
+    return;
+  }
+
+  // Read baud rate after reset
+  status = Ee_Read(CFG_BAUD_RATE, &read_baud);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST6] read CFG_BAUD_RATE=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST6] FAIL\r\n");
+    return;
+  }
+
+  // Read timeout after reset
+  status = Ee_Read(CFG_TIMEOUT_MS, &read_timeout);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST6] read CFG_TIMEOUT_MS=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST6] FAIL\r\n");
+    return;
+  }
+
+  // Read mode after reset
+  status = Ee_Read(CFG_MODE, &read_mode);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST6] read CFG_MODE=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST6] FAIL\r\n");
+    return;
+  }
+
+  // Print read values
+  UartLog_Printf("[TEST6] read CFG_BAUD_RATE=%lu OK\r\n", (unsigned long)read_baud);
+  UartLog_Printf("[TEST6] read CFG_TIMEOUT_MS=%lu OK\r\n", (unsigned long)read_timeout);
+  UartLog_Printf("[TEST6] read CFG_MODE=%lu OK\r\n", (unsigned long)read_mode);
+
+  // Check read values
+  if ((read_baud != APP_TEST6_FINAL_BAUD) ||
+      (read_timeout != APP_TEST6_TIMEOUT) ||
+      (read_mode != APP_TEST6_MODE)) {
+    UartLog_Printf("[TEST6] value_check=NG\r\n");
+    UartLog_Printf("[TEST6] FAIL\r\n");
+    return;
+  }
+
+  // Mark test as completed
+  status = Ee_Write(EE_VAR_ID_TEST_PHASE, APP_TEST6_PHASE_DONE);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST6] write TEST_PHASE=done NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST6] FAIL\r\n");
+    return;
+  }
+  UartLog_Printf("[TEST6] write TEST_PHASE=done OK\r\n");
+
+  // Print final page states
+  UartLog_Printf("[TEST6] page A state=%s\r\n", Ee_PageStateToString(Ee_GetPageState(EE_PAGE_A_ADDR)));
+  UartLog_Printf("[TEST6] page B state=%s\r\n", Ee_PageStateToString(Ee_GetPageState(EE_PAGE_B_ADDR)));
+
+  // Print test result
+  UartLog_Printf("[TEST6] PASS\r\n");
+}
+
 // Print message for unimplemented test modes
 static void App_RunNotImplemented(void)
 {
@@ -752,6 +1002,8 @@ void App_Run(void)
   App_RunRebootReadback();
 #elif APP_TEST_MODE == APP_TEST_MODE_PAGE_TRANSFER
   App_RunPageTransfer();
+#elif APP_TEST_MODE == APP_TEST_MODE_PAGE_TRANSFER_REBOOT
+  App_RunPageTransferReboot();
 #else
   App_RunNotImplemented();
 #endif
