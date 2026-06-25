@@ -3,13 +3,14 @@
 This project implements a small EEPROM emulation layer on the internal Flash of an STM32G0B1RE.
 
 The goal is not to build a production storage stack.  
-The goal is to make the core idea measurable:
+The goal is to make the core idea measurable on real hardware:
 
 - append-only records
 - two Flash pages used in rotation
 - page state markers
 - latest-value lookup
 - page transfer when the active page is full
+- boot-time write offset recovery
 - recovery behavior after software reset fault injection
 - corrupt-record handling using CRC
 
@@ -38,6 +39,14 @@ The implementation stores small configuration values as append-only records.
 Instead of overwriting an old value, the firmware writes a new record.  
 When reading, it scans backward and returns the latest valid record.
 
+This project also verifies reset-sensitive behavior, such as:
+
+```txt
+- reset after a page is marked RECEIVE
+- reset after latest records are copied
+- reset after HAL_FLASH_Program() succeeds but before RAM write_offset is updated
+```
+
 ---
 
 ## 2. Target
@@ -54,7 +63,10 @@ When reading, it scans backward and returns the latest valid record.
 | Page B | `0x08040800` |
 | UART log | USART2, 115200 bps |
 | RTOS | Not used in this project |
-| Logger | Reuse UART logger style from Project 01 |
+| Logger | Simple blocking UART logger |
+
+This project is intentionally bare-metal.  
+FreeRTOS is not used so that Flash behavior, page transfer, and reset recovery can be observed without scheduling noise.
 
 ---
 
@@ -71,16 +83,16 @@ Previous related projects:
 Project 01 provides the UART logging style used by this project.
 
 Project 02 is intentionally not reused directly.  
-This project is bare-metal so that Flash behavior, page transfer, and recovery can be tested without RTOS scheduling noise.
+This project focuses on Flash behavior and recovery logic, so the implementation stays bare-metal.
 
-The theory article is:
+The related theory article is:
 
 ```txt
 Flash STM32G0: Linker Script, EEPROM Emulation và Dual Bank
 ```
 
 The article explains the concepts.  
-This project implements and tests them on hardware.
+This project implements and tests them on real hardware.
 
 ---
 
@@ -131,7 +143,7 @@ Bank 1:
 
 Bank 2:
   0x08040000 - 0x0807FFFF
-  EEPROM emulation and reserved area
+  Reserved Flash bank
 
 EEPROM emulation:
   Page A: 0x08040000 - 0x080407FF
@@ -155,35 +167,46 @@ Expected capacity:
 (2048 - 32) / 8 = 252 records per page
 ```
 
+Measured TEST0 result:
+
+```txt
+[TEST0] EE_PAGE_A_ADDR=0x08040000
+[TEST0] EE_PAGE_B_ADDR=0x08040800
+[TEST0] page_size=2048
+[TEST0] header_size=32
+[TEST0] record_size=8
+[TEST0] records_per_page=252
+[TEST0] system_clock_check=OK
+[TEST0] PASS
+```
+
 ---
 
 ## 6. Linker Script Requirement
 
-The linker script should keep application code in Bank 1 and reserve a Flash area in Bank 2.
+The linker script keeps application code in Bank 1 and reserves the EEPROM emulation area in Bank 2.
 
-Example:
+Example memory layout:
 
 ```ld
 MEMORY
 {
-  FLASH     (rx)  : ORIGIN = 0x08000000, LENGTH = 256K
-  FLASH_EE  (r)   : ORIGIN = 0x08040000, LENGTH = 4K
-  RAM       (xrw) : ORIGIN = 0x20000000, LENGTH = 144K
+  RAM      (xrw) : ORIGIN = 0x20000000, LENGTH = 144K
+  FLASH    (rx)  : ORIGIN = 0x08000000, LENGTH = 256K
+  FLASH_EE (r)   : ORIGIN = 0x08040000, LENGTH = 4K
 }
 ```
 
-Optional reserved section:
+`FLASH_EE` is marked as read-only from the linker point of view.  
+Runtime Flash writing is still done by the Flash controller through:
 
-```ld
-.eeprom_store (NOLOAD) :
-{
-  . = ALIGN(2048);
-  KEEP(*(.eeprom_store))
-  . = ALIGN(2048);
-} > FLASH_EE
+```c
+HAL_FLASH_Unlock();
+HAL_FLASH_Program(...);
+HAL_FLASH_Lock();
 ```
 
-The implementation may also use absolute addresses directly, but the linker script must still document and protect the reserved area.
+The linker script protects the reserved area from accidentally being used by application code.
 
 ---
 
@@ -201,7 +224,7 @@ Offset +0x20 : First record
 
 Each marker slot is 8 bytes and is programmed only once after a page erase.
 
-This avoids overwriting the same double-word to change the page state.
+This avoids overwriting the same Flash double-word to change the page state.
 
 ---
 
@@ -212,12 +235,12 @@ Page states:
 ```c
 typedef enum
 {
-    EE_PAGE_RECEIVE = 0,
-    EE_PAGE_ACTIVE,
-    EE_PAGE_VALID,
-    EE_PAGE_ERASING,
-    EE_PAGE_ERASED,
-    EE_PAGE_INVALID,
+  EE_PAGE_RECEIVE = 0,
+  EE_PAGE_ACTIVE,
+  EE_PAGE_VALID,
+  EE_PAGE_ERASING,
+  EE_PAGE_ERASED,
+  EE_PAGE_INVALID
 } EePageState_t;
 ```
 
@@ -230,18 +253,24 @@ State meaning:
 | `ACTIVE` | Current read/write page |
 | `VALID` | Old page still has valid data but is no longer the main write page |
 | `ERASING` | Page is obsolete and can be erased |
-| `INVALID` | Unexpected marker combination or corrupted state |
+| `INVALID` | Unexpected state |
 
-State progression:
+Marker priority is checked from newest state to oldest state:
 
 ```txt
-ERASED
-  -> RECEIVE
-  -> ACTIVE
-  -> VALID
-  -> ERASING
-  -> ERASED
+ERASING -> VALID -> ACTIVE -> RECEIVE -> ERASED
 ```
+
+This is important because a page may contain multiple programmed marker slots.
+
+Example:
+
+```txt
+RECEIVE slot programmed
+ACTIVE slot programmed later
+```
+
+The current state should be interpreted as `ACTIVE`, not `RECEIVE`.
 
 ---
 
@@ -252,9 +281,9 @@ Each record is exactly 8 bytes.
 ```c
 typedef struct __attribute__((packed))
 {
-    uint16_t var_id;
-    uint16_t crc;
-    uint32_t value;
+  uint16_t var_id;
+  uint16_t crc;
+  uint32_t value;
 } EeRecord_t;
 ```
 
@@ -291,19 +320,20 @@ Public API:
 ```c
 typedef enum
 {
-    EE_OK = 0,
-    EE_NOT_INIT,
-    EE_NOT_FOUND,
-    EE_INVALID_PARAM,
-    EE_WRITE_ERROR,
-    EE_ERASE_ERROR,
-    EE_NO_ACTIVE_PAGE,
-    EE_NO_FREE_PAGE,
-    EE_TRANSFER_ERROR,
-    EE_CRC_MISMATCH,
+  EE_OK = 0,
+  EE_NOT_INIT,
+  EE_NOT_FOUND,
+  EE_INVALID_PARAM,
+  EE_WRITE_ERROR,
+  EE_ERASE_ERROR,
+  EE_NO_ACTIVE_PAGE,
+  EE_NO_FREE_PAGE,
+  EE_TRANSFER_ERROR,
+  EE_CRC_MISMATCH
 } EeStatus_t;
 
 EeStatus_t Ee_Init(void);
+EeStatus_t Ee_Format(void);
 EeStatus_t Ee_Read(uint16_t var_id, uint32_t *value);
 EeStatus_t Ee_Write(uint16_t var_id, uint32_t value);
 ```
@@ -316,6 +346,7 @@ uint32_t      Ee_GetWriteOffset(void);
 EePageState_t Ee_GetPageState(uint32_t page_addr);
 uint32_t      Ee_CountValidRecords(uint32_t page_addr);
 uint32_t      Ee_CountRecordsForVar(uint16_t var_id);
+EeStatus_t    Ee_TestWriteCorruptRecord(uint16_t var_id, uint32_t value);
 ```
 
 ---
@@ -337,16 +368,83 @@ At boot, it must:
 
 This is required because reset may occur after a record has been programmed but before the RAM write offset is updated.
 
+TEST4 and TEST10 verify this behavior.
+
 ---
 
-## 12. Recovery Policy
+## 12. Write Behavior
+
+`Ee_Write()` appends a new record to the current active page.
+
+Normal write flow:
+
+```txt
+1. Check initialized state
+2. Check var_id
+3. Check active page
+4. Check free space
+5. Build record with CRC
+6. Program one Flash double-word
+7. Verify written record
+8. Update RAM write_offset
+```
+
+If the active page is full, `Ee_Write()` triggers page transfer.
+
+---
+
+## 13. Read Behavior
+
+`Ee_Read()` scans the active page backward from the current write offset.
+
+Read flow:
+
+```txt
+1. Start from write_offset
+2. Move backward record by record
+3. Find matching var_id
+4. Validate CRC
+5. Return the latest valid value
+6. Skip corrupt records
+```
+
+This is why the newest valid record is returned even when older records with the same `var_id` still exist.
+
+---
+
+## 14. Page Transfer
+
+When the active page is full, the firmware transfers the latest valid values to the other page.
+
+Transfer flow:
+
+```txt
+1. Choose the other page
+2. Erase the other page if needed
+3. Set new page to RECEIVE
+4. Scan old page backward
+5. Copy only the latest valid value for each virtual ID
+6. Write the new trigger record
+7. Set new page to ACTIVE
+8. Mark old page VALID
+9. Mark old page ERASING
+10. Erase old page
+11. Update active_page_addr and write_offset
+```
+
+TEST5 verifies page transfer in the same boot.  
+TEST6 verifies page transfer persistence after reset.
+
+---
+
+## 15. Recovery Policy
 
 This project uses a simple recovery policy.
 
 If boot detects:
 
 ```txt
-one page is ACTIVE or VALID
+one page is ACTIVE
 the other page is RECEIVE
 ```
 
@@ -356,16 +454,30 @@ Recovery action:
 
 ```txt
 Erase RECEIVE page
-Continue using the previous ACTIVE/VALID page
+Continue using the previous ACTIVE page
+```
+
+Example:
+
+```txt
+Before recovery:
+  Page A = ACTIVE
+  Page B = RECEIVE
+
+After recovery:
+  Page A = ACTIVE
+  Page B = ERASED
 ```
 
 This policy intentionally treats RECEIVE as not trustworthy until it becomes ACTIVE.
 
 This is simpler than resuming a transfer from a partially copied RECEIVE page and is easier to prove with logs.
 
+TEST7 and TEST8 verify this behavior.
+
 ---
 
-## 13. Software Reset Fault Injection
+## 16. Software Reset Fault Injection
 
 This project uses `NVIC_SystemReset()` for controlled fault injection.
 
@@ -373,8 +485,8 @@ Fault injection points:
 
 ```txt
 After writing RECEIVE marker
-After copying records but before writing ACTIVE marker
-After HAL_FLASH_Program() returns OK but before RAM write offset update
+After copying latest records but before writing trigger record
+After HAL_FLASH_Program() returns OK but before RAM write_offset update
 ```
 
 Important limitation:
@@ -384,29 +496,33 @@ Software reset fault injection is not the same as physical power loss.
 ```
 
 It verifies that firmware handles intermediate states created by its own code.  
-It does not fully prove behavior when power is physically removed during a Flash program/erase operation.
+It does not fully prove behavior when power is physically removed during a Flash program or erase operation.
 
 A physical power-cut test would require separate hardware setup.
 
 ---
 
-## 14. Test Modes
+## 17. Test Modes
 
-Recommended compile-time test modes:
+Actual compile-time test modes:
 
 ```c
-#define APP_TEST_MODE_BOOT_CHECK              0U
-#define APP_TEST_MODE_FORMAT_DEFAULT          1U
-#define APP_TEST_MODE_WRITE_READBACK          2U
-#define APP_TEST_MODE_APPEND_LATEST           3U
-#define APP_TEST_MODE_PAGE_TRANSFER           4U
-#define APP_TEST_MODE_FAULT_AFTER_RECEIVE     5U
-#define APP_TEST_MODE_FAULT_AFTER_COPY        6U
-#define APP_TEST_MODE_CORRUPT_RECORD          7U
-#define APP_TEST_MODE_FAULT_AFTER_PROGRAM     8U
+#define APP_TEST_MODE_BOOT_CHECK              0
+#define APP_TEST_MODE_FORMAT_DEFAULT          1
+#define APP_TEST_MODE_WRITE_READBACK          2
+#define APP_TEST_MODE_APPEND_LATEST           3
+#define APP_TEST_MODE_REBOOT_READBACK         4
+#define APP_TEST_MODE_PAGE_TRANSFER           5
+#define APP_TEST_MODE_PAGE_TRANSFER_REBOOT    6
+#define APP_TEST_MODE_FAULT_AFTER_RECEIVE     7
+#define APP_TEST_MODE_FAULT_AFTER_COPY        8
+#define APP_TEST_MODE_CORRUPT_RECORD          9
+#define APP_TEST_MODE_FAULT_AFTER_PROGRAM     10
 ```
 
-Each test should end with:
+Inactive test code is guarded by preprocessor selectors to avoid unused static function and unused variable warnings.
+
+Each test ends with:
 
 ```txt
 [TESTn] PASS
@@ -415,106 +531,102 @@ Each test should end with:
 or:
 
 ```txt
-[TESTn] FAIL: <reason>
+[TESTn] FAIL
 ```
 
 ---
 
-## 15. Test 0 - Boot Check
+## 18. Test Result Summary
+
+| Test | Name | Result | Main Purpose |
+| --- | --- | --- | --- |
+| TEST0 | boot_check | PASS | Check Flash layout constants and 48 MHz clock |
+| TEST1 | format_default | PASS | Erase pages and set Page A ACTIVE |
+| TEST2 | write_readback | PASS | Write and read one record |
+| TEST3 | append_latest | PASS | Append multiple values and read latest |
+| TEST4 | reboot_readback | PASS | Restore active page and write offset after reset |
+| TEST5 | page_transfer | PASS | Transfer latest records to the other page |
+| TEST6 | page_transfer_reboot | PASS | Verify page transfer result after reset |
+| TEST7 | fault_after_receive | PASS | Recover reset after RECEIVE marker |
+| TEST8 | fault_after_copy | PASS | Recover reset after copying latest records |
+| TEST9 | corrupt_record | PASS | Skip corrupt latest record by CRC |
+| TEST10 | fault_after_program | PASS | Restore write offset after reset before RAM update |
+
+---
+
+## 19. TEST0 - Boot Check
 
 Purpose:
 
 ```txt
-Verify memory layout, DBANK assumption, page size, header size, record size and capacity.
+Verify memory layout, page size, header size, record size, record capacity, and system clock.
 ```
 
-Expected log:
+Measured log:
 
 ```txt
 [BOOT] Project: 03_flash_eeprom_emulation
+[BOOT] System clock: 48000000 Hz
+[BOOT] Test mode: boot_check
 [TEST0] EE_PAGE_A_ADDR=0x08040000
 [TEST0] EE_PAGE_B_ADDR=0x08040800
 [TEST0] page_size=2048
 [TEST0] header_size=32
 [TEST0] record_size=8
 [TEST0] records_per_page=252
+[TEST0] system_clock_check=OK
 [TEST0] PASS
 ```
 
 ---
 
-## 16. Test 1 - Format and Default Load
+## 20. TEST1 - Format Default
 
 Purpose:
 
 ```txt
-Verify first-boot behavior.
+Verify EEPROM format behavior.
 ```
 
-Expected behavior:
+Measured result:
 
 ```txt
-Both pages erased
-Ee_Init() formats Page A
-Page A becomes ACTIVE
-Read before write returns EE_NOT_FOUND
-Write config value
-Read back returns the written value
-```
-
-Expected log:
-
-```txt
-[TEST1] page_a_state=ERASED page_b_state=ERASED
-[TEST1] after init: active_page=A state=ACTIVE
-[TEST1] read before write: status=EE_NOT_FOUND
-[TEST1] write CFG_BAUD_RATE=115200: status=EE_OK
-[TEST1] read CFG_BAUD_RATE: status=EE_OK value=115200
+[EE] format start
+[EE] erase page A OK
+[EE] erase page B OK
+[EE] set page A ACTIVE OK
+[EE] page A state=ACTIVE
+[EE] page B state=ERASED
+[EE] active_page=0x08040000
+[EE] write_offset=32
+[EE] format done
+[TEST1] active_page_check=OK
+[TEST1] write_offset_check=OK
 [TEST1] PASS
 ```
 
 ---
 
-## 17. Test 2 - Write and Read Back After Reset
+## 21. TEST2 - Write Readback
 
 Purpose:
 
 ```txt
-Verify that records survive software reset.
+Verify basic record write and read in the same boot.
 ```
 
-Expected behavior:
+Measured result:
 
 ```txt
-Write config values
-Write TEST_PHASE marker
-Call NVIC_SystemReset()
-After reset, Ee_Init() scans Flash again
-Read config values
-Mark test as done
-```
-
-Expected log:
-
-```txt
-[TEST2] write CFG_BAUD_RATE=9600
-[TEST2] write CFG_TIMEOUT_MS=500
-[TEST2] resetting now...
-```
-
-After reset:
-
-```txt
-[BOOT] Test mode: write_readback
-[TEST2] post-reset phase detected
-[TEST2] read CFG_BAUD_RATE: status=EE_OK value=9600
-[TEST2] read CFG_TIMEOUT_MS: status=EE_OK value=500
+[TEST2] write CFG_BAUD_RATE=115200 OK
+[TEST2] read CFG_BAUD_RATE=115200 OK
+[TEST2] write_offset=40
 [TEST2] PASS
 ```
 
 ---
 
-## 18. Test 3 - Append and Latest Value
+## 22. TEST3 - Append Latest
 
 Purpose:
 
@@ -522,20 +634,60 @@ Purpose:
 Verify that read returns the latest valid record.
 ```
 
-Expected log:
+Measured result:
 
 ```txt
-[TEST3] write CFG_BAUD_RATE=9600
-[TEST3] write CFG_BAUD_RATE=19200
-[TEST3] write CFG_BAUD_RATE=115200
-[TEST3] read CFG_BAUD_RATE: value=115200
-[TEST3] record count for var_id=0x0001: 3
+[TEST3] write CFG_BAUD_RATE=9600 OK
+[TEST3] write CFG_BAUD_RATE=115200 OK
+[TEST3] write CFG_BAUD_RATE=230400 OK
+[TEST3] read CFG_BAUD_RATE=230400 OK
+[TEST3] record_count=3
+[TEST3] write_offset=56
 [TEST3] PASS
 ```
 
+This confirms that `Ee_Read()` scans backward and returns the latest valid value.
+
 ---
 
-## 19. Test 4 - Page Transfer
+## 23. TEST4 - Reboot Readback
+
+Purpose:
+
+```txt
+Verify that records survive software reset and Ee_Init() rebuilds write_offset.
+```
+
+Measured result before reset:
+
+```txt
+[TEST4] phase=prepare
+[TEST4] write TEST_PHASE=after_reset OK
+[TEST4] write CFG_BAUD_RATE=230400 OK
+[TEST4] write_offset_before_reset=48
+[TEST4] trigger software reset
+```
+
+Measured result after reset:
+
+```txt
+[EE] page A state=ACTIVE
+[EE] page B state=ERASED
+[EE] active_page=0x08040000
+[EE] write_offset=48
+[TEST4] phase=after_reset
+[TEST4] active_page=0x08040000
+[TEST4] write_offset_after_reset=48
+[TEST4] read CFG_BAUD_RATE=230400 OK
+[TEST4] write TEST_PHASE=done OK
+[TEST4] PASS
+```
+
+This confirms that the RAM write pointer is not trusted after reset.
+
+---
+
+## 24. TEST5 - Page Transfer
 
 Purpose:
 
@@ -543,93 +695,173 @@ Purpose:
 Verify page transfer when the active page becomes full.
 ```
 
-With 32-byte header:
+Measured result:
 
 ```txt
-record #1   offset = 32
-record #252 offset = 2040
-record #253 triggers transfer
+[TEST5] fill_records=250 OK
+[TEST5] write_offset_before_transfer=2048
+[EE] transfer start old=0x08040000 new=0x08040800
+[EE] set new page RECEIVE OK
+[EE] copied_records=2
+[EE] write trigger record OK
+[EE] set new page ACTIVE OK
+[EE] set old page VALID OK
+[EE] set old page ERASING OK
+[EE] erase old page OK
+[EE] page A state=ERASED
+[EE] page B state=ACTIVE
+[EE] transfer done active_page=0x08040800 write_offset=56
+[TEST5] read CFG_BAUD_RATE=230400 OK
+[TEST5] read CFG_TIMEOUT_MS=1000 OK
+[TEST5] read CFG_MODE=3 OK
+[TEST5] page A state=ERASED valid_count=0
+[TEST5] page B state=ACTIVE valid_count=3
+[TEST5] PASS
 ```
 
-Expected log:
+Explanation:
 
 ```txt
-[TEST4] writing records until page near full...
-[TEST4] write #252: offset=2040
-[TEST4] write #253 triggers transfer
-[TRANSFER] new_page=B state=RECEIVE
-[TRANSFER] copied latest values to page B
-[TRANSFER] new_page=B state=ACTIVE
-[TRANSFER] old_page=A state=ERASING
-[TRANSFER] old_page=A erased
-[TEST4] post-transfer read CFG_BAUD_RATE: status=EE_OK
-[TEST4] PASS
+Page A was filled to offset 2048.
+The next write triggered transfer to Page B.
+Only the latest values were copied.
+Page B became ACTIVE.
+Page A was erased.
 ```
 
 ---
 
-## 20. Test 5A - Fault After RECEIVE Marker
+## 25. TEST6 - Page Transfer Reboot
 
 Purpose:
 
 ```txt
-Verify recovery when reset occurs after the new page is marked RECEIVE.
+Verify that page transfer result is still valid after software reset.
 ```
 
-Expected log before reset:
+Measured result before reset:
 
 ```txt
-[TEST5A] page A near full, triggering transfer
-[TRANSFER] new_page=B state=RECEIVE
-[FAULT] reset after RECEIVE marker
+[TEST6] fill_records=249 OK
+[TEST6] write_offset_before_transfer=2048
+[EE] transfer start old=0x08040000 new=0x08040800
+[EE] copied_records=3
+[EE] transfer done active_page=0x08040800 write_offset=64
+[TEST6] active_page_before_reset=0x08040800
+[TEST6] write_offset_before_reset=64
+[TEST6] trigger software reset
 ```
 
-Expected log after reset:
+Measured result after reset:
 
 ```txt
-[RECOVER] page_a_state=ACTIVE page_b_state=RECEIVE
-[RECOVER] incomplete RECEIVE page detected
-[RECOVER] erasing page B
-[RECOVER] active_page=A
-[TEST5A] read CFG_BAUD_RATE: status=EE_OK
-[TEST5A] PASS
+[EE] page A state=ERASED
+[EE] page B state=ACTIVE
+[EE] active_page=0x08040800
+[EE] write_offset=64
+[TEST6] phase=after_reset
+[TEST6] active_page_after_reset=0x08040800
+[TEST6] write_offset_after_reset=64
+[TEST6] read CFG_BAUD_RATE=230400 OK
+[TEST6] read CFG_TIMEOUT_MS=1000 OK
+[TEST6] read CFG_MODE=3 OK
+[TEST6] write TEST_PHASE=done OK
+[TEST6] PASS
 ```
+
+This proves that the page transfer result is persistent in Flash and not only stored in RAM.
 
 ---
 
-## 21. Test 5B - Fault After Copy Before ACTIVE Marker
+## 26. TEST7 - Fault After RECEIVE Marker
 
 Purpose:
 
 ```txt
-Verify recovery when reset occurs after data copy but before ACTIVE marker.
+Verify recovery when reset occurs immediately after the new page is marked RECEIVE.
 ```
 
-Expected log before reset:
+Measured result before reset:
 
 ```txt
-[TEST5B] page A near full, triggering transfer
-[TRANSFER] new_page=B state=RECEIVE
-[TRANSFER] copied latest values to page B
-[FAULT] reset before ACTIVE marker
+[TEST7] fill_records=249 OK
+[TEST7] write_offset_before_fault=2048
+[TEST7] trigger write CFG_BAUD_RATE=230400
+[EE] transfer start old=0x08040000 new=0x08040800
+[EE] set new page RECEIVE OK
 ```
 
-Expected log after reset:
+Measured result after reset:
 
 ```txt
-[RECOVER] page_a_state=ACTIVE page_b_state=RECEIVE
-[RECOVER] RECEIVE page is not trusted
-[RECOVER] erasing page B
-[RECOVER] active_page=A
-[TEST5B] read CFG_BAUD_RATE: status=EE_OK
-[TEST5B] PASS
+[EE] page A state=ACTIVE
+[EE] page B state=RECEIVE
+[EE] recovery erase RECEIVE page=0x08040800
+[EE] recovery erase RECEIVE OK
+[EE] page B state after recovery=ERASED
+[EE] active_page=0x08040000
+[EE] write_offset=2048
+[TEST7] phase=after_reset
+[TEST7] read CFG_BAUD_RATE=9848 OK
+[TEST7] read CFG_TIMEOUT_MS=1000 OK
+[TEST7] read CFG_MODE=3 OK
+[TEST7] page A state=ACTIVE
+[TEST7] page B state=ERASED
+[TEST7] PASS
 ```
 
-Test 5A and Test 5B intentionally produce the same recovery decision.
+The trigger value `230400` is not written yet.  
+The old latest value is preserved.
 
 ---
 
-## 22. Test 6 - Corrupt Record
+## 27. TEST8 - Fault After Copy
+
+Purpose:
+
+```txt
+Verify recovery when reset occurs after copied records are written to the RECEIVE page but before the new page becomes ACTIVE.
+```
+
+Measured result before reset:
+
+```txt
+[TEST8] fill_records=249 OK
+[TEST8] write_offset_before_fault=2048
+[TEST8] trigger write CFG_BAUD_RATE=230400
+[EE] transfer start old=0x08040000 new=0x08040800
+[EE] set new page RECEIVE OK
+[EE] copied_records=3
+```
+
+Measured result after reset:
+
+```txt
+[EE] page A state=ACTIVE
+[EE] page B state=RECEIVE
+[EE] recovery erase RECEIVE page=0x08040800
+[EE] recovery erase RECEIVE OK
+[EE] page B state after recovery=ERASED
+[EE] active_page=0x08040000
+[EE] write_offset=2048
+[TEST8] phase=after_reset
+[TEST8] read CFG_BAUD_RATE=9848 OK
+[TEST8] read CFG_TIMEOUT_MS=1000 OK
+[TEST8] read CFG_MODE=3 OK
+[TEST8] page A state=ACTIVE
+[TEST8] page B state=ERASED
+[TEST8] PASS
+```
+
+TEST7 and TEST8 intentionally produce the same recovery decision:
+
+```txt
+The RECEIVE page is not trusted until it becomes ACTIVE.
+```
+
+---
+
+## 28. TEST9 - Corrupt Record
 
 Purpose:
 
@@ -637,36 +869,32 @@ Purpose:
 Verify that Ee_Read() skips a record with wrong CRC.
 ```
 
-Expected behavior:
+Measured result:
 
 ```txt
-Write valid record #1
-Force-write corrupt record #2 with wrong CRC
-Write valid record #3
-Read must return record #3
+[TEST9] write valid CFG_BAUD_RATE=115200 OK
+[TEST9] write corrupt CFG_BAUD_RATE=230400 OK
+[TEST9] read CFG_BAUD_RATE=115200 OK
+[TEST9] valid_record_count=1
+[TEST9] write_offset=48
+[TEST9] page A state=ACTIVE
+[TEST9] page B state=ERASED
+[TEST9] PASS
 ```
 
-Expected log:
+Explanation:
 
 ```txt
-[TEST6] write record #1: CFG_BAUD_RATE=9600
-[TEST6] force-write corrupt record #2: value=0xBAADF00D crc=0x0000
-[TEST6] write record #3: CFG_BAUD_RATE=115200
-[EE_READ] var_id=0x0001 CRC mismatch, skipping
-[TEST6] read CFG_BAUD_RATE: value=115200
-[TEST6] PASS
+The latest physical record has the same var_id but invalid CRC.
+Ee_Read() scans backward, sees the corrupt record, skips it, and returns the previous valid value.
 ```
 
-Note:
-
-```txt
-This test simulates the result of a corrupted record.
-It does not simulate the physical cause of power loss during double-word program.
-```
+This test simulates the result of a corrupted record.  
+It does not simulate the physical cause of corruption during Flash programming.
 
 ---
 
-## 23. Test 7 - Fault After Program Before Offset Update
+## 29. TEST10 - Fault After Program Before Offset Update
 
 Purpose:
 
@@ -674,30 +902,46 @@ Purpose:
 Verify that Ee_Init() rebuilds write offset from Flash, not from RAM.
 ```
 
-Expected log before reset:
+Fault injection point:
 
 ```txt
-[TEST7] write CFG_BAUD_RATE=9600
-[FLASH_PROGRAM] writing CFG_TIMEOUT_MS=500 at offset=40
-[FAULT] Flash program returned OK, resetting before offset update
+after HAL_FLASH_Program() succeeds
+after record verification succeeds
+before RAM write_offset is incremented
 ```
 
-Expected log after reset:
+Measured result before reset:
 
 ```txt
-[RECOVER] scanning active page for next write offset
-[RECOVER] found next_write_offset=48
-[TEST7] read CFG_TIMEOUT_MS: status=EE_OK value=500
-[TEST7] write CFG_BAUD_RATE=19200 at offset=48
-[TEST7] verify CFG_TIMEOUT_MS still =500
-[TEST7] PASS
+[TEST10] write TEST_PHASE=after_reset OK
+[TEST10] write_offset_before_fault=40
+[TEST10] trigger write CFG_BAUD_RATE=115200
 ```
+
+Measured result after reset:
+
+```txt
+[EE] page A state=ACTIVE
+[EE] page B state=ERASED
+[EE] active_page=0x08040000
+[EE] write_offset=48
+[TEST10] phase=after_reset
+[TEST10] active_page_after_reset=0x08040000
+[TEST10] write_offset_after_reset=48
+[TEST10] read CFG_BAUD_RATE=115200 OK
+[TEST10] write TEST_PHASE=done OK
+[TEST10] page A state=ACTIVE
+[TEST10] page B state=ERASED
+[TEST10] PASS
+```
+
+This confirms that `Ee_Init()` scans Flash and rebuilds the write pointer from actual Flash contents.
 
 ---
 
-## 24. Source Structure
+## 30. Source Structure
 
-Expected application files:
+Application files:
 
 ```txt
 Core/Inc/
@@ -719,68 +963,62 @@ Recommended responsibility:
 
 | File | Responsibility |
 | --- | --- |
-| `app_main.c` | test dispatcher and main loop |
+| `app_main.c` | Test dispatcher and main loop |
 | `ee_format.c` | CRC, record validation, marker parsing, offset scanning |
-| `ee_storage.c` | init, read, write, transfer, recovery |
-| `ee_fault_inject.c` | reset injection points and test phase helper |
+| `ee_storage.c` | Init, read, write, transfer, recovery |
+| `ee_fault_inject.c` | Reset injection point control |
 | `uart_log.c` | UART log output |
 
 ---
 
-## 25. Evidence Files
+## 31. Evidence Files
 
-Recommended evidence outputs:
+Evidence logs:
 
 ```txt
-assets/logs/03_flash_eeprom_emulation_boot_check.txt
-assets/logs/03_flash_eeprom_emulation_format_default.txt
-assets/logs/03_flash_eeprom_emulation_write_readback.txt
-assets/logs/03_flash_eeprom_emulation_append_latest.txt
-assets/logs/03_flash_eeprom_emulation_page_transfer.txt
-assets/logs/03_flash_eeprom_emulation_fault_receive.txt
-assets/logs/03_flash_eeprom_emulation_fault_copy.txt
-assets/logs/03_flash_eeprom_emulation_corrupt_record.txt
-assets/logs/03_flash_eeprom_emulation_fault_after_program.txt
-assets/logs/03_flash_eeprom_emulation_test_analysis.md
+assets/logs/03_flash_eeprom_emulation/test0_boot_check.txt
+assets/logs/03_flash_eeprom_emulation/test1_format_default.txt
+assets/logs/03_flash_eeprom_emulation/test2_write_readback.txt
+assets/logs/03_flash_eeprom_emulation/test3_append_latest.txt
+assets/logs/03_flash_eeprom_emulation/test4_reboot_readback.txt
+assets/logs/03_flash_eeprom_emulation/test5_page_transfer.txt
+assets/logs/03_flash_eeprom_emulation/test6_page_transfer_reboot.txt
+assets/logs/03_flash_eeprom_emulation/test7_fault_after_receive.txt
+assets/logs/03_flash_eeprom_emulation/test8_fault_after_copy.txt
+assets/logs/03_flash_eeprom_emulation/test9_corrupt_record.txt
+assets/logs/03_flash_eeprom_emulation/test10_fault_after_program.txt
 ```
 
-Recommended screenshots:
+Summary report:
 
 ```txt
-assets/screenshots/03_flash_eeprom_emulation_build_success.png
-assets/screenshots/03_flash_eeprom_emulation_page_transfer.png
-assets/screenshots/03_flash_eeprom_emulation_fault_recovery.png
-assets/screenshots/03_flash_eeprom_emulation_corrupt_record.png
+assets/reports/03_flash_eeprom_emulation/test_summary.md
 ```
 
----
-
-## 26. Expected Boot Log
+Screenshots:
 
 ```txt
-[BOOT] STM32G0B1RE Firmware Debugging Lab
-[BOOT] Project: 03_flash_eeprom_emulation
-[BOOT] Board: NUCLEO-G0B1RE
-[BOOT] System clock: 48 MHz
-[BOOT] UART logger initialized
-[BOOT] Test mode: <test name>
+assets/screenshots/03_flash_eeprom_emulation/
 ```
 
 ---
 
-## 27. Final Acceptance Criteria
+## 32. Final Acceptance Criteria
 
 The project is considered complete when:
 
 ```txt
-Test 0 passes
-Test 1 passes
-Test 2 passes after software reset
-Test 3 proves latest-value lookup
-Test 4 proves page transfer
-Test 5A and 5B prove RECEIVE recovery policy
-Test 6 proves corrupt record is skipped
-Test 7 proves write offset recovery after reset
+TEST0 passes
+TEST1 passes
+TEST2 proves write/readback
+TEST3 proves append/latest lookup
+TEST4 proves readback after reset
+TEST5 proves page transfer
+TEST6 proves page transfer persists after reset
+TEST7 proves RECEIVE marker recovery
+TEST8 proves recovery after copied records
+TEST9 proves corrupt record is skipped
+TEST10 proves write offset recovery after Flash program reset
 All logs are saved under assets/logs
-README and test analysis are committed
+README and test summary are committed
 ```
