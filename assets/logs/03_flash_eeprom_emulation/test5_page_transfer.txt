@@ -1,0 +1,37 @@
+[BOOT] STM32G0B1RE Firmware Debugging Lab
+[BOOT] Project: 03_flash_eeprom_emulation
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 48000000 Hz
+[BOOT] Test mode: page_transfer
+[EE] format start
+[EE] erase page A OK
+[EE] erase page B OK
+[EE] set page A ACTIVE OK
+[EE] page A state=ACTIVE
+[EE] page B state=ERASED
+[EE] active_page=0x08040000
+[EE] write_offset=32
+[EE] format done
+[TEST5] write seed configs OK
+[TEST5] fill_records=250 OK
+[TEST5] write_offset_before_transfer=2048
+[EE] transfer start old=0x08040000 new=0x08040800
+[EE] set new page RECEIVE OK
+[EE] copied_records=2
+[EE] write trigger record OK
+[EE] set new page ACTIVE OK
+[EE] set old page VALID OK
+[EE] set old page ERASING OK
+[EE] erase old page OK
+[EE] page A state=ERASED
+[EE] page B state=ACTIVE
+[EE] transfer done active_page=0x08040800 write_offset=56
+[TEST5] write final CFG_BAUD_RATE=230400 OK
+[TEST5] active_page_after_transfer=0x08040800
+[TEST5] write_offset_after_transfer=56
+[TEST5] read CFG_BAUD_RATE=230400 OK
+[TEST5] read CFG_TIMEOUT_MS=1000 OK
+[TEST5] read CFG_MODE=3 OK
+[TEST5] page A state=ERASED valid_count=0
+[TEST5] page B state=ACTIVE valid_count=3
+[TEST5] PASS

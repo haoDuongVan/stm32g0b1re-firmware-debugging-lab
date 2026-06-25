@@ -1,0 +1,22 @@
+[BOOT] STM32G0B1RE Firmware Debugging Lab
+[BOOT] Project: 03_flash_eeprom_emulation
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 48000000 Hz
+[BOOT] Test mode: corrupt_record
+[EE] format start
+[EE] erase page A OK
+[EE] erase page B OK
+[EE] set page A ACTIVE OK
+[EE] page A state=ACTIVE
+[EE] page B state=ERASED
+[EE] active_page=0x08040000
+[EE] write_offset=32
+[EE] format done
+[TEST9] write valid CFG_BAUD_RATE=115200 OK
+[TEST9] write corrupt CFG_BAUD_RATE=230400 OK
+[TEST9] read CFG_BAUD_RATE=115200 OK
+[TEST9] valid_record_count=1
+[TEST9] write_offset=48
+[TEST9] page A state=ACTIVE
+[TEST9] page B state=ERASED
+[TEST9] PASS

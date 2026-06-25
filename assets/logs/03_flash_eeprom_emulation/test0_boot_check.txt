@@ -1,0 +1,13 @@
+[BOOT] STM32G0B1RE Firmware Debugging Lab
+[BOOT] Project: 03_flash_eeprom_emulation
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 48000000 Hz
+[BOOT] Test mode: boot_check
+[TEST0] EE_PAGE_A_ADDR=0x08040000
+[TEST0] EE_PAGE_B_ADDR=0x08040800
+[TEST0] page_size=2048
+[TEST0] header_size=32
+[TEST0] record_size=8
+[TEST0] records_per_page=252
+[TEST0] system_clock_check=OK
+[TEST0] PASS

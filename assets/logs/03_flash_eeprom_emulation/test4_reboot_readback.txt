@@ -1,0 +1,58 @@
+[BOOT] STM32G0B1RE Firmware Debugging Lab
+[BOOT] Project: 03_flash_eeprom_emulation
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 48000000 Hz
+[BOOT] Test mode: reboot_readback
+[EE] init start
+[EE] page A state=ACTIVE
+[EE] page B state=ERASED
+[EE] active_page=0x08040000
+[EE] write_offset=32
+[EE] init done
+[TEST4] phase=prepare
+[EE] format start
+[EE] erase page A OK
+[EE] erase page B OK
+[EE] set page A ACTIVE OK
+[EE] page A state=ACTIVE
+[EE] page B state=ERASED
+[EE] active_page=0x08040000
+[EE] write_offset=32
+[EE] format done
+[TEST4] write TEST_PHASE=after_reset OK
+[TEST4] write CFG_BAUD_RATE=230400 OK
+[TEST4] write_offset_before_reset=48
+[TEST4] trigger software reset
+
+[BOOT] STM32G0B1RE Firmware Debugging Lab
+[BOOT] Project: 03_flash_eeprom_emulation
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 48000000 Hz
+[BOOT] Test mode: reboot_readback
+[EE] init start
+[EE] page A state=ACTIVE
+[EE] page B state=ERASED
+[EE] active_page=0x08040000
+[EE] write_offset=48
+[EE] init done
+[TEST4] phase=after_reset
+[TEST4] active_page=0x08040000
+[TEST4] write_offset_after_reset=48
+[TEST4] read CFG_BAUD_RATE=230400 OK
+[TEST4] write TEST_PHASE=done OK
+[TEST4] PASS
+
+[BOOT] STM32G0B1RE Firmware Debugging Lab
+[BOOT] Project: 03_flash_eeprom_emulation
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 48000000 Hz
+[BOOT] Test mode: reboot_readback
+[EE] init start
+[EE] page A state=ACTIVE
+[EE] page B state=ERASED
+[EE] active_page=0x08040000
+[EE] write_offset=56
+[EE] init done
+[TEST4] phase=done
+[TEST4] read CFG_BAUD_RATE=230400 OK
+[TEST4] PASS
