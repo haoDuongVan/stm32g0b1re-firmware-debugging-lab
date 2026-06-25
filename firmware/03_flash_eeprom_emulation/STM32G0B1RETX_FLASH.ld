@@ -44,8 +44,22 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Memories definition */
 MEMORY
 {
-  RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 144K
-  FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 512K
+  RAM      (xrw) : ORIGIN = 0x20000000, LENGTH = 144K
+
+  /*
+   * Bank 1: application code
+   * 0x08000000 - 0x0803FFFF
+   */
+  FLASH    (rx)  : ORIGIN = 0x08000000, LENGTH = 256K
+
+  /*
+   * Bank 2: EEPROM emulation area
+   * 0x08040000 - 0x08040FFF
+   *
+   * Page A: 0x08040000 - 0x080407FF
+   * Page B: 0x08040800 - 0x08040FFF
+   */
+  FLASH_EE (r)   : ORIGIN = 0x08040000, LENGTH = 4K
 }
 
 /* Sections */
@@ -174,6 +188,37 @@ SECTIONS
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
   } >RAM
+
+  /*
+   * EEPROM emulation reserved Flash area.
+   *
+   * This section is NOLOAD, so it does not add data to the firmware image.
+   * It reserves the first 4KB of Bank 2 for EEPROM emulation:
+   *
+   *   Page A: 0x08040000 - 0x080407FF
+   *   Page B: 0x08040800 - 0x08040FFF
+   */
+  .eeprom_store (NOLOAD) :
+  {
+    . = ALIGN(8);
+    __eeprom_store_start__ = .;
+
+    /*
+     * Keep user-defined objects if we later decide to place something
+     * explicitly into .eeprom_store.
+     */
+    KEEP(*(.eeprom_store))
+    KEEP(*(.eeprom_store*))
+
+    /*
+     * Reserve the whole FLASH_EE region.
+     * This protects the area from accidental linker placement.
+     */
+    . = ORIGIN(FLASH_EE) + LENGTH(FLASH_EE);
+
+    __eeprom_store_end__ = .;
+    . = ALIGN(8);
+  } >FLASH_EE
 
   /* Remove information from the compiler libraries */
   /DISCARD/ :
