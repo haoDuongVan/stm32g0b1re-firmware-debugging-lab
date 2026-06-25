@@ -23,7 +23,7 @@
 #define APP_TEST_MODE_FAULT_AFTER_PROGRAM     8
 
 // Set default test mode
-#define APP_TEST_MODE                         APP_TEST_MODE_WRITE_READBACK
+#define APP_TEST_MODE                         APP_TEST_MODE_APPEND_LATEST
 
 // Define LED for heartbeat
 #define APP_LED_GPIO_Port                     GPIOA
@@ -37,6 +37,7 @@ static uint8_t boot_log_done = 0U;
 static uint8_t boot_check_done = 0U;
 static uint8_t format_test_done = 0U;
 static uint8_t write_readback_test_done = 0U;
+static uint8_t append_latest_test_done = 0U;
 static uint8_t not_implemented_log_done = 0U;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -45,6 +46,7 @@ static void App_PrintBootLog(void);
 static void App_RunBootCheck(void);
 static void App_RunFormatDefault(void);
 static void App_RunWriteReadback(void);
+static void App_RunAppendLatest(void);
 static void App_RunNotImplemented(void);
 static void App_UpdateHeartbeat(void);
 
@@ -242,6 +244,101 @@ static void App_RunWriteReadback(void)
   UartLog_Printf("[TEST2] PASS\r\n");
 }
 
+// Run append latest value test
+static void App_RunAppendLatest(void)
+{
+  EeStatus_t status;
+  uint32_t read_value = 0U;
+  uint32_t record_count = 0U;
+
+  // Run this test only once
+  if (append_latest_test_done != 0U) {
+    return;
+  }
+
+  // Mark test as done
+  append_latest_test_done = 1U;
+
+  // Format EEPROM area for deterministic test
+  status = Ee_Format();
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST3] format=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST3] FAIL\r\n");
+    return;
+  }
+
+  // Write first baud rate value
+  status = Ee_Write(CFG_BAUD_RATE, 9600UL);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST3] write CFG_BAUD_RATE=9600 NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST3] FAIL\r\n");
+    return;
+  }
+  UartLog_Printf("[TEST3] write CFG_BAUD_RATE=9600 OK\r\n");
+
+  // Write second baud rate value
+  status = Ee_Write(CFG_BAUD_RATE, 115200UL);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST3] write CFG_BAUD_RATE=115200 NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST3] FAIL\r\n");
+    return;
+  }
+  UartLog_Printf("[TEST3] write CFG_BAUD_RATE=115200 OK\r\n");
+
+  // Write latest baud rate value
+  status = Ee_Write(CFG_BAUD_RATE, 230400UL);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST3] write CFG_BAUD_RATE=230400 NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST3] FAIL\r\n");
+    return;
+  }
+  UartLog_Printf("[TEST3] write CFG_BAUD_RATE=230400 OK\r\n");
+
+  // Read latest baud rate value
+  status = Ee_Read(CFG_BAUD_RATE, &read_value);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST3] read CFG_BAUD_RATE=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST3] FAIL\r\n");
+    return;
+  }
+  UartLog_Printf("[TEST3] read CFG_BAUD_RATE=%lu OK\r\n", (unsigned long)read_value);
+
+  // Check latest value
+  if (read_value != 230400UL) {
+    UartLog_Printf("[TEST3] latest_value_check=NG expected=230400 actual=%lu\r\n",
+                   (unsigned long)read_value);
+    UartLog_Printf("[TEST3] FAIL\r\n");
+    return;
+  }
+
+  // Count valid records for CFG_BAUD_RATE
+  record_count = Ee_CountRecordsForVar(CFG_BAUD_RATE);
+  UartLog_Printf("[TEST3] record_count=%lu\r\n", (unsigned long)record_count);
+
+  // Check record count
+  if (record_count != 3U) {
+    UartLog_Printf("[TEST3] record_count_check=NG expected=3 actual=%lu\r\n",
+                   (unsigned long)record_count);
+    UartLog_Printf("[TEST3] FAIL\r\n");
+    return;
+  }
+
+  // Print write offset after 3 records
+  UartLog_Printf("[TEST3] write_offset=%lu\r\n", (unsigned long)Ee_GetWriteOffset());
+
+  // Check write offset
+  if (Ee_GetWriteOffset() != (EE_HEADER_SIZE + (3U * EE_RECORD_SIZE))) {
+    UartLog_Printf("[TEST3] write_offset_check=NG expected=%lu actual=%lu\r\n",
+                   (unsigned long)(EE_HEADER_SIZE + (3U * EE_RECORD_SIZE)),
+                   (unsigned long)Ee_GetWriteOffset());
+    UartLog_Printf("[TEST3] FAIL\r\n");
+    return;
+  }
+
+  // Print test result
+  UartLog_Printf("[TEST3] PASS\r\n");
+}
+
 // Print message for unimplemented test modes
 static void App_RunNotImplemented(void)
 {
@@ -297,6 +394,8 @@ void App_Run(void)
   App_RunFormatDefault();
 #elif APP_TEST_MODE == APP_TEST_MODE_WRITE_READBACK
   App_RunWriteReadback();
+#elif APP_TEST_MODE == APP_TEST_MODE_APPEND_LATEST
+  App_RunAppendLatest();
 #else
   App_RunNotImplemented();
 #endif
