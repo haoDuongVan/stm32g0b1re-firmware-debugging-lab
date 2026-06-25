@@ -26,7 +26,7 @@
 #define APP_TEST_MODE_FAULT_AFTER_PROGRAM     10
 
 // Set default test mode
-#define APP_TEST_MODE                         APP_TEST_MODE_FAULT_AFTER_PROGRAM
+#define APP_TEST_MODE                         APP_TEST_MODE_BOOT_CHECK
 
 
 // Define reboot readback test phase values
@@ -97,34 +97,62 @@
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t boot_log_done = 0U;
+
+#if APP_TEST_MODE == APP_TEST_MODE_BOOT_CHECK
 static uint8_t boot_check_done = 0U;
+#elif APP_TEST_MODE == APP_TEST_MODE_FORMAT_DEFAULT
 static uint8_t format_test_done = 0U;
+#elif APP_TEST_MODE == APP_TEST_MODE_WRITE_READBACK
 static uint8_t write_readback_test_done = 0U;
+#elif APP_TEST_MODE == APP_TEST_MODE_APPEND_LATEST
 static uint8_t append_latest_test_done = 0U;
+#elif APP_TEST_MODE == APP_TEST_MODE_REBOOT_READBACK
 static uint8_t reboot_readback_test_done = 0U;
+#elif APP_TEST_MODE == APP_TEST_MODE_PAGE_TRANSFER
 static uint8_t page_transfer_test_done = 0U;
+#elif APP_TEST_MODE == APP_TEST_MODE_PAGE_TRANSFER_REBOOT
 static uint8_t page_transfer_reboot_test_done = 0U;
+#elif APP_TEST_MODE == APP_TEST_MODE_FAULT_AFTER_RECEIVE
 static uint8_t fault_receive_test_done = 0U;
+#elif APP_TEST_MODE == APP_TEST_MODE_FAULT_AFTER_COPY
 static uint8_t fault_copy_test_done = 0U;
+#elif APP_TEST_MODE == APP_TEST_MODE_CORRUPT_RECORD
 static uint8_t corrupt_record_test_done = 0U;
+#elif APP_TEST_MODE == APP_TEST_MODE_FAULT_AFTER_PROGRAM
 static uint8_t fault_program_test_done = 0U;
+#else
 static uint8_t not_implemented_log_done = 0U;
+#endif
 
 /* Private function prototypes -----------------------------------------------*/
 static const char *App_GetTestModeName(uint32_t test_mode);
 static void App_PrintBootLog(void);
+#if APP_TEST_MODE == APP_TEST_MODE_BOOT_CHECK
 static void App_RunBootCheck(void);
+#elif APP_TEST_MODE == APP_TEST_MODE_FORMAT_DEFAULT
 static void App_RunFormatDefault(void);
+#elif APP_TEST_MODE == APP_TEST_MODE_WRITE_READBACK
 static void App_RunWriteReadback(void);
+#elif APP_TEST_MODE == APP_TEST_MODE_APPEND_LATEST
 static void App_RunAppendLatest(void);
+#elif APP_TEST_MODE == APP_TEST_MODE_REBOOT_READBACK
 static void App_RunRebootReadback(void);
+#elif APP_TEST_MODE == APP_TEST_MODE_PAGE_TRANSFER
 static void App_RunPageTransfer(void);
+#elif APP_TEST_MODE == APP_TEST_MODE_PAGE_TRANSFER_REBOOT
 static void App_RunPageTransferReboot(void);
+#elif APP_TEST_MODE == APP_TEST_MODE_FAULT_AFTER_RECEIVE
 static void App_RunFaultAfterReceive(void);
+#elif APP_TEST_MODE == APP_TEST_MODE_FAULT_AFTER_COPY
 static void App_RunFaultAfterCopy(void);
+#elif APP_TEST_MODE == APP_TEST_MODE_CORRUPT_RECORD
 static void App_RunCorruptRecord(void);
+#elif APP_TEST_MODE == APP_TEST_MODE_FAULT_AFTER_PROGRAM
 static void App_RunFaultAfterProgram(void);
+#else
 static void App_RunNotImplemented(void);
+#endif
+
 static void App_UpdateHeartbeat(void);
 
 /* Private functions ---------------------------------------------------------*/
@@ -196,6 +224,7 @@ static void App_PrintBootLog(void)
   UartLog_Printf("[BOOT] Test mode: %s\r\n", App_GetTestModeName(APP_TEST_MODE));
 }
 
+#if APP_TEST_MODE == APP_TEST_MODE_BOOT_CHECK
 // Run boot check test
 static void App_RunBootCheck(void)
 {
@@ -228,7 +257,7 @@ static void App_RunBootCheck(void)
   // Print test result
   UartLog_Printf("[TEST0] PASS\r\n");
 }
-
+#elif APP_TEST_MODE == APP_TEST_MODE_FORMAT_DEFAULT
 // Run format default test
 static void App_RunFormatDefault(void)
 {
@@ -262,7 +291,7 @@ static void App_RunFormatDefault(void)
     UartLog_Printf("[TEST1] FAIL\r\n");
   }
 }
-
+#elif APP_TEST_MODE == APP_TEST_MODE_WRITE_READBACK
 // Run write and readback test
 static void App_RunWriteReadback(void)
 {
@@ -326,7 +355,7 @@ static void App_RunWriteReadback(void)
   // Print test result
   UartLog_Printf("[TEST2] PASS\r\n");
 }
-
+#elif APP_TEST_MODE == APP_TEST_MODE_APPEND_LATEST
 // Run append latest value test
 static void App_RunAppendLatest(void)
 {
@@ -421,7 +450,7 @@ static void App_RunAppendLatest(void)
   // Print test result
   UartLog_Printf("[TEST3] PASS\r\n");
 }
-
+#elif APP_TEST_MODE == APP_TEST_MODE_REBOOT_READBACK
 // Run reboot readback test
 static void App_RunRebootReadback(void)
 {
@@ -575,7 +604,7 @@ static void App_RunRebootReadback(void)
   // Print test result
   UartLog_Printf("[TEST4] PASS\r\n");
 }
-
+#elif APP_TEST_MODE == APP_TEST_MODE_PAGE_TRANSFER
 // Run page transfer test
 static void App_RunPageTransfer(void)
 {
@@ -751,7 +780,7 @@ static void App_RunPageTransfer(void)
   // Print test result
   UartLog_Printf("[TEST5] PASS\r\n");
 }
-
+#elif APP_TEST_MODE == APP_TEST_MODE_PAGE_TRANSFER_REBOOT
 // Run page transfer reboot test
 static void App_RunPageTransferReboot(void)
 {
@@ -980,7 +1009,7 @@ static void App_RunPageTransferReboot(void)
   // Print test result
   UartLog_Printf("[TEST6] PASS\r\n");
 }
-
+#elif APP_TEST_MODE == APP_TEST_MODE_FAULT_AFTER_RECEIVE
 // Run fault injection test after RECEIVE marker
 static void App_RunFaultAfterReceive(void)
 {
@@ -1176,7 +1205,7 @@ static void App_RunFaultAfterReceive(void)
   // Print test result
   UartLog_Printf("[TEST7] PASS\r\n");
 }
-
+#elif APP_TEST_MODE == APP_TEST_MODE_FAULT_AFTER_COPY
 // Run fault injection test after copying latest records
 static void App_RunFaultAfterCopy(void)
 {
@@ -1369,7 +1398,7 @@ static void App_RunFaultAfterCopy(void)
   // Print test result
   UartLog_Printf("[TEST8] PASS\r\n");
 }
-
+#elif APP_TEST_MODE == APP_TEST_MODE_CORRUPT_RECORD
 // Run corrupt record test
 static void App_RunCorruptRecord(void)
 {
@@ -1466,7 +1495,7 @@ static void App_RunCorruptRecord(void)
   // Print test result
   UartLog_Printf("[TEST9] PASS\r\n");
 }
-
+#elif APP_TEST_MODE == APP_TEST_MODE_FAULT_AFTER_PROGRAM
 // Run fault injection test after Flash program OK
 static void App_RunFaultAfterProgram(void)
 {
@@ -1649,7 +1678,7 @@ static void App_RunFaultAfterProgram(void)
   // Print test result
   UartLog_Printf("[TEST10] PASS\r\n");
 }
-
+#else
 // Print message for unimplemented test modes
 static void App_RunNotImplemented(void)
 {
@@ -1666,6 +1695,7 @@ static void App_RunNotImplemented(void)
                  (unsigned long)APP_TEST_MODE,
                  App_GetTestModeName(APP_TEST_MODE));
 }
+#endif
 
 // Toggle LED periodically
 static void App_UpdateHeartbeat(void)
