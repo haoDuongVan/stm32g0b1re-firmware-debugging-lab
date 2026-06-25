@@ -36,6 +36,7 @@ static uint32_t Ee_GetOtherPageAddr(uint32_t page_addr);
 static EeStatus_t Ee_ErasePage(uint32_t page_addr);
 static EeStatus_t Ee_WriteMarker(uint32_t page_addr, uint32_t marker_offset);
 static uint64_t Ee_BuildRecordRaw(uint16_t var_id, uint32_t value);
+static uint64_t Ee_BuildCorruptRecordRaw(uint16_t var_id, uint32_t value);
 static EeStatus_t Ee_ProgramRecordAt(uint32_t page_addr,
                                      uint32_t *target_offset,
                                      uint16_t var_id,
@@ -185,6 +186,23 @@ static uint64_t Ee_BuildRecordRaw(uint16_t var_id, uint32_t value)
   crc = Ee_CalcCrc16(var_id, value);
 
   // Pack record as var_id + crc + value
+  raw = ((uint64_t)var_id) |
+        ((uint64_t)crc << 16) |
+        ((uint64_t)value << 32);
+
+  return raw;
+}
+
+// Build one raw corrupt EEPROM record
+static uint64_t Ee_BuildCorruptRecordRaw(uint16_t var_id, uint32_t value)
+{
+  uint16_t crc;
+  uint64_t raw;
+
+  // Calculate CRC and intentionally corrupt it
+  crc = (uint16_t)(Ee_CalcCrc16(var_id, value) ^ 0x00FFU);
+
+  // Pack record as var_id + bad crc + value
   raw = ((uint64_t)var_id) |
         ((uint64_t)crc << 16) |
         ((uint64_t)value << 32);
@@ -798,6 +816,86 @@ uint32_t Ee_CountRecordsForVar(uint16_t var_id)
   }
 
   return count;
+}
+
+// Write one intentionally corrupt record for test
+EeStatus_t Ee_TestWriteCorruptRecord(uint16_t var_id, uint32_t value)
+{
+  uint32_t write_addr;
+  uint64_t raw;
+  const EeRecord_t *record;
+  HAL_StatusTypeDef hal_status;
+
+  // Check initialization state
+  if (initialized == 0U) {
+    return EE_NOT_INIT;
+  }
+
+  // Check virtual ID
+  if ((var_id == EE_VAR_ID_INVALID) ||
+      (var_id == EE_VAR_ID_ERASED)) {
+    return EE_INVALID_PARAM;
+  }
+
+  // Check active page
+  if (active_page_addr == 0U) {
+    return EE_NO_ACTIVE_PAGE;
+  }
+
+  // Check free space
+  if ((write_offset + EE_RECORD_SIZE) > EE_PAGE_SIZE) {
+    return EE_NO_FREE_PAGE;
+  }
+
+  // Calculate write address
+  write_addr = active_page_addr + write_offset;
+
+  // Check target double-word is erased
+  if (*(const volatile uint64_t *)write_addr != EE_ERASED_DOUBLEWORD) {
+    return EE_WRITE_ERROR;
+  }
+
+  // Build corrupt raw record
+  raw = Ee_BuildCorruptRecordRaw(var_id, value);
+
+  // Unlock Flash
+  hal_status = HAL_FLASH_Unlock();
+  if (hal_status != HAL_OK) {
+    return EE_WRITE_ERROR;
+  }
+
+  // Program corrupt record
+  hal_status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD,
+                                 write_addr,
+                                 raw);
+
+  // Lock Flash
+  (void)HAL_FLASH_Lock();
+
+  // Check program result
+  if (hal_status != HAL_OK) {
+    UartLog_Printf("[EE] corrupt record write failed addr=0x%08lX\r\n",
+                   (unsigned long)write_addr);
+    return EE_WRITE_ERROR;
+  }
+
+  // Get written record pointer
+  record = (const EeRecord_t *)write_addr;
+
+  // Check that record is really corrupt
+  if (Ee_IsRecordValid(record) == true) {
+    return EE_WRITE_ERROR;
+  }
+
+  // Check written var_id and value
+  if ((record->var_id != var_id) || (record->value != value)) {
+    return EE_WRITE_ERROR;
+  }
+
+  // Move write offset after successful corrupt program
+  write_offset += EE_RECORD_SIZE;
+
+  return EE_OK;
 }
 
 // Convert EEPROM status to readable string

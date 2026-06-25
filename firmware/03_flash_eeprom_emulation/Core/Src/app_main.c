@@ -26,7 +26,7 @@
 #define APP_TEST_MODE_FAULT_AFTER_PROGRAM     10
 
 // Set default test mode
-#define APP_TEST_MODE                         APP_TEST_MODE_FAULT_AFTER_COPY
+#define APP_TEST_MODE                         APP_TEST_MODE_CORRUPT_RECORD
 
 
 // Define reboot readback test phase values
@@ -77,6 +77,10 @@
 #define APP_TEST8_FILL_COUNT                  (EE_RECORDS_PER_PAGE - 3U)
 #define APP_TEST8_LAST_BAUD                   (9600UL + APP_TEST8_FILL_COUNT - 1U)
 
+// Define corrupt record test values
+#define APP_TEST9_VALID_BAUD                  115200UL
+#define APP_TEST9_CORRUPT_BAUD                230400UL
+
 // Define LED for heartbeat
 #define APP_LED_GPIO_Port                     GPIOA
 #define APP_LED_Pin                           GPIO_PIN_5
@@ -95,6 +99,7 @@ static uint8_t page_transfer_test_done = 0U;
 static uint8_t page_transfer_reboot_test_done = 0U;
 static uint8_t fault_receive_test_done = 0U;
 static uint8_t fault_copy_test_done = 0U;
+static uint8_t corrupt_record_test_done = 0U;
 static uint8_t not_implemented_log_done = 0U;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -109,6 +114,7 @@ static void App_RunPageTransfer(void);
 static void App_RunPageTransferReboot(void);
 static void App_RunFaultAfterReceive(void);
 static void App_RunFaultAfterCopy(void);
+static void App_RunCorruptRecord(void);
 static void App_RunNotImplemented(void);
 static void App_UpdateHeartbeat(void);
 
@@ -1355,6 +1361,103 @@ static void App_RunFaultAfterCopy(void)
   UartLog_Printf("[TEST8] PASS\r\n");
 }
 
+// Run corrupt record test
+static void App_RunCorruptRecord(void)
+{
+  EeStatus_t status;
+  uint32_t read_baud = 0U;
+  uint32_t valid_count = 0U;
+
+  // Run this test only once
+  if (corrupt_record_test_done != 0U) {
+    return;
+  }
+
+  // Mark test as done
+  corrupt_record_test_done = 1U;
+
+  // Format EEPROM area for deterministic test
+  status = Ee_Format();
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST9] format=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST9] FAIL\r\n");
+    return;
+  }
+
+  // Write valid baud rate record
+  status = Ee_Write(CFG_BAUD_RATE, APP_TEST9_VALID_BAUD);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST9] write valid CFG_BAUD_RATE=NG status=%s\r\n",
+                   Ee_StatusToString(status));
+    UartLog_Printf("[TEST9] FAIL\r\n");
+    return;
+  }
+  UartLog_Printf("[TEST9] write valid CFG_BAUD_RATE=%lu OK\r\n",
+                 (unsigned long)APP_TEST9_VALID_BAUD);
+
+  // Write corrupt baud rate record
+  status = Ee_TestWriteCorruptRecord(CFG_BAUD_RATE, APP_TEST9_CORRUPT_BAUD);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST9] write corrupt CFG_BAUD_RATE=NG status=%s\r\n",
+                   Ee_StatusToString(status));
+    UartLog_Printf("[TEST9] FAIL\r\n");
+    return;
+  }
+  UartLog_Printf("[TEST9] write corrupt CFG_BAUD_RATE=%lu OK\r\n",
+                 (unsigned long)APP_TEST9_CORRUPT_BAUD);
+
+  // Read baud rate after corrupt record
+  status = Ee_Read(CFG_BAUD_RATE, &read_baud);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST9] read CFG_BAUD_RATE=NG status=%s\r\n",
+                   Ee_StatusToString(status));
+    UartLog_Printf("[TEST9] FAIL\r\n");
+    return;
+  }
+  UartLog_Printf("[TEST9] read CFG_BAUD_RATE=%lu OK\r\n",
+                 (unsigned long)read_baud);
+
+  // Check that corrupt latest record was skipped
+  if (read_baud != APP_TEST9_VALID_BAUD) {
+    UartLog_Printf("[TEST9] value_check=NG expected=%lu actual=%lu\r\n",
+                   (unsigned long)APP_TEST9_VALID_BAUD,
+                   (unsigned long)read_baud);
+    UartLog_Printf("[TEST9] FAIL\r\n");
+    return;
+  }
+
+  // Count valid records for CFG_BAUD_RATE
+  valid_count = Ee_CountRecordsForVar(CFG_BAUD_RATE);
+  UartLog_Printf("[TEST9] valid_record_count=%lu\r\n", (unsigned long)valid_count);
+
+  // Check valid record count
+  if (valid_count != 1U) {
+    UartLog_Printf("[TEST9] valid_record_count_check=NG expected=1 actual=%lu\r\n",
+                   (unsigned long)valid_count);
+    UartLog_Printf("[TEST9] FAIL\r\n");
+    return;
+  }
+
+  // Print write offset
+  UartLog_Printf("[TEST9] write_offset=%lu\r\n", (unsigned long)Ee_GetWriteOffset());
+
+  // Check write offset
+  if (Ee_GetWriteOffset() != (EE_HEADER_SIZE + (2U * EE_RECORD_SIZE))) {
+    UartLog_Printf("[TEST9] write_offset_check=NG expected=%lu actual=%lu\r\n",
+                   (unsigned long)(EE_HEADER_SIZE + (2U * EE_RECORD_SIZE)),
+                   (unsigned long)Ee_GetWriteOffset());
+    UartLog_Printf("[TEST9] FAIL\r\n");
+    return;
+  }
+
+  // Print page states
+  UartLog_Printf("[TEST9] page A state=%s\r\n", Ee_PageStateToString(Ee_GetPageState(EE_PAGE_A_ADDR)));
+  UartLog_Printf("[TEST9] page B state=%s\r\n", Ee_PageStateToString(Ee_GetPageState(EE_PAGE_B_ADDR)));
+
+  // Print test result
+  UartLog_Printf("[TEST9] PASS\r\n");
+}
+
 // Print message for unimplemented test modes
 static void App_RunNotImplemented(void)
 {
@@ -1422,6 +1525,8 @@ void App_Run(void)
   App_RunFaultAfterReceive();
 #elif APP_TEST_MODE == APP_TEST_MODE_FAULT_AFTER_COPY
   App_RunFaultAfterCopy();
+#elif APP_TEST_MODE == APP_TEST_MODE_CORRUPT_RECORD
+  App_RunCorruptRecord();
 #else
   App_RunNotImplemented();
 #endif

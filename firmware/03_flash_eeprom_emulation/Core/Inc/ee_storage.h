@@ -32,11 +32,14 @@ EeStatus_t Ee_Format(void);
 EeStatus_t Ee_Read(uint16_t var_id, uint32_t *value);
 EeStatus_t Ee_Write(uint16_t var_id, uint32_t value);
 
+
 uint32_t Ee_GetActivePageAddr(void);
 uint32_t Ee_GetWriteOffset(void);
 uint32_t Ee_CountValidRecords(uint32_t page_addr);
 uint32_t Ee_CountRecordsForVar(uint16_t var_id);
 
+/* Test helper functions -----------------------------------------------------*/
+EeStatus_t Ee_TestWriteCorruptRecord(uint16_t var_id, uint32_t value);
 const char *Ee_StatusToString(EeStatus_t status);
 
 #endif /* INC_EE_STORAGE_H_ */
