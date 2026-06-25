@@ -1,0 +1,600 @@
+[BOOT] STM32G0B1RE Firmware Debugging Lab
+[BOOT] Project: 02_freertos_firmware_skeleton
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 48 MHz
+[BOOT] Test mode: queue stress
+[BOOT] FreeRTOS objects created
+[BOOT] FastTask=OK EventTask=OK WorkerTask=OK HeartbeatTask=OK MonitorTask=OK
+[BOOT] FreeRTOS kernel starting
+[STRESS] burst=1 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=1002 fast=101 heartbeat=2 generated=20 processed=0 dropped=12 queue=8
+[STRESS] burst=2 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=2002 fast=201 heartbeat=4 generated=40 processed=8 dropped=24 queue=8
+[WORKER] processed=10 event=SENSOR_SAMPLE value=21 tick=2000
+[STRESS] burst=3 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=3002 fast=301 heartbeat=6 generated=60 processed=16 dropped=36 queue=8
+[WORKER] processed=20 event=COMMAND_RECEIVED value=43 tick=3000
+[STRESS] burst=4 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=4002 fast=401 heartbeat=8 generated=80 processed=24 dropped=48 queue=8
+[WORKER] processed=30 event=ERROR_INJECT value=65 tick=4000
+[STRESS] burst=5 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=5002 fast=501 heartbeat=10 generated=100 processed=32 dropped=60 queue=8
+[WORKER] processed=40 event=SENSOR_SAMPLE value=87 tick=5000
+[STRESS] burst=6 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=6002 fast=601 heartbeat=12 generated=120 processed=40 dropped=72 queue=8
+[STRESS] burst=7 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=7002 fast=701 heartbeat=14 generated=140 processed=48 dropped=84 queue=8
+[WORKER] processed=50 event=COMMAND_RECEIVED value=121 tick=7000
+[STRESS] burst=8 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=8002 fast=801 heartbeat=16 generated=160 processed=56 dropped=96 queue=8
+[WORKER] processed=60 event=ERROR_INJECT value=143 tick=8000
+[STRESS] burst=9 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=9002 fast=901 heartbeat=18 generated=180 processed=64 dropped=108 queue=8
+[WORKER] processed=70 event=SENSOR_SAMPLE value=165 tick=9000
+[STRESS] burst=10 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=10002 fast=1001 heartbeat=20 generated=200 processed=72 dropped=120 queue=8
+[WORKER] processed=80 event=COMMAND_RECEIVED value=187 tick=10000
+[STRESS] burst=11 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=11002 fast=1101 heartbeat=22 generated=220 processed=80 dropped=132 queue=8
+[STRESS] burst=12 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=12002 fast=1201 heartbeat=24 generated=240 processed=88 dropped=144 queue=8
+[WORKER] processed=90 event=ERROR_INJECT value=221 tick=12000
+[STRESS] burst=13 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=13002 fast=1301 heartbeat=26 generated=260 processed=96 dropped=156 queue=8
+[WORKER] processed=100 event=SENSOR_SAMPLE value=243 tick=13000
+[STRESS] burst=14 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=14002 fast=1401 heartbeat=28 generated=280 processed=104 dropped=168 queue=8
+[WORKER] processed=110 event=COMMAND_RECEIVED value=265 tick=14000
+[STRESS] burst=15 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=15002 fast=1501 heartbeat=30 generated=300 processed=112 dropped=180 queue=8
+[WORKER] processed=120 event=ERROR_INJECT value=287 tick=15000
+[STRESS] burst=16 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=16002 fast=1601 heartbeat=32 generated=320 processed=120 dropped=192 queue=8
+[STRESS] burst=17 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=17002 fast=1701 heartbeat=34 generated=340 processed=128 dropped=204 queue=8
+[WORKER] processed=130 event=SENSOR_SAMPLE value=321 tick=17000
+[STRESS] burst=18 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=18002 fast=1801 heartbeat=36 generated=360 processed=136 dropped=216 queue=8
+[WORKER] processed=140 event=COMMAND_RECEIVED value=343 tick=18000
+[STRESS] burst=19 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=19002 fast=1901 heartbeat=38 generated=380 processed=144 dropped=228 queue=8
+[WORKER] processed=150 event=ERROR_INJECT value=365 tick=19000
+[STRESS] burst=20 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=20002 fast=2001 heartbeat=40 generated=400 processed=152 dropped=240 queue=8
+[WORKER] processed=160 event=SENSOR_SAMPLE value=387 tick=20000
+[STRESS] burst=21 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=21002 fast=2101 heartbeat=42 generated=420 processed=160 dropped=252 queue=8
+[STRESS] burst=22 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=22002 fast=2201 heartbeat=44 generated=440 processed=168 dropped=264 queue=8
+[WORKER] processed=170 event=COMMAND_RECEIVED value=421 tick=22000
+[STRESS] burst=23 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=23002 fast=2301 heartbeat=46 generated=460 processed=176 dropped=276 queue=8
+[WORKER] processed=180 event=ERROR_INJECT value=443 tick=23000
+[STRESS] burst=24 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=24002 fast=2401 heartbeat=48 generated=480 processed=184 dropped=288 queue=8
+[WORKER] processed=190 event=SENSOR_SAMPLE value=465 tick=24000
+[STRESS] burst=25 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=25002 fast=2501 heartbeat=50 generated=500 processed=192 dropped=300 queue=8
+[WORKER] processed=200 event=COMMAND_RECEIVED value=487 tick=25000
+[STRESS] burst=26 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=26002 fast=2601 heartbeat=52 generated=520 processed=200 dropped=312 queue=8
+[STRESS] burst=27 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=27002 fast=2701 heartbeat=54 generated=540 processed=208 dropped=324 queue=8
+[WORKER] processed=210 event=ERROR_INJECT value=521 tick=27000
+[STRESS] burst=28 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=28002 fast=2801 heartbeat=56 generated=560 processed=216 dropped=336 queue=8
+[WORKER] processed=220 event=SENSOR_SAMPLE value=543 tick=28000
+[STRESS] burst=29 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=29002 fast=2901 heartbeat=58 generated=580 processed=224 dropped=348 queue=8
+[WORKER] processed=230 event=COMMAND_RECEIVED value=565 tick=29000
+[STRESS] burst=30 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=30002 fast=3001 heartbeat=60 generated=600 processed=232 dropped=360 queue=8
+[WORKER] processed=240 event=ERROR_INJECT value=587 tick=30000
+[STRESS] burst=31 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=31002 fast=3101 heartbeat=62 generated=620 processed=240 dropped=372 queue=8
+[STRESS] burst=32 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=32002 fast=3201 heartbeat=64 generated=640 processed=248 dropped=384 queue=8
+[WORKER] processed=250 event=SENSOR_SAMPLE value=621 tick=32000
+[STRESS] burst=33 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=33002 fast=3301 heartbeat=66 generated=660 processed=256 dropped=396 queue=8
+[WORKER] processed=260 event=COMMAND_RECEIVED value=643 tick=33000
+[STRESS] burst=34 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=34002 fast=3401 heartbeat=68 generated=680 processed=264 dropped=408 queue=8
+[WORKER] processed=270 event=ERROR_INJECT value=665 tick=34000
+[STRESS] burst=35 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=35002 fast=3501 heartbeat=70 generated=700 processed=272 dropped=420 queue=8
+[WORKER] processed=280 event=SENSOR_SAMPLE value=687 tick=35000
+[STRESS] burst=36 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=36002 fast=3601 heartbeat=72 generated=720 processed=280 dropped=432 queue=8
+[STRESS] burst=37 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=37002 fast=3701 heartbeat=74 generated=740 processed=288 dropped=444 queue=8
+[WORKER] processed=290 event=COMMAND_RECEIVED value=721 tick=37000
+[STRESS] burst=38 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=38002 fast=3801 heartbeat=76 generated=760 processed=296 dropped=456 queue=8
+[WORKER] processed=300 event=ERROR_INJECT value=743 tick=38000
+[STRESS] burst=39 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=39002 fast=3901 heartbeat=78 generated=780 processed=304 dropped=468 queue=8
+[WORKER] processed=310 event=SENSOR_SAMPLE value=765 tick=39000
+[STRESS] burst=40 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=40002 fast=4001 heartbeat=80 generated=800 processed=312 dropped=480 queue=8
+[WORKER] processed=320 event=COMMAND_RECEIVED value=787 tick=40000
+[STRESS] burst=41 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=41002 fast=4101 heartbeat=82 generated=820 processed=320 dropped=492 queue=8
+[STRESS] burst=42 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=42002 fast=4201 heartbeat=84 generated=840 processed=328 dropped=504 queue=8
+[WORKER] processed=330 event=ERROR_INJECT value=821 tick=42000
+[STRESS] burst=43 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=43002 fast=4301 heartbeat=86 generated=860 processed=336 dropped=516 queue=8
+[WORKER] processed=340 event=SENSOR_SAMPLE value=843 tick=43000
+[STRESS] burst=44 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=44002 fast=4401 heartbeat=88 generated=880 processed=344 dropped=528 queue=8
+[WORKER] processed=350 event=COMMAND_RECEIVED value=865 tick=44000
+[STRESS] burst=45 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=45002 fast=4501 heartbeat=90 generated=900 processed=352 dropped=540 queue=8
+[WORKER] processed=360 event=ERROR_INJECT value=887 tick=45000
+[STRESS] burst=46 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=46002 fast=4601 heartbeat=92 generated=920 processed=360 dropped=552 queue=8
+[STRESS] burst=47 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=47002 fast=4701 heartbeat=94 generated=940 processed=368 dropped=564 queue=8
+[WORKER] processed=370 event=SENSOR_SAMPLE value=921 tick=47000
+[STRESS] burst=48 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=48002 fast=4801 heartbeat=96 generated=960 processed=376 dropped=576 queue=8
+[WORKER] processed=380 event=COMMAND_RECEIVED value=943 tick=48000
+[STRESS] burst=49 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=49002 fast=4901 heartbeat=98 generated=980 processed=384 dropped=588 queue=8
+[WORKER] processed=390 event=ERROR_INJECT value=965 tick=49000
+[STRESS] burst=50 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=50002 fast=5001 heartbeat=100 generated=1000 processed=392 dropped=600 queue=8
+[WORKER] processed=400 event=SENSOR_SAMPLE value=987 tick=50000
+[STRESS] burst=51 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=51002 fast=5101 heartbeat=102 generated=1020 processed=400 dropped=612 queue=8
+[STRESS] burst=52 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=52002 fast=5201 heartbeat=104 generated=1040 processed=408 dropped=624 queue=8
+[WORKER] processed=410 event=COMMAND_RECEIVED value=1021 tick=52000
+[STRESS] burst=53 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=53002 fast=5301 heartbeat=106 generated=1060 processed=416 dropped=636 queue=8
+[WORKER] processed=420 event=ERROR_INJECT value=1043 tick=53000
+[STRESS] burst=54 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=54002 fast=5401 heartbeat=108 generated=1080 processed=424 dropped=648 queue=8
+[WORKER] processed=430 event=SENSOR_SAMPLE value=1065 tick=54000
+[STRESS] burst=55 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=55002 fast=5501 heartbeat=110 generated=1100 processed=432 dropped=660 queue=8
+[WORKER] processed=440 event=COMMAND_RECEIVED value=1087 tick=55000
+[STRESS] burst=56 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=56002 fast=5601 heartbeat=112 generated=1120 processed=440 dropped=672 queue=8
+[STRESS] burst=57 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=57002 fast=5701 heartbeat=114 generated=1140 processed=448 dropped=684 queue=8
+[WORKER] processed=450 event=ERROR_INJECT value=1121 tick=57000
+[STRESS] burst=58 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=58002 fast=5801 heartbeat=116 generated=1160 processed=456 dropped=696 queue=8
+[WORKER] processed=460 event=SENSOR_SAMPLE value=1143 tick=58000
+[STRESS] burst=59 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=59002 fast=5901 heartbeat=118 generated=1180 processed=464 dropped=708 queue=8
+[WORKER] processed=470 event=COMMAND_RECEIVED value=1165 tick=59000
+[STRESS] burst=60 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=60002 fast=6001 heartbeat=120 generated=1200 processed=472 dropped=720 queue=8
+[WORKER] processed=480 event=ERROR_INJECT value=1187 tick=60000
+[STRESS] burst=61 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=61002 fast=6101 heartbeat=122 generated=1220 processed=480 dropped=732 queue=8
+[STRESS] burst=62 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=62002 fast=6201 heartbeat=124 generated=1240 processed=488 dropped=744 queue=8
+[WORKER] processed=490 event=SENSOR_SAMPLE value=1221 tick=62000
+[STRESS] burst=63 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=63002 fast=6301 heartbeat=126 generated=1260 processed=496 dropped=756 queue=8
+[WORKER] processed=500 event=COMMAND_RECEIVED value=1243 tick=63000
+[STRESS] burst=64 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=64002 fast=6401 heartbeat=128 generated=1280 processed=504 dropped=768 queue=8
+[WORKER] processed=510 event=ERROR_INJECT value=1265 tick=64000
+[STRESS] burst=65 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=65002 fast=6501 heartbeat=130 generated=1300 processed=512 dropped=780 queue=8
+[WORKER] processed=520 event=SENSOR_SAMPLE value=1287 tick=65000
+[STRESS] burst=66 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=66002 fast=6601 heartbeat=132 generated=1320 processed=520 dropped=792 queue=8
+[STRESS] burst=67 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=67002 fast=6701 heartbeat=134 generated=1340 processed=528 dropped=804 queue=8
+[WORKER] processed=530 event=COMMAND_RECEIVED value=1321 tick=67000
+[STRESS] burst=68 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=68002 fast=6801 heartbeat=136 generated=1360 processed=536 dropped=816 queue=8
+[WORKER] processed=540 event=ERROR_INJECT value=1343 tick=68000
+[STRESS] burst=69 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=69002 fast=6901 heartbeat=138 generated=1380 processed=544 dropped=828 queue=8
+[WORKER] processed=550 event=SENSOR_SAMPLE value=1365 tick=69000
+[STRESS] burst=70 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=70002 fast=7001 heartbeat=140 generated=1400 processed=552 dropped=840 queue=8
+[WORKER] processed=560 event=COMMAND_RECEIVED value=1387 tick=70000
+[STRESS] burst=71 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=71002 fast=7101 heartbeat=142 generated=1420 processed=560 dropped=852 queue=8
+[STRESS] burst=72 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=72002 fast=7201 heartbeat=144 generated=1440 processed=568 dropped=864 queue=8
+[WORKER] processed=570 event=ERROR_INJECT value=1421 tick=72000
+[STRESS] burst=73 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=73002 fast=7301 heartbeat=146 generated=1460 processed=576 dropped=876 queue=8
+[WORKER] processed=580 event=SENSOR_SAMPLE value=1443 tick=73000
+[STRESS] burst=74 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=74002 fast=7401 heartbeat=148 generated=1480 processed=584 dropped=888 queue=8
+[WORKER] processed=590 event=COMMAND_RECEIVED value=1465 tick=74000
+[STRESS] burst=75 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=75002 fast=7501 heartbeat=150 generated=1500 processed=592 dropped=900 queue=8
+[WORKER] processed=600 event=ERROR_INJECT value=1487 tick=75000
+[STRESS] burst=76 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=76002 fast=7601 heartbeat=152 generated=1520 processed=600 dropped=912 queue=8
+[STRESS] burst=77 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=77002 fast=7701 heartbeat=154 generated=1540 processed=608 dropped=924 queue=8
+[WORKER] processed=610 event=SENSOR_SAMPLE value=1521 tick=77000
+[STRESS] burst=78 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=78002 fast=7801 heartbeat=156 generated=1560 processed=616 dropped=936 queue=8
+[WORKER] processed=620 event=COMMAND_RECEIVED value=1543 tick=78000
+[STRESS] burst=79 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=79002 fast=7901 heartbeat=158 generated=1580 processed=624 dropped=948 queue=8
+[WORKER] processed=630 event=ERROR_INJECT value=1565 tick=79000
+[STRESS] burst=80 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=80002 fast=8001 heartbeat=160 generated=1600 processed=632 dropped=960 queue=8
+[WORKER] processed=640 event=SENSOR_SAMPLE value=1587 tick=80000
+[STRESS] burst=81 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=81002 fast=8101 heartbeat=162 generated=1620 processed=640 dropped=972 queue=8
+[STRESS] burst=82 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=82002 fast=8201 heartbeat=164 generated=1640 processed=648 dropped=984 queue=8
+[WORKER] processed=650 event=COMMAND_RECEIVED value=1621 tick=82000
+[STRESS] burst=83 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=83002 fast=8301 heartbeat=166 generated=1660 processed=656 dropped=996 queue=8
+[WORKER] processed=660 event=ERROR_INJECT value=1643 tick=83000
+[STRESS] burst=84 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=84002 fast=8401 heartbeat=168 generated=1680 processed=664 dropped=1008 queue=8
+[WORKER] processed=670 event=SENSOR_SAMPLE value=1665 tick=84000
+[STRESS] burst=85 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=85002 fast=8501 heartbeat=170 generated=1700 processed=672 dropped=1020 queue=8
+[WORKER] processed=680 event=COMMAND_RECEIVED value=1687 tick=85000
+[STRESS] burst=86 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=86002 fast=8601 heartbeat=172 generated=1720 processed=680 dropped=1032 queue=8
+[STRESS] burst=87 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=87002 fast=8701 heartbeat=174 generated=1740 processed=688 dropped=1044 queue=8
+[WORKER] processed=690 event=ERROR_INJECT value=1721 tick=87000
+[STRESS] burst=88 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=88002 fast=8801 heartbeat=176 generated=1760 processed=696 dropped=1056 queue=8
+[WORKER] processed=700 event=SENSOR_SAMPLE value=1743 tick=88000
+[STRESS] burst=89 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=89002 fast=8901 heartbeat=178 generated=1780 processed=704 dropped=1068 queue=8
+[WORKER] processed=710 event=COMMAND_RECEIVED value=1765 tick=89000
+[STRESS] burst=90 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=90002 fast=9001 heartbeat=180 generated=1800 processed=712 dropped=1080 queue=8
+[WORKER] processed=720 event=ERROR_INJECT value=1787 tick=90000
+[STRESS] burst=91 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=91002 fast=9101 heartbeat=182 generated=1820 processed=720 dropped=1092 queue=8
+[STRESS] burst=92 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=92002 fast=9201 heartbeat=184 generated=1840 processed=728 dropped=1104 queue=8
+[WORKER] processed=730 event=SENSOR_SAMPLE value=1821 tick=92000
+[STRESS] burst=93 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=93002 fast=9301 heartbeat=186 generated=1860 processed=736 dropped=1116 queue=8
+[WORKER] processed=740 event=COMMAND_RECEIVED value=1843 tick=93000
+[STRESS] burst=94 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=94002 fast=9401 heartbeat=188 generated=1880 processed=744 dropped=1128 queue=8
+[WORKER] processed=750 event=ERROR_INJECT value=1865 tick=94000
+[STRESS] burst=95 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=95002 fast=9501 heartbeat=190 generated=1900 processed=752 dropped=1140 queue=8
+[WORKER] processed=760 event=SENSOR_SAMPLE value=1887 tick=95000
+[STRESS] burst=96 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=96002 fast=9601 heartbeat=192 generated=1920 processed=760 dropped=1152 queue=8
+[STRESS] burst=97 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=97002 fast=9701 heartbeat=194 generated=1940 processed=768 dropped=1164 queue=8
+[WORKER] processed=770 event=COMMAND_RECEIVED value=1921 tick=97000
+[STRESS] burst=98 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=98002 fast=9801 heartbeat=196 generated=1960 processed=776 dropped=1176 queue=8
+[WORKER] processed=780 event=ERROR_INJECT value=1943 tick=98000
+[STRESS] burst=99 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=99002 fast=9901 heartbeat=198 generated=1980 processed=784 dropped=1188 queue=8
+[WORKER] processed=790 event=SENSOR_SAMPLE value=1965 tick=99000
+[STRESS] burst=100 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=100002 fast=10001 heartbeat=200 generated=2000 processed=792 dropped=1200 queue=8
+[WORKER] processed=800 event=COMMAND_RECEIVED value=1987 tick=100000
+[STRESS] burst=101 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=101002 fast=10101 heartbeat=202 generated=2020 processed=800 dropped=1212 queue=8
+[STRESS] burst=102 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=102002 fast=10201 heartbeat=204 generated=2040 processed=808 dropped=1224 queue=8
+[WORKER] processed=810 event=ERROR_INJECT value=2021 tick=102000
+[STRESS] burst=103 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=103002 fast=10301 heartbeat=206 generated=2060 processed=816 dropped=1236 queue=8
+[WORKER] processed=820 event=SENSOR_SAMPLE value=2043 tick=103000
+[STRESS] burst=104 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=104002 fast=10401 heartbeat=208 generated=2080 processed=824 dropped=1248 queue=8
+[WORKER] processed=830 event=COMMAND_RECEIVED value=2065 tick=104000
+[STRESS] burst=105 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=105002 fast=10501 heartbeat=210 generated=2100 processed=832 dropped=1260 queue=8
+[WORKER] processed=840 event=ERROR_INJECT value=2087 tick=105000
+[STRESS] burst=106 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=106002 fast=10601 heartbeat=212 generated=2120 processed=840 dropped=1272 queue=8
+[STRESS] burst=107 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=107002 fast=10701 heartbeat=214 generated=2140 processed=848 dropped=1284 queue=8
+[WORKER] processed=850 event=SENSOR_SAMPLE value=2121 tick=107000
+[STRESS] burst=108 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=108002 fast=10801 heartbeat=216 generated=2160 processed=856 dropped=1296 queue=8
+[WORKER] processed=860 event=COMMAND_RECEIVED value=2143 tick=108000
+[STRESS] burst=109 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=109002 fast=10901 heartbeat=218 generated=2180 processed=864 dropped=1308 queue=8
+[WORKER] processed=870 event=ERROR_INJECT value=2165 tick=109000
+[STRESS] burst=110 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=110002 fast=11001 heartbeat=220 generated=2200 processed=872 dropped=1320 queue=8
+[WORKER] processed=880 event=SENSOR_SAMPLE value=2187 tick=110000
+[STRESS] burst=111 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=111002 fast=11101 heartbeat=222 generated=2220 processed=880 dropped=1332 queue=8
+[STRESS] burst=112 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=112002 fast=11201 heartbeat=224 generated=2240 processed=888 dropped=1344 queue=8
+[WORKER] processed=890 event=COMMAND_RECEIVED value=2221 tick=112000
+[STRESS] burst=113 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=113002 fast=11301 heartbeat=226 generated=2260 processed=896 dropped=1356 queue=8
+[WORKER] processed=900 event=ERROR_INJECT value=2243 tick=113000
+[STRESS] burst=114 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=114002 fast=11401 heartbeat=228 generated=2280 processed=904 dropped=1368 queue=8
+[WORKER] processed=910 event=SENSOR_SAMPLE value=2265 tick=114000
+[STRESS] burst=115 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=115002 fast=11501 heartbeat=230 generated=2300 processed=912 dropped=1380 queue=8
+[WORKER] processed=920 event=COMMAND_RECEIVED value=2287 tick=115000
+[STRESS] burst=116 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=116002 fast=11601 heartbeat=232 generated=2320 processed=920 dropped=1392 queue=8
+[STRESS] burst=117 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=117002 fast=11701 heartbeat=234 generated=2340 processed=928 dropped=1404 queue=8
+[WORKER] processed=930 event=ERROR_INJECT value=2321 tick=117000
+[STRESS] burst=118 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=118002 fast=11801 heartbeat=236 generated=2360 processed=936 dropped=1416 queue=8
+[WORKER] processed=940 event=SENSOR_SAMPLE value=2343 tick=118000
+[STRESS] burst=119 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=119002 fast=11901 heartbeat=238 generated=2380 processed=944 dropped=1428 queue=8
+[WORKER] processed=950 event=COMMAND_RECEIVED value=2365 tick=119000
+[STRESS] burst=120 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=120002 fast=12001 heartbeat=240 generated=2400 processed=952 dropped=1440 queue=8
+[WORKER] processed=960 event=ERROR_INJECT value=2387 tick=120000
+[STRESS] burst=121 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=121002 fast=12101 heartbeat=242 generated=2420 processed=960 dropped=1452 queue=8
+[STRESS] burst=122 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=122002 fast=12201 heartbeat=244 generated=2440 processed=968 dropped=1464 queue=8
+[WORKER] processed=970 event=SENSOR_SAMPLE value=2421 tick=122000
+[STRESS] burst=123 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=123002 fast=12301 heartbeat=246 generated=2460 processed=976 dropped=1476 queue=8
+[WORKER] processed=980 event=COMMAND_RECEIVED value=2443 tick=123000
+[STRESS] burst=124 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=124002 fast=12401 heartbeat=248 generated=2480 processed=984 dropped=1488 queue=8
+[WORKER] processed=990 event=ERROR_INJECT value=2465 tick=124000
+[STRESS] burst=125 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=125002 fast=12501 heartbeat=250 generated=2500 processed=992 dropped=1500 queue=8
+[WORKER] processed=1000 event=SENSOR_SAMPLE value=2487 tick=125000
+[STRESS] burst=126 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=126002 fast=12601 heartbeat=252 generated=2520 processed=1000 dropped=1512 queue=8
+[STRESS] burst=127 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=127002 fast=12701 heartbeat=254 generated=2540 processed=1008 dropped=1524 queue=8
+[WORKER] processed=1010 event=COMMAND_RECEIVED value=2521 tick=127000
+[STRESS] burst=128 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=128002 fast=12801 heartbeat=256 generated=2560 processed=1016 dropped=1536 queue=8
+[WORKER] processed=1020 event=ERROR_INJECT value=2543 tick=128000
+[STRESS] burst=129 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=129002 fast=12901 heartbeat=258 generated=2580 processed=1024 dropped=1548 queue=8
+[WORKER] processed=1030 event=SENSOR_SAMPLE value=2565 tick=129000
+[STRESS] burst=130 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=130002 fast=13001 heartbeat=260 generated=2600 processed=1032 dropped=1560 queue=8
+[WORKER] processed=1040 event=COMMAND_RECEIVED value=2587 tick=130000
+[STRESS] burst=131 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=131002 fast=13101 heartbeat=262 generated=2620 processed=1040 dropped=1572 queue=8
+[STRESS] burst=132 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=132002 fast=13201 heartbeat=264 generated=2640 processed=1048 dropped=1584 queue=8
+[WORKER] processed=1050 event=ERROR_INJECT value=2621 tick=132000
+[STRESS] burst=133 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=133002 fast=13301 heartbeat=266 generated=2660 processed=1056 dropped=1596 queue=8
+[WORKER] processed=1060 event=SENSOR_SAMPLE value=2643 tick=133000
+[STRESS] burst=134 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=134002 fast=13401 heartbeat=268 generated=2680 processed=1064 dropped=1608 queue=8
+[WORKER] processed=1070 event=COMMAND_RECEIVED value=2665 tick=134000
+[STRESS] burst=135 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=135002 fast=13501 heartbeat=270 generated=2700 processed=1072 dropped=1620 queue=8
+[WORKER] processed=1080 event=ERROR_INJECT value=2687 tick=135000
+[STRESS] burst=136 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=136002 fast=13601 heartbeat=272 generated=2720 processed=1080 dropped=1632 queue=8
+[STRESS] burst=137 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=137002 fast=13701 heartbeat=274 generated=2740 processed=1088 dropped=1644 queue=8
+[WORKER] processed=1090 event=SENSOR_SAMPLE value=2721 tick=137000
+[STRESS] burst=138 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=138002 fast=13801 heartbeat=276 generated=2760 processed=1096 dropped=1656 queue=8
+[WORKER] processed=1100 event=COMMAND_RECEIVED value=2743 tick=138000
+[STRESS] burst=139 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=139002 fast=13901 heartbeat=278 generated=2780 processed=1104 dropped=1668 queue=8
+[WORKER] processed=1110 event=ERROR_INJECT value=2765 tick=139000
+[STRESS] burst=140 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=140002 fast=14001 heartbeat=280 generated=2800 processed=1112 dropped=1680 queue=8
+[WORKER] processed=1120 event=SENSOR_SAMPLE value=2787 tick=140000
+[STRESS] burst=141 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=141002 fast=14101 heartbeat=282 generated=2820 processed=1120 dropped=1692 queue=8
+[STRESS] burst=142 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=142002 fast=14201 heartbeat=284 generated=2840 processed=1128 dropped=1704 queue=8
+[WORKER] processed=1130 event=COMMAND_RECEIVED value=2821 tick=142000
+[STRESS] burst=143 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=143002 fast=14301 heartbeat=286 generated=2860 processed=1136 dropped=1716 queue=8
+[WORKER] processed=1140 event=ERROR_INJECT value=2843 tick=143000
+[STRESS] burst=144 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=144002 fast=14401 heartbeat=288 generated=2880 processed=1144 dropped=1728 queue=8
+[WORKER] processed=1150 event=SENSOR_SAMPLE value=2865 tick=144000
+[STRESS] burst=145 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=145002 fast=14501 heartbeat=290 generated=2900 processed=1152 dropped=1740 queue=8
+[WORKER] processed=1160 event=COMMAND_RECEIVED value=2887 tick=145000
+[STRESS] burst=146 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=146002 fast=14601 heartbeat=292 generated=2920 processed=1160 dropped=1752 queue=8
+[STRESS] burst=147 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=147002 fast=14701 heartbeat=294 generated=2940 processed=1168 dropped=1764 queue=8
+[WORKER] processed=1170 event=ERROR_INJECT value=2921 tick=147000
+[STRESS] burst=148 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=148002 fast=14801 heartbeat=296 generated=2960 processed=1176 dropped=1776 queue=8
+[WORKER] processed=1180 event=SENSOR_SAMPLE value=2943 tick=148000
+[STRESS] burst=149 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=149002 fast=14901 heartbeat=298 generated=2980 processed=1184 dropped=1788 queue=8
+[WORKER] processed=1190 event=COMMAND_RECEIVED value=2965 tick=149000
+[STRESS] burst=150 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=150002 fast=15001 heartbeat=300 generated=3000 processed=1192 dropped=1800 queue=8
+[WORKER] processed=1200 event=ERROR_INJECT value=2987 tick=150000
+[STRESS] burst=151 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=151002 fast=15101 heartbeat=302 generated=3020 processed=1200 dropped=1812 queue=8
+[STRESS] burst=152 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=152002 fast=15201 heartbeat=304 generated=3040 processed=1208 dropped=1824 queue=8
+[WORKER] processed=1210 event=SENSOR_SAMPLE value=3021 tick=152000
+[STRESS] burst=153 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=153002 fast=15301 heartbeat=306 generated=3060 processed=1216 dropped=1836 queue=8
+[WORKER] processed=1220 event=COMMAND_RECEIVED value=3043 tick=153000
+[STRESS] burst=154 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=154002 fast=15401 heartbeat=308 generated=3080 processed=1224 dropped=1848 queue=8
+[WORKER] processed=1230 event=ERROR_INJECT value=3065 tick=154000
+[STRESS] burst=155 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=155002 fast=15501 heartbeat=310 generated=3100 processed=1232 dropped=1860 queue=8
+[WORKER] processed=1240 event=SENSOR_SAMPLE value=3087 tick=155000
+[STRESS] burst=156 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=156002 fast=15601 heartbeat=312 generated=3120 processed=1240 dropped=1872 queue=8
+[STRESS] burst=157 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=157002 fast=15701 heartbeat=314 generated=3140 processed=1248 dropped=1884 queue=8
+[WORKER] processed=1250 event=COMMAND_RECEIVED value=3121 tick=157000
+[STRESS] burst=158 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=158002 fast=15801 heartbeat=316 generated=3160 processed=1256 dropped=1896 queue=8
+[WORKER] processed=1260 event=ERROR_INJECT value=3143 tick=158000
+[STRESS] burst=159 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=159002 fast=15901 heartbeat=318 generated=3180 processed=1264 dropped=1908 queue=8
+[WORKER] processed=1270 event=SENSOR_SAMPLE value=3165 tick=159000
+[STRESS] burst=160 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=160002 fast=16001 heartbeat=320 generated=3200 processed=1272 dropped=1920 queue=8
+[WORKER] processed=1280 event=COMMAND_RECEIVED value=3187 tick=160000
+[STRESS] burst=161 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=161002 fast=16101 heartbeat=322 generated=3220 processed=1280 dropped=1932 queue=8
+[STRESS] burst=162 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=162002 fast=16201 heartbeat=324 generated=3240 processed=1288 dropped=1944 queue=8
+[WORKER] processed=1290 event=ERROR_INJECT value=3221 tick=162000
+[STRESS] burst=163 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=163002 fast=16301 heartbeat=326 generated=3260 processed=1296 dropped=1956 queue=8
+[WORKER] processed=1300 event=SENSOR_SAMPLE value=3243 tick=163000
+[STRESS] burst=164 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=164002 fast=16401 heartbeat=328 generated=3280 processed=1304 dropped=1968 queue=8
+[WORKER] processed=1310 event=COMMAND_RECEIVED value=3265 tick=164000
+[STRESS] burst=165 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=165002 fast=16501 heartbeat=330 generated=3300 processed=1312 dropped=1980 queue=8
+[WORKER] processed=1320 event=ERROR_INJECT value=3287 tick=165000
+[STRESS] burst=166 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=166002 fast=16601 heartbeat=332 generated=3320 processed=1320 dropped=1992 queue=8
+[STRESS] burst=167 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=167002 fast=16701 heartbeat=334 generated=3340 processed=1328 dropped=2004 queue=8
+[WORKER] processed=1330 event=SENSOR_SAMPLE value=3321 tick=167000
+[STRESS] burst=168 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=168002 fast=16801 heartbeat=336 generated=3360 processed=1336 dropped=2016 queue=8
+[WORKER] processed=1340 event=COMMAND_RECEIVED value=3343 tick=168000
+[STRESS] burst=169 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=169002 fast=16901 heartbeat=338 generated=3380 processed=1344 dropped=2028 queue=8
+[WORKER] processed=1350 event=ERROR_INJECT value=3365 tick=169000
+[STRESS] burst=170 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=170002 fast=17001 heartbeat=340 generated=3400 processed=1352 dropped=2040 queue=8
+[WORKER] processed=1360 event=SENSOR_SAMPLE value=3387 tick=170000
+[STRESS] burst=171 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=171002 fast=17101 heartbeat=342 generated=3420 processed=1360 dropped=2052 queue=8
+[STRESS] burst=172 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=172002 fast=17201 heartbeat=344 generated=3440 processed=1368 dropped=2064 queue=8
+[WORKER] processed=1370 event=COMMAND_RECEIVED value=3421 tick=172000
+[STRESS] burst=173 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=173002 fast=17301 heartbeat=346 generated=3460 processed=1376 dropped=2076 queue=8
+[WORKER] processed=1380 event=ERROR_INJECT value=3443 tick=173000
+[STRESS] burst=174 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=174002 fast=17401 heartbeat=348 generated=3480 processed=1384 dropped=2088 queue=8
+[WORKER] processed=1390 event=SENSOR_SAMPLE value=3465 tick=174000
+[STRESS] burst=175 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=175002 fast=17501 heartbeat=350 generated=3500 processed=1392 dropped=2100 queue=8
+[WORKER] processed=1400 event=COMMAND_RECEIVED value=3487 tick=175000
+[STRESS] burst=176 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=176002 fast=17601 heartbeat=352 generated=3520 processed=1400 dropped=2112 queue=8
+[STRESS] burst=177 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=177002 fast=17701 heartbeat=354 generated=3540 processed=1408 dropped=2124 queue=8
+[WORKER] processed=1410 event=ERROR_INJECT value=3521 tick=177000
+[STRESS] burst=178 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=178002 fast=17801 heartbeat=356 generated=3560 processed=1416 dropped=2136 queue=8
+[WORKER] processed=1420 event=SENSOR_SAMPLE value=3543 tick=178000
+[STRESS] burst=179 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=179002 fast=17901 heartbeat=358 generated=3580 processed=1424 dropped=2148 queue=8
+[WORKER] processed=1430 event=COMMAND_RECEIVED value=3565 tick=179000
+[STRESS] burst=180 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=180002 fast=18001 heartbeat=360 generated=3600 processed=1432 dropped=2160 queue=8
+[WORKER] processed=1440 event=ERROR_INJECT value=3587 tick=180000
+[STRESS] burst=181 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=181002 fast=18101 heartbeat=362 generated=3620 processed=1440 dropped=2172 queue=8
+[STRESS] burst=182 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=182002 fast=18201 heartbeat=364 generated=3640 processed=1448 dropped=2184 queue=8
+[WORKER] processed=1450 event=SENSOR_SAMPLE value=3621 tick=182000
+[STRESS] burst=183 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=183002 fast=18301 heartbeat=366 generated=3660 processed=1456 dropped=2196 queue=8
+[WORKER] processed=1460 event=COMMAND_RECEIVED value=3643 tick=183000
+[STRESS] burst=184 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=184002 fast=18401 heartbeat=368 generated=3680 processed=1464 dropped=2208 queue=8
+[WORKER] processed=1470 event=ERROR_INJECT value=3665 tick=184000
+[STRESS] burst=185 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=185002 fast=18501 heartbeat=370 generated=3700 processed=1472 dropped=2220 queue=8
+[WORKER] processed=1480 event=SENSOR_SAMPLE value=3687 tick=185000
+[STRESS] burst=186 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=186002 fast=18601 heartbeat=372 generated=3720 processed=1480 dropped=2232 queue=8
+[STRESS] burst=187 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=187002 fast=18701 heartbeat=374 generated=3740 processed=1488 dropped=2244 queue=8
+[WORKER] processed=1490 event=COMMAND_RECEIVED value=3721 tick=187000
+[STRESS] burst=188 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=188002 fast=18801 heartbeat=376 generated=3760 processed=1496 dropped=2256 queue=8
+[WORKER] processed=1500 event=ERROR_INJECT value=3743 tick=188000
+[STRESS] burst=189 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=189002 fast=18901 heartbeat=378 generated=3780 processed=1504 dropped=2268 queue=8
+[WORKER] processed=1510 event=SENSOR_SAMPLE value=3765 tick=189000
+[STRESS] burst=190 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=190002 fast=19001 heartbeat=380 generated=3800 processed=1512 dropped=2280 queue=8
+[WORKER] processed=1520 event=COMMAND_RECEIVED value=3787 tick=190000
+[STRESS] burst=191 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=191002 fast=19101 heartbeat=382 generated=3820 processed=1520 dropped=2292 queue=8
+[STRESS] burst=192 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=192002 fast=19201 heartbeat=384 generated=3840 processed=1528 dropped=2304 queue=8
+[WORKER] processed=1530 event=ERROR_INJECT value=3821 tick=192000
+[STRESS] burst=193 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=193002 fast=19301 heartbeat=386 generated=3860 processed=1536 dropped=2316 queue=8
+[WORKER] processed=1540 event=SENSOR_SAMPLE value=3843 tick=193000
+[STRESS] burst=194 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=194002 fast=19401 heartbeat=388 generated=3880 processed=1544 dropped=2328 queue=8
+[WORKER] processed=1550 event=COMMAND_RECEIVED value=3865 tick=194000
+[STRESS] burst=195 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=195002 fast=19501 heartbeat=390 generated=3900 processed=1552 dropped=2340 queue=8
+[WORKER] processed=1560 event=ERROR_INJECT value=3887 tick=195000
+[STRESS] burst=196 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=196002 fast=19601 heartbeat=392 generated=3920 processed=1560 dropped=2352 queue=8
+[STRESS] burst=197 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=197002 fast=19701 heartbeat=394 generated=3940 processed=1568 dropped=2364 queue=8
+[WORKER] processed=1570 event=SENSOR_SAMPLE value=3921 tick=197000
+[STRESS] burst=198 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=198002 fast=19801 heartbeat=396 generated=3960 processed=1576 dropped=2376 queue=8
+[WORKER] processed=1580 event=COMMAND_RECEIVED value=3943 tick=198000
+[STRESS] burst=199 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=199002 fast=19901 heartbeat=398 generated=3980 processed=1584 dropped=2388 queue=8
+[WORKER] processed=1590 event=ERROR_INJECT value=3965 tick=199000
+[STRESS] burst=200 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=200002 fast=20001 heartbeat=400 generated=4000 processed=1592 dropped=2400 queue=8
+[WORKER] processed=1600 event=SENSOR_SAMPLE value=3987 tick=200000
+[STRESS] burst=201 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=201002 fast=20101 heartbeat=402 generated=4020 processed=1600 dropped=2412 queue=8
+[STRESS] burst=202 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=202002 fast=20201 heartbeat=404 generated=4040 processed=1608 dropped=2424 queue=8
+[WORKER] processed=1610 event=COMMAND_RECEIVED value=4021 tick=202000
+[STRESS] burst=203 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=203002 fast=20301 heartbeat=406 generated=4060 processed=1616 dropped=2436 queue=8
+[WORKER] processed=1620 event=ERROR_INJECT value=4043 tick=203000
+[STRESS] burst=204 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=204002 fast=20401 heartbeat=408 generated=4080 processed=1624 dropped=2448 queue=8
+[WORKER] processed=1630 event=SENSOR_SAMPLE value=4065 tick=204000
+[STRESS] burst=205 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=205002 fast=20501 heartbeat=410 generated=4100 processed=1632 dropped=2460 queue=8
+[WORKER] processed=1640 event=COMMAND_RECEIVED value=4087 tick=205000
+[STRESS] burst=206 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=206002 fast=20601 heartbeat=412 generated=4120 processed=1640 dropped=2472 queue=8
+[STRESS] burst=207 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=207002 fast=20701 heartbeat=414 generated=4140 processed=1648 dropped=2484 queue=8
+[WORKER] processed=1650 event=ERROR_INJECT value=4121 tick=207000
+[STRESS] burst=208 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=208002 fast=20801 heartbeat=416 generated=4160 processed=1656 dropped=2496 queue=8
+[WORKER] processed=1660 event=SENSOR_SAMPLE value=4143 tick=208000
+[STRESS] burst=209 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=209002 fast=20901 heartbeat=418 generated=4180 processed=1664 dropped=2508 queue=8
+[WORKER] processed=1670 event=COMMAND_RECEIVED value=4165 tick=209000
+[STRESS] burst=210 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=210002 fast=21001 heartbeat=420 generated=4200 processed=1672 dropped=2520 queue=8
+[WORKER] processed=1680 event=ERROR_INJECT value=4187 tick=210000
+[STRESS] burst=211 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=211002 fast=21101 heartbeat=422 generated=4220 processed=1680 dropped=2532 queue=8
+[STRESS] burst=212 generated=20 accepted=8 dropped=12
+[MONITOR] uptime=212002 fast=21201 heartbeat=424 gen

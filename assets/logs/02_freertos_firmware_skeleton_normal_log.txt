@@ -1,0 +1,126 @@
+[BOOT] STM32G0B1RE Firmware Debugging Lab
+[BOOT] Project: 02_freertos_firmware_skeleton
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 48 MHz
+[BOOT] Test mode: normal
+[BOOT] FreeRTOS objects created
+[BOOT] FastTask=OK EventTask=OK WorkerTask=OK HeartbeatTask=OK MonitorTask=OK
+[BOOT] FreeRTOS kernel starting
+[MONITOR] uptime=1001 fast=101 heartbeat=2 generated=9 processed=9 dropped=0 queue=0
+[WORKER] processed=10 event=SENSOR_SAMPLE value=9 tick=1001
+[MONITOR] uptime=2001 fast=201 heartbeat=4 generated=19 processed=19 dropped=0 queue=0
+[WORKER] processed=20 event=COMMAND_RECEIVED value=19 tick=2001
+[MONITOR] uptime=3001 fast=301 heartbeat=6 generated=29 processed=29 dropped=0 queue=0
+[WORKER] processed=30 event=ERROR_INJECT value=29 tick=3001
+[MONITOR] uptime=4001 fast=401 heartbeat=8 generated=39 processed=39 dropped=0 queue=0
+[WORKER] processed=40 event=SENSOR_SAMPLE value=39 tick=4001
+[MONITOR] uptime=5001 fast=501 heartbeat=10 generated=49 processed=49 dropped=0 queue=0
+[WORKER] processed=50 event=COMMAND_RECEIVED value=49 tick=5001
+[MONITOR] uptime=6001 fast=601 heartbeat=12 generated=59 processed=59 dropped=0 queue=0
+[WORKER] processed=60 event=ERROR_INJECT value=59 tick=6001
+[MONITOR] uptime=7001 fast=701 heartbeat=14 generated=69 processed=69 dropped=0 queue=0
+[WORKER] processed=70 event=SENSOR_SAMPLE value=69 tick=7001
+[MONITOR] uptime=8001 fast=801 heartbeat=16 generated=79 processed=79 dropped=0 queue=0
+[WORKER] processed=80 event=COMMAND_RECEIVED value=79 tick=8001
+[MONITOR] uptime=9001 fast=901 heartbeat=18 generated=89 processed=89 dropped=0 queue=0
+[WORKER] processed=90 event=ERROR_INJECT value=89 tick=9001
+[MONITOR] uptime=10001 fast=1001 heartbeat=20 generated=99 processed=99 dropped=0 queue=0
+[WORKER] processed=100 event=SENSOR_SAMPLE value=99 tick=10001
+[MONITOR] uptime=11001 fast=1101 heartbeat=22 generated=109 processed=109 dropped=0 queue=0
+[WORKER] processed=110 event=COMMAND_RECEIVED value=109 tick=11001
+[MONITOR] uptime=12001 fast=1201 heartbeat=24 generated=119 processed=119 dropped=0 queue=0
+[WORKER] processed=120 event=ERROR_INJECT value=119 tick=12001
+[MONITOR] uptime=13001 fast=1301 heartbeat=26 generated=129 processed=129 dropped=0 queue=0
+[WORKER] processed=130 event=SENSOR_SAMPLE value=129 tick=13001
+[MONITOR] uptime=14001 fast=1401 heartbeat=28 generated=139 processed=139 dropped=0 queue=0
+[WORKER] processed=140 event=COMMAND_RECEIVED value=139 tick=14001
+[MONITOR] uptime=15001 fast=1501 heartbeat=30 generated=149 processed=149 dropped=0 queue=0
+[WORKER] processed=150 event=ERROR_INJECT value=149 tick=15001
+[MONITOR] uptime=16001 fast=1601 heartbeat=32 generated=159 processed=159 dropped=0 queue=0
+[WORKER] processed=160 event=SENSOR_SAMPLE value=159 tick=16001
+[MONITOR] uptime=17001 fast=1701 heartbeat=34 generated=169 processed=169 dropped=0 queue=0
+[WORKER] processed=170 event=COMMAND_RECEIVED value=169 tick=17001
+[MONITOR] uptime=18001 fast=1801 heartbeat=36 generated=179 processed=179 dropped=0 queue=0
+[WORKER] processed=180 event=ERROR_INJECT value=179 tick=18001
+[MONITOR] uptime=19001 fast=1901 heartbeat=38 generated=189 processed=189 dropped=0 queue=0
+[WORKER] processed=190 event=SENSOR_SAMPLE value=189 tick=19001
+[MONITOR] uptime=20001 fast=2001 heartbeat=40 generated=199 processed=199 dropped=0 queue=0
+[WORKER] processed=200 event=COMMAND_RECEIVED value=199 tick=20001
+[MONITOR] uptime=21001 fast=2101 heartbeat=42 generated=209 processed=209 dropped=0 queue=0
+[WORKER] processed=210 event=ERROR_INJECT value=209 tick=21001
+[MONITOR] uptime=22001 fast=2201 heartbeat=44 generated=219 processed=219 dropped=0 queue=0
+[WORKER] processed=220 event=SENSOR_SAMPLE value=219 tick=22001
+[MONITOR] uptime=23001 fast=2301 heartbeat=46 generated=229 processed=229 dropped=0 queue=0
+[WORKER] processed=230 event=COMMAND_RECEIVED value=229 tick=23001
+[MONITOR] uptime=24001 fast=2401 heartbeat=48 generated=239 processed=239 dropped=0 queue=0
+[WORKER] processed=240 event=ERROR_INJECT value=239 tick=24001
+[MONITOR] uptime=25001 fast=2501 heartbeat=50 generated=249 processed=249 dropped=0 queue=0
+[WORKER] processed=250 event=SENSOR_SAMPLE value=249 tick=25001
+[MONITOR] uptime=26001 fast=2601 heartbeat=52 generated=259 processed=259 dropped=0 queue=0
+[WORKER] processed=260 event=COMMAND_RECEIVED value=259 tick=26001
+[MONITOR] uptime=27001 fast=2701 heartbeat=54 generated=269 processed=269 dropped=0 queue=0
+[WORKER] processed=270 event=ERROR_INJECT value=269 tick=27001
+[MONITOR] uptime=28001 fast=2801 heartbeat=56 generated=279 processed=279 dropped=0 queue=0
+[WORKER] processed=280 event=SENSOR_SAMPLE value=279 tick=28001
+[MONITOR] uptime=29001 fast=2901 heartbeat=58 generated=289 processed=289 dropped=0 queue=0
+[WORKER] processed=290 event=COMMAND_RECEIVED value=289 tick=29001
+[MONITOR] uptime=30001 fast=3001 heartbeat=60 generated=299 processed=299 dropped=0 queue=0
+[WORKER] processed=300 event=ERROR_INJECT value=299 tick=30001
+[MONITOR] uptime=31001 fast=3101 heartbeat=62 generated=309 processed=309 dropped=0 queue=0
+[WORKER] processed=310 event=SENSOR_SAMPLE value=309 tick=31001
+[MONITOR] uptime=32001 fast=3201 heartbeat=64 generated=319 processed=319 dropped=0 queue=0
+[WORKER] processed=320 event=COMMAND_RECEIVED value=319 tick=32001
+[MONITOR] uptime=33001 fast=3301 heartbeat=66 generated=329 processed=329 dropped=0 queue=0
+[WORKER] processed=330 event=ERROR_INJECT value=329 tick=33001
+[MONITOR] uptime=34001 fast=3401 heartbeat=68 generated=339 processed=339 dropped=0 queue=0
+[WORKER] processed=340 event=SENSOR_SAMPLE value=339 tick=34001
+[MONITOR] uptime=35001 fast=3501 heartbeat=70 generated=349 processed=349 dropped=0 queue=0
+[WORKER] processed=350 event=COMMAND_RECEIVED value=349 tick=35001
+[MONITOR] uptime=36001 fast=3601 heartbeat=72 generated=359 processed=359 dropped=0 queue=0
+[WORKER] processed=360 event=ERROR_INJECT value=359 tick=36001
+[MONITOR] uptime=37001 fast=3701 heartbeat=74 generated=369 processed=369 dropped=0 queue=0
+[WORKER] processed=370 event=SENSOR_SAMPLE value=369 tick=37001
+[MONITOR] uptime=38001 fast=3801 heartbeat=76 generated=379 processed=379 dropped=0 queue=0
+[WORKER] processed=380 event=COMMAND_RECEIVED value=379 tick=38001
+[MONITOR] uptime=39001 fast=3901 heartbeat=78 generated=389 processed=389 dropped=0 queue=0
+[WORKER] processed=390 event=ERROR_INJECT value=389 tick=39001
+[MONITOR] uptime=40001 fast=4001 heartbeat=80 generated=399 processed=399 dropped=0 queue=0
+[WORKER] processed=400 event=SENSOR_SAMPLE value=399 tick=40001
+[MONITOR] uptime=41001 fast=4101 heartbeat=82 generated=409 processed=409 dropped=0 queue=0
+[WORKER] processed=410 event=COMMAND_RECEIVED value=409 tick=41001
+[MONITOR] uptime=42001 fast=4201 heartbeat=84 generated=419 processed=419 dropped=0 queue=0
+[WORKER] processed=420 event=ERROR_INJECT value=419 tick=42001
+[MONITOR] uptime=43001 fast=4301 heartbeat=86 generated=429 processed=429 dropped=0 queue=0
+[WORKER] processed=430 event=SENSOR_SAMPLE value=429 tick=43001
+[MONITOR] uptime=44001 fast=4401 heartbeat=88 generated=439 processed=439 dropped=0 queue=0
+[WORKER] processed=440 event=COMMAND_RECEIVED value=439 tick=44001
+[MONITOR] uptime=45001 fast=4501 heartbeat=90 generated=449 processed=449 dropped=0 queue=0
+[WORKER] processed=450 event=ERROR_INJECT value=449 tick=45001
+[MONITOR] uptime=46001 fast=4601 heartbeat=92 generated=459 processed=459 dropped=0 queue=0
+[WORKER] processed=460 event=SENSOR_SAMPLE value=459 tick=46001
+[MONITOR] uptime=47001 fast=4701 heartbeat=94 generated=469 processed=469 dropped=0 queue=0
+[WORKER] processed=470 event=COMMAND_RECEIVED value=469 tick=47001
+[MONITOR] uptime=48001 fast=4801 heartbeat=96 generated=479 processed=479 dropped=0 queue=0
+[WORKER] processed=480 event=ERROR_INJECT value=479 tick=48001
+[MONITOR] uptime=49001 fast=4901 heartbeat=98 generated=489 processed=489 dropped=0 queue=0
+[WORKER] processed=490 event=SENSOR_SAMPLE value=489 tick=49001
+[MONITOR] uptime=50001 fast=5001 heartbeat=100 generated=499 processed=499 dropped=0 queue=0
+[WORKER] processed=500 event=COMMAND_RECEIVED value=499 tick=50001
+[MONITOR] uptime=51001 fast=5101 heartbeat=102 generated=509 processed=509 dropped=0 queue=0
+[WORKER] processed=510 event=ERROR_INJECT value=509 tick=51001
+[MONITOR] uptime=52001 fast=5201 heartbeat=104 generated=519 processed=519 dropped=0 queue=0
+[WORKER] processed=520 event=SENSOR_SAMPLE value=519 tick=52001
+[MONITOR] uptime=53001 fast=5301 heartbeat=106 generated=529 processed=529 dropped=0 queue=0
+[WORKER] processed=530 event=COMMAND_RECEIVED value=529 tick=53001
+[MONITOR] uptime=54001 fast=5401 heartbeat=108 generated=539 processed=539 dropped=0 queue=0
+[WORKER] processed=540 event=ERROR_INJECT value=539 tick=54001
+[MONITOR] uptime=55001 fast=5501 heartbeat=110 generated=549 processed=549 dropped=0 queue=0
+[WORKER] processed=550 event=SENSOR_SAMPLE value=549 tick=55001
+[MONITOR] uptime=56001 fast=5601 heartbeat=112 generated=559 processed=559 dropped=0 queue=0
+[WORKER] processed=560 event=COMMAND_RECEIVED value=559 tick=56001
+[MONITOR] uptime=57001 fast=5701 heartbeat=114 generated=569 processed=569 dropped=0 queue=0
+[WORKER] processed=570 event=ERROR_INJECT value=569 tick=57001
+[MONITOR] uptime=58001 fast=5801 heartbeat=116 generated=579 processed=579 dropped=0 queue=0
+[WORKER] processed=580 event=SENSOR_SAMPLE value=579 tick=58001
+[MONITOR] uptime=59001 fast=5901 heartbeat=118 generated=589 processed=589 dropped=0 queue=0
+[WORKER] processed=590 event=COMMAND_RECEIVED value=589 tick=59001
