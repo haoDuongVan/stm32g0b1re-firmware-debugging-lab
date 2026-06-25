@@ -13,6 +13,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "ee_fault_inject.h"
+
 /* Private defines -----------------------------------------------------------*/
 #define EE_FLASH_BANK                    FLASH_BANK_2
 
@@ -48,6 +50,7 @@ static EeStatus_t Ee_CopyLatestRecords(uint32_t src_page_addr,
                                        uint16_t skip_var_id,
                                        uint32_t *copied_count);
 static EeStatus_t Ee_TransferPage(uint16_t var_id, uint32_t value);
+static EeStatus_t Ee_RecoverReceivePage(uint32_t receive_page_addr);
 static void Ee_PrintPageStates(void);
 
 /* Private functions ---------------------------------------------------------*/
@@ -385,6 +388,9 @@ static EeStatus_t Ee_TransferPage(uint16_t var_id, uint32_t value)
   }
   UartLog_Printf("[EE] set new page RECEIVE OK\r\n");
 
+  // Inject reset after RECEIVE marker
+  EeFault_CheckAfterReceiveMarker();
+
   // Copy latest valid records except current var_id
   status = Ee_CopyLatestRecords(old_page_addr,
                                 write_offset,
@@ -450,6 +456,29 @@ static EeStatus_t Ee_TransferPage(uint16_t var_id, uint32_t value)
   return EE_OK;
 }
 
+// Recover an unfinished RECEIVE page
+static EeStatus_t Ee_RecoverReceivePage(uint32_t receive_page_addr)
+{
+  EeStatus_t status;
+
+  // Print recovery target
+  UartLog_Printf("[EE] recovery erase RECEIVE page=0x%08lX\r\n",
+                 (unsigned long)receive_page_addr);
+
+  // Erase unfinished RECEIVE page
+  status = Ee_ErasePage(receive_page_addr);
+  if (status != EE_OK) {
+    UartLog_Printf("[EE] recovery erase RECEIVE failed status=%s\r\n",
+                   Ee_StatusToString(status));
+    return status;
+  }
+
+  // Print recovery result
+  UartLog_Printf("[EE] recovery erase RECEIVE OK\r\n");
+
+  return EE_OK;
+}
+
 // Print current Page A and Page B states
 static void Ee_PrintPageStates(void)
 {
@@ -472,6 +501,7 @@ EeStatus_t Ee_Init(void)
 {
   EePageState_t page_a_state;
   EePageState_t page_b_state;
+  EeStatus_t status;
 
   // Clear runtime control variables
   active_page_addr = 0U;
@@ -488,6 +518,34 @@ EeStatus_t Ee_Init(void)
   // Print detected states
   UartLog_Printf("[EE] page A state=%s\r\n", Ee_PageStateToString(page_a_state));
   UartLog_Printf("[EE] page B state=%s\r\n", Ee_PageStateToString(page_b_state));
+
+  // Recover Page B RECEIVE when Page A is still ACTIVE
+  if ((page_a_state == EE_PAGE_ACTIVE) &&
+      (page_b_state == EE_PAGE_RECEIVE)) {
+    status = Ee_RecoverReceivePage(EE_PAGE_B_ADDR);
+    if (status != EE_OK) {
+      return status;
+    }
+
+    // Update Page B state after recovery
+    page_b_state = Ee_GetPageState(EE_PAGE_B_ADDR);
+    UartLog_Printf("[EE] page B state after recovery=%s\r\n",
+                   Ee_PageStateToString(page_b_state));
+  }
+
+  // Recover Page A RECEIVE when Page B is still ACTIVE
+  if ((page_b_state == EE_PAGE_ACTIVE) &&
+      (page_a_state == EE_PAGE_RECEIVE)) {
+    status = Ee_RecoverReceivePage(EE_PAGE_A_ADDR);
+    if (status != EE_OK) {
+      return status;
+    }
+
+    // Update Page A state after recovery
+    page_a_state = Ee_GetPageState(EE_PAGE_A_ADDR);
+    UartLog_Printf("[EE] page A state after recovery=%s\r\n",
+                   Ee_PageStateToString(page_a_state));
+  }
 
   // Format EEPROM area if both pages are empty
   if ((page_a_state == EE_PAGE_ERASED) &&
