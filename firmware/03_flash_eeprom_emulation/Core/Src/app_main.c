@@ -26,7 +26,7 @@
 #define APP_TEST_MODE_FAULT_AFTER_PROGRAM     10
 
 // Set default test mode
-#define APP_TEST_MODE                         APP_TEST_MODE_CORRUPT_RECORD
+#define APP_TEST_MODE                         APP_TEST_MODE_FAULT_AFTER_PROGRAM
 
 
 // Define reboot readback test phase values
@@ -81,6 +81,13 @@
 #define APP_TEST9_VALID_BAUD                  115200UL
 #define APP_TEST9_CORRUPT_BAUD                230400UL
 
+// Define fault-after-program test phase
+#define APP_TEST10_PHASE_AFTER_RESET          0x00001001UL
+#define APP_TEST10_PHASE_DONE                 0x00001002UL
+
+// Define fault-after-program test value
+#define APP_TEST10_BAUD_RATE                  115200UL
+
 // Define LED for heartbeat
 #define APP_LED_GPIO_Port                     GPIOA
 #define APP_LED_Pin                           GPIO_PIN_5
@@ -100,6 +107,7 @@ static uint8_t page_transfer_reboot_test_done = 0U;
 static uint8_t fault_receive_test_done = 0U;
 static uint8_t fault_copy_test_done = 0U;
 static uint8_t corrupt_record_test_done = 0U;
+static uint8_t fault_program_test_done = 0U;
 static uint8_t not_implemented_log_done = 0U;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -115,6 +123,7 @@ static void App_RunPageTransferReboot(void);
 static void App_RunFaultAfterReceive(void);
 static void App_RunFaultAfterCopy(void);
 static void App_RunCorruptRecord(void);
+static void App_RunFaultAfterProgram(void);
 static void App_RunNotImplemented(void);
 static void App_UpdateHeartbeat(void);
 
@@ -1458,6 +1467,189 @@ static void App_RunCorruptRecord(void)
   UartLog_Printf("[TEST9] PASS\r\n");
 }
 
+// Run fault injection test after Flash program OK
+static void App_RunFaultAfterProgram(void)
+{
+  static uint8_t fault_program_test_done = 0U;
+  EeStatus_t status;
+  uint32_t phase = 0U;
+  uint32_t read_baud = 0U;
+
+  // Run this test only once per boot
+  if (fault_program_test_done != 0U) {
+    return;
+  }
+
+  // Mark test as done for this boot
+  fault_program_test_done = 1U;
+
+  // Initialize EEPROM module from current Flash state
+  status = Ee_Init();
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST10] init=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST10] FAIL\r\n");
+    return;
+  }
+
+  // Read test phase
+  status = Ee_Read(EE_VAR_ID_TEST_PHASE, &phase);
+
+  // Verify completed test state on later boots
+  if ((status == EE_OK) && (phase == APP_TEST10_PHASE_DONE)) {
+    UartLog_Printf("[TEST10] phase=done\r\n");
+
+    // Read baud rate value
+    status = Ee_Read(CFG_BAUD_RATE, &read_baud);
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST10] read CFG_BAUD_RATE=NG status=%s\r\n",
+                     Ee_StatusToString(status));
+      UartLog_Printf("[TEST10] FAIL\r\n");
+      return;
+    }
+
+    // Print restored state
+    UartLog_Printf("[TEST10] active_page=0x%08lX\r\n",
+                   (unsigned long)Ee_GetActivePageAddr());
+    UartLog_Printf("[TEST10] write_offset=%lu\r\n",
+                   (unsigned long)Ee_GetWriteOffset());
+    UartLog_Printf("[TEST10] read CFG_BAUD_RATE=%lu OK\r\n",
+                   (unsigned long)read_baud);
+
+    // Check value
+    if (read_baud != APP_TEST10_BAUD_RATE) {
+      UartLog_Printf("[TEST10] value_check=NG expected=%lu actual=%lu\r\n",
+                     (unsigned long)APP_TEST10_BAUD_RATE,
+                     (unsigned long)read_baud);
+      UartLog_Printf("[TEST10] FAIL\r\n");
+      return;
+    }
+
+    // Print test result
+    UartLog_Printf("[TEST10] PASS\r\n");
+    return;
+  }
+
+  // Prepare fault injection when phase is not after-reset
+  if ((status != EE_OK) || (phase != APP_TEST10_PHASE_AFTER_RESET)) {
+    UartLog_Printf("[TEST10] phase=prepare\r\n");
+
+    // Format EEPROM area for deterministic test
+    status = Ee_Format();
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST10] format=NG status=%s\r\n", Ee_StatusToString(status));
+      UartLog_Printf("[TEST10] FAIL\r\n");
+      return;
+    }
+
+    // Write phase marker before enabling fault injection
+    status = Ee_Write(EE_VAR_ID_TEST_PHASE, APP_TEST10_PHASE_AFTER_RESET);
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST10] write TEST_PHASE=NG status=%s\r\n",
+                     Ee_StatusToString(status));
+      UartLog_Printf("[TEST10] FAIL\r\n");
+      return;
+    }
+    UartLog_Printf("[TEST10] write TEST_PHASE=after_reset OK\r\n");
+
+    // Print offset before fault write
+    UartLog_Printf("[TEST10] write_offset_before_fault=%lu\r\n",
+                   (unsigned long)Ee_GetWriteOffset());
+
+    /*
+     * Enable fault injection only after TEST_PHASE is written.
+     * Otherwise the reset would happen while writing TEST_PHASE.
+     */
+    EeFault_SetMode(EE_FAULT_AFTER_PROGRAM);
+
+    // Trigger write and reset after Flash program OK
+    UartLog_Printf("[TEST10] trigger write CFG_BAUD_RATE=%lu\r\n",
+                   (unsigned long)APP_TEST10_BAUD_RATE);
+    status = Ee_Write(CFG_BAUD_RATE, APP_TEST10_BAUD_RATE);
+
+    /*
+     * This line should not be reached because NVIC_SystemReset()
+     * must happen after Flash program OK and before write_offset update.
+     */
+    UartLog_Printf("[TEST10] unexpected return status=%s\r\n",
+                   Ee_StatusToString(status));
+    UartLog_Printf("[TEST10] FAIL\r\n");
+    return;
+  }
+
+  // Continue test after software reset
+  UartLog_Printf("[TEST10] phase=after_reset\r\n");
+
+  // Print restored runtime state
+  UartLog_Printf("[TEST10] active_page_after_reset=0x%08lX\r\n",
+                 (unsigned long)Ee_GetActivePageAddr());
+  UartLog_Printf("[TEST10] write_offset_after_reset=%lu\r\n",
+                 (unsigned long)Ee_GetWriteOffset());
+
+  // Check active page
+  if (Ee_GetActivePageAddr() != EE_PAGE_A_ADDR) {
+    UartLog_Printf("[TEST10] active_page_check=NG expected=0x%08lX actual=0x%08lX\r\n",
+                   (unsigned long)EE_PAGE_A_ADDR,
+                   (unsigned long)Ee_GetActivePageAddr());
+    UartLog_Printf("[TEST10] FAIL\r\n");
+    return;
+  }
+
+  /*
+   * Expected records after reset:
+   *   1. TEST_PHASE
+   *   2. CFG_BAUD_RATE
+   *
+   * write_offset must be restored by scanning Flash:
+   *   32 + 2 * 8 = 48
+   */
+  if (Ee_GetWriteOffset() != (EE_HEADER_SIZE + (2U * EE_RECORD_SIZE))) {
+    UartLog_Printf("[TEST10] write_offset_check=NG expected=%lu actual=%lu\r\n",
+                   (unsigned long)(EE_HEADER_SIZE + (2U * EE_RECORD_SIZE)),
+                   (unsigned long)Ee_GetWriteOffset());
+    UartLog_Printf("[TEST10] FAIL\r\n");
+    return;
+  }
+
+  // Read baud rate after reset
+  status = Ee_Read(CFG_BAUD_RATE, &read_baud);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST10] read CFG_BAUD_RATE=NG status=%s\r\n",
+                   Ee_StatusToString(status));
+    UartLog_Printf("[TEST10] FAIL\r\n");
+    return;
+  }
+  UartLog_Printf("[TEST10] read CFG_BAUD_RATE=%lu OK\r\n",
+                 (unsigned long)read_baud);
+
+  // Check read value
+  if (read_baud != APP_TEST10_BAUD_RATE) {
+    UartLog_Printf("[TEST10] value_check=NG expected=%lu actual=%lu\r\n",
+                   (unsigned long)APP_TEST10_BAUD_RATE,
+                   (unsigned long)read_baud);
+    UartLog_Printf("[TEST10] FAIL\r\n");
+    return;
+  }
+
+  // Mark test as completed
+  status = Ee_Write(EE_VAR_ID_TEST_PHASE, APP_TEST10_PHASE_DONE);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST10] write TEST_PHASE=done NG status=%s\r\n",
+                   Ee_StatusToString(status));
+    UartLog_Printf("[TEST10] FAIL\r\n");
+    return;
+  }
+  UartLog_Printf("[TEST10] write TEST_PHASE=done OK\r\n");
+
+  // Print final page states
+  UartLog_Printf("[TEST10] page A state=%s\r\n",
+                 Ee_PageStateToString(Ee_GetPageState(EE_PAGE_A_ADDR)));
+  UartLog_Printf("[TEST10] page B state=%s\r\n",
+                 Ee_PageStateToString(Ee_GetPageState(EE_PAGE_B_ADDR)));
+
+  // Print test result
+  UartLog_Printf("[TEST10] PASS\r\n");
+}
+
 // Print message for unimplemented test modes
 static void App_RunNotImplemented(void)
 {
@@ -1527,6 +1719,8 @@ void App_Run(void)
   App_RunFaultAfterCopy();
 #elif APP_TEST_MODE == APP_TEST_MODE_CORRUPT_RECORD
   App_RunCorruptRecord();
+#elif APP_TEST_MODE == APP_TEST_MODE_FAULT_AFTER_PROGRAM
+  App_RunFaultAfterProgram();
 #else
   App_RunNotImplemented();
 #endif

@@ -274,6 +274,9 @@ static EeStatus_t Ee_ProgramRecordAt(uint32_t page_addr,
     return EE_WRITE_ERROR;
   }
 
+  // Inject reset after Flash program and verify OK
+  EeFault_CheckAfterProgramOk();
+
   // Move write offset after successful program
   *target_offset += EE_RECORD_SIZE;
 
