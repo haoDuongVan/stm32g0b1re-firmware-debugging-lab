@@ -16,14 +16,22 @@
 #define APP_TEST_MODE_FORMAT_DEFAULT          1
 #define APP_TEST_MODE_WRITE_READBACK          2
 #define APP_TEST_MODE_APPEND_LATEST           3
-#define APP_TEST_MODE_PAGE_TRANSFER           4
-#define APP_TEST_MODE_FAULT_AFTER_RECEIVE     5
-#define APP_TEST_MODE_FAULT_AFTER_COPY        6
-#define APP_TEST_MODE_CORRUPT_RECORD          7
-#define APP_TEST_MODE_FAULT_AFTER_PROGRAM     8
+#define APP_TEST_MODE_REBOOT_READBACK         4
+#define APP_TEST_MODE_PAGE_TRANSFER           5
+#define APP_TEST_MODE_FAULT_AFTER_RECEIVE     6
+#define APP_TEST_MODE_FAULT_AFTER_COPY        7
+#define APP_TEST_MODE_CORRUPT_RECORD          8
+#define APP_TEST_MODE_FAULT_AFTER_PROGRAM     9
 
 // Set default test mode
-#define APP_TEST_MODE                         APP_TEST_MODE_APPEND_LATEST
+#define APP_TEST_MODE                         APP_TEST_MODE_REBOOT_READBACK
+
+// Define reboot readback test phase values
+#define APP_TEST_PHASE_AFTER_RESET            1U
+#define APP_TEST_PHASE_DONE                   2U
+
+// Define reboot readback test value
+#define APP_TEST_REBOOT_BAUD_RATE             230400UL
 
 // Define LED for heartbeat
 #define APP_LED_GPIO_Port                     GPIOA
@@ -38,6 +46,7 @@ static uint8_t boot_check_done = 0U;
 static uint8_t format_test_done = 0U;
 static uint8_t write_readback_test_done = 0U;
 static uint8_t append_latest_test_done = 0U;
+static uint8_t reboot_readback_test_done = 0U;
 static uint8_t not_implemented_log_done = 0U;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -47,6 +56,7 @@ static void App_RunBootCheck(void);
 static void App_RunFormatDefault(void);
 static void App_RunWriteReadback(void);
 static void App_RunAppendLatest(void);
+static void App_RunRebootReadback(void);
 static void App_RunNotImplemented(void);
 static void App_UpdateHeartbeat(void);
 
@@ -68,6 +78,9 @@ static const char *App_GetTestModeName(uint32_t test_mode)
 
     case APP_TEST_MODE_APPEND_LATEST:
       return "append_latest";
+
+    case APP_TEST_MODE_REBOOT_READBACK:
+      return "reboot_readback";
 
     case APP_TEST_MODE_PAGE_TRANSFER:
       return "page_transfer";
@@ -339,6 +352,160 @@ static void App_RunAppendLatest(void)
   UartLog_Printf("[TEST3] PASS\r\n");
 }
 
+// Run reboot readback test
+static void App_RunRebootReadback(void)
+{
+  EeStatus_t status;
+  uint32_t phase = 0U;
+  uint32_t read_value = 0U;
+
+  // Run this test only once per boot
+  if (reboot_readback_test_done != 0U) {
+    return;
+  }
+
+  // Mark test as done for this boot
+  reboot_readback_test_done = 1U;
+
+  // Initialize EEPROM module from current Flash state
+  status = Ee_Init();
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST4] init=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST4] FAIL\r\n");
+    return;
+  }
+
+  // Read test phase from Flash
+  status = Ee_Read(EE_VAR_ID_TEST_PHASE, &phase);
+
+  // If test was already completed, only verify value again
+  if ((status == EE_OK) && (phase == APP_TEST_PHASE_DONE)) {
+    UartLog_Printf("[TEST4] phase=done\r\n");
+
+    // Read baud rate value
+    status = Ee_Read(CFG_BAUD_RATE, &read_value);
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST4] read CFG_BAUD_RATE=NG status=%s\r\n", Ee_StatusToString(status));
+      UartLog_Printf("[TEST4] FAIL\r\n");
+      return;
+    }
+
+    // Print read value
+    UartLog_Printf("[TEST4] read CFG_BAUD_RATE=%lu OK\r\n", (unsigned long)read_value);
+
+    // Check read value
+    if (read_value != APP_TEST_REBOOT_BAUD_RATE) {
+      UartLog_Printf("[TEST4] value_check=NG expected=%lu actual=%lu\r\n",
+                     (unsigned long)APP_TEST_REBOOT_BAUD_RATE,
+                     (unsigned long)read_value);
+      UartLog_Printf("[TEST4] FAIL\r\n");
+      return;
+    }
+
+    // Print test result
+    UartLog_Printf("[TEST4] PASS\r\n");
+    return;
+  }
+
+  // Prepare test if phase is not found or not after-reset phase
+  if ((status != EE_OK) || (phase != APP_TEST_PHASE_AFTER_RESET)) {
+    UartLog_Printf("[TEST4] phase=prepare\r\n");
+
+    // Format EEPROM area for deterministic test
+    status = Ee_Format();
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST4] format=NG status=%s\r\n", Ee_StatusToString(status));
+      UartLog_Printf("[TEST4] FAIL\r\n");
+      return;
+    }
+
+    // Write phase marker
+    status = Ee_Write(EE_VAR_ID_TEST_PHASE, APP_TEST_PHASE_AFTER_RESET);
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST4] write TEST_PHASE=NG status=%s\r\n", Ee_StatusToString(status));
+      UartLog_Printf("[TEST4] FAIL\r\n");
+      return;
+    }
+    UartLog_Printf("[TEST4] write TEST_PHASE=after_reset OK\r\n");
+
+    // Write baud rate value
+    status = Ee_Write(CFG_BAUD_RATE, APP_TEST_REBOOT_BAUD_RATE);
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST4] write CFG_BAUD_RATE=NG status=%s\r\n", Ee_StatusToString(status));
+      UartLog_Printf("[TEST4] FAIL\r\n");
+      return;
+    }
+    UartLog_Printf("[TEST4] write CFG_BAUD_RATE=%lu OK\r\n",
+                   (unsigned long)APP_TEST_REBOOT_BAUD_RATE);
+
+    // Print write offset before reset
+    UartLog_Printf("[TEST4] write_offset_before_reset=%lu\r\n",
+                   (unsigned long)Ee_GetWriteOffset());
+
+    // Trigger software reset
+    UartLog_Printf("[TEST4] trigger software reset\r\n");
+    HAL_Delay(100);
+    NVIC_SystemReset();
+
+    return;
+  }
+
+  // Continue test after software reset
+  UartLog_Printf("[TEST4] phase=after_reset\r\n");
+
+  // Print restored runtime state
+  UartLog_Printf("[TEST4] active_page=0x%08lX\r\n", (unsigned long)Ee_GetActivePageAddr());
+  UartLog_Printf("[TEST4] write_offset_after_reset=%lu\r\n", (unsigned long)Ee_GetWriteOffset());
+
+  // Check restored active page
+  if (Ee_GetActivePageAddr() != EE_PAGE_A_ADDR) {
+    UartLog_Printf("[TEST4] active_page_check=NG expected=0x%08lX actual=0x%08lX\r\n",
+                   (unsigned long)EE_PAGE_A_ADDR,
+                   (unsigned long)Ee_GetActivePageAddr());
+    UartLog_Printf("[TEST4] FAIL\r\n");
+    return;
+  }
+
+  // Check restored write offset
+  if (Ee_GetWriteOffset() != (EE_HEADER_SIZE + (2U * EE_RECORD_SIZE))) {
+    UartLog_Printf("[TEST4] write_offset_check=NG expected=%lu actual=%lu\r\n",
+                   (unsigned long)(EE_HEADER_SIZE + (2U * EE_RECORD_SIZE)),
+                   (unsigned long)Ee_GetWriteOffset());
+    UartLog_Printf("[TEST4] FAIL\r\n");
+    return;
+  }
+
+  // Read baud rate value after reset
+  status = Ee_Read(CFG_BAUD_RATE, &read_value);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST4] read CFG_BAUD_RATE=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST4] FAIL\r\n");
+    return;
+  }
+  UartLog_Printf("[TEST4] read CFG_BAUD_RATE=%lu OK\r\n", (unsigned long)read_value);
+
+  // Check read value
+  if (read_value != APP_TEST_REBOOT_BAUD_RATE) {
+    UartLog_Printf("[TEST4] value_check=NG expected=%lu actual=%lu\r\n",
+                   (unsigned long)APP_TEST_REBOOT_BAUD_RATE,
+                   (unsigned long)read_value);
+    UartLog_Printf("[TEST4] FAIL\r\n");
+    return;
+  }
+
+  // Mark test as completed to avoid reset loop on later boots
+  status = Ee_Write(EE_VAR_ID_TEST_PHASE, APP_TEST_PHASE_DONE);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST4] write TEST_PHASE=done NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST4] FAIL\r\n");
+    return;
+  }
+  UartLog_Printf("[TEST4] write TEST_PHASE=done OK\r\n");
+
+  // Print test result
+  UartLog_Printf("[TEST4] PASS\r\n");
+}
+
 // Print message for unimplemented test modes
 static void App_RunNotImplemented(void)
 {
@@ -396,6 +563,8 @@ void App_Run(void)
   App_RunWriteReadback();
 #elif APP_TEST_MODE == APP_TEST_MODE_APPEND_LATEST
   App_RunAppendLatest();
+#elif APP_TEST_MODE == APP_TEST_MODE_REBOOT_READBACK
+  App_RunRebootReadback();
 #else
   App_RunNotImplemented();
 #endif
