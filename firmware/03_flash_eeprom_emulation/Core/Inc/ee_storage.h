@@ -28,6 +28,7 @@ typedef enum
 
 /* Function prototypes -------------------------------------------------------*/
 EeStatus_t Ee_Init(void);
+EeStatus_t Ee_Format(void);
 EeStatus_t Ee_Read(uint16_t var_id, uint32_t *value);
 EeStatus_t Ee_Write(uint16_t var_id, uint32_t value);
 

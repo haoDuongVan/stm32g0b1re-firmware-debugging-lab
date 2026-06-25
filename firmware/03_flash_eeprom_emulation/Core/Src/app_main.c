@@ -9,6 +9,7 @@
 #include "app_main.h"
 #include "uart_log.h"
 #include "ee_format.h"
+#include "ee_storage.h"
 
 /* Private defines -----------------------------------------------------------*/
 #define APP_TEST_MODE_BOOT_CHECK              0
@@ -22,7 +23,7 @@
 #define APP_TEST_MODE_FAULT_AFTER_PROGRAM     8
 
 // Set default test mode
-#define APP_TEST_MODE                         APP_TEST_MODE_BOOT_CHECK
+#define APP_TEST_MODE                         APP_TEST_MODE_FORMAT_DEFAULT
 
 // Define LED for heartbeat
 #define APP_LED_GPIO_Port                     GPIOA
@@ -34,12 +35,14 @@
 /* Private variables ---------------------------------------------------------*/
 static uint8_t boot_log_done = 0U;
 static uint8_t boot_check_done = 0U;
+static uint8_t format_test_done = 0U;
 static uint8_t not_implemented_log_done = 0U;
 
 /* Private function prototypes -----------------------------------------------*/
 static const char *App_GetTestModeName(uint32_t test_mode);
 static void App_PrintBootLog(void);
 static void App_RunBootCheck(void);
+static void App_RunFormatDefault(void);
 static void App_RunNotImplemented(void);
 static void App_UpdateHeartbeat(void);
 
@@ -139,6 +142,41 @@ static void App_RunBootCheck(void)
   UartLog_Printf("[TEST0] PASS\r\n");
 }
 
+// Run format default test
+static void App_RunFormatDefault(void)
+{
+  EeStatus_t status;
+
+  // Run this test only once
+  if (format_test_done != 0U) {
+    return;
+  }
+
+  // Mark test as done
+  format_test_done = 1U;
+
+  // Force format EEPROM area
+  status = Ee_Format();
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST1] format=NG status=%s\r\n", Ee_StatusToString(status));
+    return;
+  }
+
+  // Verify active page after format
+  if ((Ee_GetActivePageAddr() == EE_PAGE_A_ADDR) &&
+      (Ee_GetWriteOffset() == EE_HEADER_SIZE)) {
+    UartLog_Printf("[TEST1] active_page_check=OK\r\n");
+    UartLog_Printf("[TEST1] write_offset_check=OK\r\n");
+    UartLog_Printf("[TEST1] PASS\r\n");
+  } else {
+    UartLog_Printf("[TEST1] active_page_check=NG active=0x%08lX offset=%lu\r\n",
+                   (unsigned long)Ee_GetActivePageAddr(),
+                   (unsigned long)Ee_GetWriteOffset());
+    UartLog_Printf("[TEST1] FAIL\r\n");
+  }
+}
+
+
 // Print message for unimplemented test modes
 static void App_RunNotImplemented(void)
 {
@@ -190,6 +228,8 @@ void App_Run(void)
   // Run selected test mode
 #if APP_TEST_MODE == APP_TEST_MODE_BOOT_CHECK
   App_RunBootCheck();
+#elif APP_TEST_MODE == APP_TEST_MODE_FORMAT_DEFAULT
+  App_RunFormatDefault();
 #else
   App_RunNotImplemented();
 #endif
