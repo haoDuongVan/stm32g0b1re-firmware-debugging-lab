@@ -23,7 +23,7 @@
 #define APP_TEST_MODE_FAULT_AFTER_PROGRAM     8
 
 // Set default test mode
-#define APP_TEST_MODE                         APP_TEST_MODE_FORMAT_DEFAULT
+#define APP_TEST_MODE                         APP_TEST_MODE_WRITE_READBACK
 
 // Define LED for heartbeat
 #define APP_LED_GPIO_Port                     GPIOA
@@ -36,6 +36,7 @@
 static uint8_t boot_log_done = 0U;
 static uint8_t boot_check_done = 0U;
 static uint8_t format_test_done = 0U;
+static uint8_t write_readback_test_done = 0U;
 static uint8_t not_implemented_log_done = 0U;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -43,6 +44,7 @@ static const char *App_GetTestModeName(uint32_t test_mode);
 static void App_PrintBootLog(void);
 static void App_RunBootCheck(void);
 static void App_RunFormatDefault(void);
+static void App_RunWriteReadback(void);
 static void App_RunNotImplemented(void);
 static void App_UpdateHeartbeat(void);
 
@@ -176,6 +178,69 @@ static void App_RunFormatDefault(void)
   }
 }
 
+// Run write and readback test
+static void App_RunWriteReadback(void)
+{
+  EeStatus_t status;
+  uint32_t read_value = 0U;
+
+  // Run this test only once
+  if (write_readback_test_done != 0U) {
+    return;
+  }
+
+  // Mark test as done
+  write_readback_test_done = 1U;
+
+  // Format EEPROM area for deterministic test
+  status = Ee_Format();
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST2] format=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST2] FAIL\r\n");
+    return;
+  }
+
+  // Write baud rate config
+  status = Ee_Write(CFG_BAUD_RATE, 115200UL);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST2] write CFG_BAUD_RATE=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST2] FAIL\r\n");
+    return;
+  }
+  UartLog_Printf("[TEST2] write CFG_BAUD_RATE=115200 OK\r\n");
+
+  // Read baud rate config
+  status = Ee_Read(CFG_BAUD_RATE, &read_value);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST2] read CFG_BAUD_RATE=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST2] FAIL\r\n");
+    return;
+  }
+  UartLog_Printf("[TEST2] read CFG_BAUD_RATE=%lu OK\r\n", (unsigned long)read_value);
+
+  // Check read value
+  if (read_value != 115200UL) {
+    UartLog_Printf("[TEST2] value_check=NG expected=115200 actual=%lu\r\n",
+                   (unsigned long)read_value);
+    UartLog_Printf("[TEST2] FAIL\r\n");
+    return;
+  }
+
+  // Print write offset after one record
+  UartLog_Printf("[TEST2] write_offset=%lu\r\n", (unsigned long)Ee_GetWriteOffset());
+
+  // Check write offset
+  if (Ee_GetWriteOffset() != (EE_HEADER_SIZE + EE_RECORD_SIZE)) {
+    UartLog_Printf("[TEST2] write_offset_check=NG expected=%lu actual=%lu\r\n",
+                   (unsigned long)(EE_HEADER_SIZE + EE_RECORD_SIZE),
+                   (unsigned long)Ee_GetWriteOffset());
+    UartLog_Printf("[TEST2] FAIL\r\n");
+    return;
+  }
+
+  // Print test result
+  UartLog_Printf("[TEST2] PASS\r\n");
+}
 
 // Print message for unimplemented test modes
 static void App_RunNotImplemented(void)
@@ -230,6 +295,8 @@ void App_Run(void)
   App_RunBootCheck();
 #elif APP_TEST_MODE == APP_TEST_MODE_FORMAT_DEFAULT
   App_RunFormatDefault();
+#elif APP_TEST_MODE == APP_TEST_MODE_WRITE_READBACK
+  App_RunWriteReadback();
 #else
   App_RunNotImplemented();
 #endif

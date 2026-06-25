@@ -27,6 +27,7 @@ static uint8_t initialized = 0U;
 static uint32_t Ee_GetPageIndex(uint32_t page_addr);
 static EeStatus_t Ee_ErasePage(uint32_t page_addr);
 static EeStatus_t Ee_WriteMarker(uint32_t page_addr, uint32_t marker_offset);
+static uint64_t Ee_BuildRecordRaw(uint16_t var_id, uint32_t value);
 static void Ee_PrintPageStates(void);
 
 /* Private functions ---------------------------------------------------------*/
@@ -44,7 +45,7 @@ static uint32_t Ee_GetPageIndex(uint32_t page_addr)
     return EE_PAGE_B_INDEX;
   }
 
-  // Return invalid index fallback
+  // Return invalid index
   return 0xFFFFFFFFUL;
 }
 
@@ -91,7 +92,7 @@ static EeStatus_t Ee_ErasePage(uint32_t page_addr)
   return EE_OK;
 }
 
-// Write one 8-byte marker slot
+// Write one 8-byte page marker
 static EeStatus_t Ee_WriteMarker(uint32_t page_addr, uint32_t marker_offset)
 {
   uint32_t marker_addr;
@@ -127,6 +128,23 @@ static EeStatus_t Ee_WriteMarker(uint32_t page_addr, uint32_t marker_offset)
   }
 
   return EE_OK;
+}
+
+// Build one raw 8-byte EEPROM record
+static uint64_t Ee_BuildRecordRaw(uint16_t var_id, uint32_t value)
+{
+  uint16_t crc;
+  uint64_t raw;
+
+  // Calculate CRC from var_id and value
+  crc = Ee_CalcCrc16(var_id, value);
+
+  // Pack record as var_id + crc + value
+  raw = ((uint64_t)var_id) |
+        ((uint64_t)crc << 16) |
+        ((uint64_t)value << 32);
+
+  return raw;
 }
 
 // Print current Page A and Page B states
@@ -236,8 +254,6 @@ EeStatus_t Ee_Format(void)
   // Update runtime control variables
   active_page_addr = EE_PAGE_A_ADDR;
   write_offset = EE_HEADER_SIZE;
-
-  // Mark EEPROM module as initialized
   initialized = 1U;
 
   // Print states after format
@@ -254,25 +270,56 @@ EeStatus_t Ee_Format(void)
 // Read latest valid value by virtual ID
 EeStatus_t Ee_Read(uint16_t var_id, uint32_t *value)
 {
-  // Mark parameters as unused in skeleton
-  (void)var_id;
-  (void)value;
+  uint32_t offset;
+  const EeRecord_t *record;
 
   // Check initialization state
   if (initialized == 0U) {
     return EE_NOT_INIT;
   }
 
-  /*
-   * Temporary skeleton.
-   *
-   * Real implementation will:
-   *   - scan active page backward
-   *   - compare var_id
-   *   - verify CRC
-   *   - skip corrupt record
-   *   - return latest valid value
-   */
+  // Check parameter
+  if (value == NULL) {
+    return EE_INVALID_PARAM;
+  }
+
+  // Check virtual ID
+  if ((var_id == EE_VAR_ID_INVALID) ||
+      (var_id == EE_VAR_ID_ERASED)) {
+    return EE_INVALID_PARAM;
+  }
+
+  // Check active page
+  if (active_page_addr == 0U) {
+    return EE_NO_ACTIVE_PAGE;
+  }
+
+  // Start from current write offset
+  offset = write_offset;
+
+  // Scan records backward
+  while (offset > EE_HEADER_SIZE) {
+    // Move to previous record
+    offset -= EE_RECORD_SIZE;
+
+    // Get record pointer
+    record = (const EeRecord_t *)(active_page_addr + offset);
+
+    // Skip different virtual ID
+    if (record->var_id != var_id) {
+      continue;
+    }
+
+    // Skip invalid or corrupt record
+    if (Ee_IsRecordValid(record) == false) {
+      continue;
+    }
+
+    // Return latest valid value
+    *value = record->value;
+
+    return EE_OK;
+  }
 
   return EE_NOT_FOUND;
 }
@@ -280,28 +327,79 @@ EeStatus_t Ee_Read(uint16_t var_id, uint32_t *value)
 // Write a new append-only record
 EeStatus_t Ee_Write(uint16_t var_id, uint32_t value)
 {
-  // Mark parameters as unused in skeleton
-  (void)var_id;
-  (void)value;
+  uint32_t write_addr;
+  uint64_t raw;
+  const EeRecord_t *record;
+  HAL_StatusTypeDef hal_status;
 
   // Check initialization state
   if (initialized == 0U) {
     return EE_NOT_INIT;
   }
 
-  /*
-   * Temporary skeleton.
-   *
-   * Real implementation will:
-   *   - validate virtual ID
-   *   - check free space
-   *   - trigger page transfer if page is full
-   *   - build record with CRC
-   *   - program one double-word
-   *   - update write_offset after successful program
-   */
+  // Check virtual ID
+  if ((var_id == EE_VAR_ID_INVALID) ||
+      (var_id == EE_VAR_ID_ERASED)) {
+    return EE_INVALID_PARAM;
+  }
 
-  return EE_WRITE_ERROR;
+  // Check active page
+  if (active_page_addr == 0U) {
+    return EE_NO_ACTIVE_PAGE;
+  }
+
+  // Check free space
+  if ((write_offset + EE_RECORD_SIZE) > EE_PAGE_SIZE) {
+    return EE_NO_FREE_PAGE;
+  }
+
+  // Calculate write address
+  write_addr = active_page_addr + write_offset;
+
+  // Check target double-word is erased
+  if (*(const volatile uint64_t *)write_addr != EE_ERASED_DOUBLEWORD) {
+    return EE_WRITE_ERROR;
+  }
+
+  // Build raw record
+  raw = Ee_BuildRecordRaw(var_id, value);
+
+  // Unlock Flash
+  hal_status = HAL_FLASH_Unlock();
+  if (hal_status != HAL_OK) {
+    return EE_WRITE_ERROR;
+  }
+
+  // Program one double-word record
+  hal_status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD,
+                                 write_addr,
+                                 raw);
+
+  // Lock Flash
+  (void)HAL_FLASH_Lock();
+
+  // Check program result
+  if (hal_status != HAL_OK) {
+    UartLog_Printf("[EE] record write failed addr=0x%08lX\r\n",
+                   (unsigned long)write_addr);
+    return EE_WRITE_ERROR;
+  }
+
+  // Verify written record
+  record = (const EeRecord_t *)write_addr;
+  if (Ee_IsRecordValid(record) == false) {
+    return EE_WRITE_ERROR;
+  }
+
+  // Check written value
+  if ((record->var_id != var_id) || (record->value != value)) {
+    return EE_WRITE_ERROR;
+  }
+
+  // Update write offset after successful program
+  write_offset += EE_RECORD_SIZE;
+
+  return EE_OK;
 }
 
 // Get current active page address
@@ -321,35 +419,60 @@ uint32_t Ee_GetWriteOffset(void)
 // Count valid records in one page
 uint32_t Ee_CountValidRecords(uint32_t page_addr)
 {
-  // Mark parameter as unused in skeleton
-  (void)page_addr;
+  uint32_t offset = EE_HEADER_SIZE;
+  uint32_t count = 0U;
+  const EeRecord_t *record;
 
-  /*
-   * Temporary skeleton.
-   *
-   * Real implementation will:
-   *   - scan all records in the selected page
-   *   - count records with valid CRC
-   */
+  // Scan records forward
+  while (offset < EE_PAGE_SIZE) {
+    // Get record pointer
+    record = (const EeRecord_t *)(page_addr + offset);
 
-  return 0U;
+    // Stop at first erased record
+    if (Ee_IsRecordErased(record)) {
+      break;
+    }
+
+    // Count valid record
+    if (Ee_IsRecordValid(record)) {
+      count++;
+    }
+
+    // Move to next record
+    offset += EE_RECORD_SIZE;
+  }
+
+  return count;
 }
 
 // Count valid records for one virtual ID
 uint32_t Ee_CountRecordsForVar(uint16_t var_id)
 {
-  // Mark parameter as unused in skeleton
-  (void)var_id;
+  uint32_t offset = EE_HEADER_SIZE;
+  uint32_t count = 0U;
+  const EeRecord_t *record;
 
-  /*
-   * Temporary skeleton.
-   *
-   * Real implementation will:
-   *   - scan active page
-   *   - count valid records matching var_id
-   */
+  // Check active page
+  if (active_page_addr == 0U) {
+    return 0U;
+  }
 
-  return 0U;
+  // Scan records forward
+  while (offset < write_offset) {
+    // Get record pointer
+    record = (const EeRecord_t *)(active_page_addr + offset);
+
+    // Count matching valid record
+    if ((record->var_id == var_id) &&
+        (Ee_IsRecordValid(record) == true)) {
+      count++;
+    }
+
+    // Move to next record
+    offset += EE_RECORD_SIZE;
+  }
+
+  return count;
 }
 
 // Convert EEPROM status to readable string
