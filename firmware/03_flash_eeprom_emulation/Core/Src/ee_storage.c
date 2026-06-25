@@ -10,6 +10,9 @@
 #include "main.h"
 #include "uart_log.h"
 
+#include <stdbool.h>
+#include <stddef.h>
+
 /* Private defines -----------------------------------------------------------*/
 #define EE_FLASH_BANK                    FLASH_BANK_2
 
@@ -17,6 +20,8 @@
 #define EE_PAGE_B_INDEX                  1U
 
 #define EE_MARKER_VALUE                  0x0000000000000000ULL
+#define EE_INVALID_PAGE_ADDR             0x00000000UL
+#define EE_INVALID_PAGE_INDEX            0xFFFFFFFFUL
 
 /* Private variables ---------------------------------------------------------*/
 static uint32_t active_page_addr = 0U;
@@ -25,9 +30,24 @@ static uint8_t initialized = 0U;
 
 /* Private function prototypes -----------------------------------------------*/
 static uint32_t Ee_GetPageIndex(uint32_t page_addr);
+static uint32_t Ee_GetOtherPageAddr(uint32_t page_addr);
 static EeStatus_t Ee_ErasePage(uint32_t page_addr);
 static EeStatus_t Ee_WriteMarker(uint32_t page_addr, uint32_t marker_offset);
 static uint64_t Ee_BuildRecordRaw(uint16_t var_id, uint32_t value);
+static EeStatus_t Ee_ProgramRecordAt(uint32_t page_addr,
+                                     uint32_t *target_offset,
+                                     uint16_t var_id,
+                                     uint32_t value);
+static bool Ee_IsVarCopied(const uint16_t *copied_vars,
+                           uint32_t copied_count,
+                           uint16_t var_id);
+static EeStatus_t Ee_CopyLatestRecords(uint32_t src_page_addr,
+                                       uint32_t src_write_offset,
+                                       uint32_t dst_page_addr,
+                                       uint32_t *dst_write_offset,
+                                       uint16_t skip_var_id,
+                                       uint32_t *copied_count);
+static EeStatus_t Ee_TransferPage(uint16_t var_id, uint32_t value);
 static void Ee_PrintPageStates(void);
 
 /* Private functions ---------------------------------------------------------*/
@@ -46,7 +66,24 @@ static uint32_t Ee_GetPageIndex(uint32_t page_addr)
   }
 
   // Return invalid index
-  return 0xFFFFFFFFUL;
+  return EE_INVALID_PAGE_INDEX;
+}
+
+// Get the other EEPROM page address
+static uint32_t Ee_GetOtherPageAddr(uint32_t page_addr)
+{
+  // Return Page B when current page is Page A
+  if (page_addr == EE_PAGE_A_ADDR) {
+    return EE_PAGE_B_ADDR;
+  }
+
+  // Return Page A when current page is Page B
+  if (page_addr == EE_PAGE_B_ADDR) {
+    return EE_PAGE_A_ADDR;
+  }
+
+  // Return invalid address
+  return EE_INVALID_PAGE_ADDR;
 }
 
 // Erase one EEPROM emulation page
@@ -59,7 +96,7 @@ static EeStatus_t Ee_ErasePage(uint32_t page_addr)
 
   // Convert address to page index
   page_index = Ee_GetPageIndex(page_addr);
-  if (page_index == 0xFFFFFFFFUL) {
+  if (page_index == EE_INVALID_PAGE_INDEX) {
     return EE_INVALID_PARAM;
   }
 
@@ -106,6 +143,11 @@ static EeStatus_t Ee_WriteMarker(uint32_t page_addr, uint32_t marker_offset)
   // Calculate marker address
   marker_addr = page_addr + marker_offset;
 
+  // Check target marker slot is erased
+  if (*(const volatile uint64_t *)marker_addr != EE_ERASED_DOUBLEWORD) {
+    return EE_WRITE_ERROR;
+  }
+
   // Unlock Flash
   hal_status = HAL_FLASH_Unlock();
   if (hal_status != HAL_OK) {
@@ -145,6 +187,267 @@ static uint64_t Ee_BuildRecordRaw(uint16_t var_id, uint32_t value)
         ((uint64_t)value << 32);
 
   return raw;
+}
+
+// Program one EEPROM record at selected page and offset
+static EeStatus_t Ee_ProgramRecordAt(uint32_t page_addr,
+                                     uint32_t *target_offset,
+                                     uint16_t var_id,
+                                     uint32_t value)
+{
+  uint32_t write_addr;
+  uint64_t raw;
+  const EeRecord_t *record;
+  HAL_StatusTypeDef hal_status;
+
+  // Check parameter
+  if (target_offset == NULL) {
+    return EE_INVALID_PARAM;
+  }
+
+  // Check free space
+  if ((*target_offset + EE_RECORD_SIZE) > EE_PAGE_SIZE) {
+    return EE_NO_FREE_PAGE;
+  }
+
+  // Calculate write address
+  write_addr = page_addr + *target_offset;
+
+  // Check target double-word is erased
+  if (*(const volatile uint64_t *)write_addr != EE_ERASED_DOUBLEWORD) {
+    return EE_WRITE_ERROR;
+  }
+
+  // Build raw record
+  raw = Ee_BuildRecordRaw(var_id, value);
+
+  // Unlock Flash
+  hal_status = HAL_FLASH_Unlock();
+  if (hal_status != HAL_OK) {
+    return EE_WRITE_ERROR;
+  }
+
+  // Program one double-word record
+  hal_status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD,
+                                 write_addr,
+                                 raw);
+
+  // Lock Flash
+  (void)HAL_FLASH_Lock();
+
+  // Check program result
+  if (hal_status != HAL_OK) {
+    UartLog_Printf("[EE] record write failed addr=0x%08lX\r\n",
+                   (unsigned long)write_addr);
+    return EE_WRITE_ERROR;
+  }
+
+  // Verify written record
+  record = (const EeRecord_t *)write_addr;
+  if (Ee_IsRecordValid(record) == false) {
+    return EE_WRITE_ERROR;
+  }
+
+  // Check written value
+  if ((record->var_id != var_id) || (record->value != value)) {
+    return EE_WRITE_ERROR;
+  }
+
+  // Move write offset after successful program
+  *target_offset += EE_RECORD_SIZE;
+
+  return EE_OK;
+}
+
+// Check whether a virtual ID was already copied
+static bool Ee_IsVarCopied(const uint16_t *copied_vars,
+                           uint32_t copied_count,
+                           uint16_t var_id)
+{
+  // Search copied variable list
+  for (uint32_t idx = 0U; idx < copied_count; idx++) {
+    if (copied_vars[idx] == var_id) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+// Copy latest valid records from old page to new page
+static EeStatus_t Ee_CopyLatestRecords(uint32_t src_page_addr,
+                                       uint32_t src_write_offset,
+                                       uint32_t dst_page_addr,
+                                       uint32_t *dst_write_offset,
+                                       uint16_t skip_var_id,
+                                       uint32_t *copied_count)
+{
+  uint16_t copied_vars[EE_RECORDS_PER_PAGE];
+  uint32_t copied_var_count = 0U;
+  uint32_t offset;
+  const EeRecord_t *record;
+  EeStatus_t status;
+
+  // Check parameter
+  if ((dst_write_offset == NULL) || (copied_count == NULL)) {
+    return EE_INVALID_PARAM;
+  }
+
+  // Start from current write offset
+  offset = src_write_offset;
+
+  // Scan old page backward to find latest value for each virtual ID
+  while (offset > EE_HEADER_SIZE) {
+    // Move to previous record
+    offset -= EE_RECORD_SIZE;
+
+    // Get record pointer
+    record = (const EeRecord_t *)(src_page_addr + offset);
+
+    // Skip invalid record
+    if (Ee_IsRecordValid(record) == false) {
+      continue;
+    }
+
+    // Skip current write target because the new value will be written later
+    if (record->var_id == skip_var_id) {
+      continue;
+    }
+
+    // Skip duplicated virtual ID
+    if (Ee_IsVarCopied(copied_vars, copied_var_count, record->var_id) == true) {
+      continue;
+    }
+
+    // Check copied list capacity
+    if (copied_var_count >= EE_RECORDS_PER_PAGE) {
+      return EE_TRANSFER_ERROR;
+    }
+
+    // Copy latest valid record to new page
+    status = Ee_ProgramRecordAt(dst_page_addr,
+                                dst_write_offset,
+                                record->var_id,
+                                record->value);
+    if (status != EE_OK) {
+      return status;
+    }
+
+    // Save copied virtual ID
+    copied_vars[copied_var_count] = record->var_id;
+    copied_var_count++;
+  }
+
+  // Return copied record count
+  *copied_count = copied_var_count;
+
+  return EE_OK;
+}
+
+// Transfer latest records to the other page and write new record
+static EeStatus_t Ee_TransferPage(uint16_t var_id, uint32_t value)
+{
+  uint32_t old_page_addr;
+  uint32_t new_page_addr;
+  uint32_t new_write_offset = EE_HEADER_SIZE;
+  uint32_t copied_count = 0U;
+  EePageState_t new_page_state;
+  EeStatus_t status;
+
+  // Save old and new page addresses
+  old_page_addr = active_page_addr;
+  new_page_addr = Ee_GetOtherPageAddr(old_page_addr);
+
+  // Check new page address
+  if (new_page_addr == EE_INVALID_PAGE_ADDR) {
+    return EE_NO_FREE_PAGE;
+  }
+
+  // Print transfer start
+  UartLog_Printf("[EE] transfer start old=0x%08lX new=0x%08lX\r\n",
+                 (unsigned long)old_page_addr,
+                 (unsigned long)new_page_addr);
+
+  // Erase new page if it is not empty
+  new_page_state = Ee_GetPageState(new_page_addr);
+  if (new_page_state != EE_PAGE_ERASED) {
+    status = Ee_ErasePage(new_page_addr);
+    if (status != EE_OK) {
+      return status;
+    }
+    UartLog_Printf("[EE] erase new page OK\r\n");
+  }
+
+  // Set new page to RECEIVE
+  status = Ee_WriteMarker(new_page_addr, EE_SLOT_RECEIVE_OFFSET);
+  if (status != EE_OK) {
+    return status;
+  }
+  UartLog_Printf("[EE] set new page RECEIVE OK\r\n");
+
+  // Copy latest valid records except current var_id
+  status = Ee_CopyLatestRecords(old_page_addr,
+                                write_offset,
+                                new_page_addr,
+                                &new_write_offset,
+                                var_id,
+                                &copied_count);
+  if (status != EE_OK) {
+    return status;
+  }
+  UartLog_Printf("[EE] copied_records=%lu\r\n", (unsigned long)copied_count);
+
+  // Write current new record to new page
+  status = Ee_ProgramRecordAt(new_page_addr,
+                              &new_write_offset,
+                              var_id,
+                              value);
+  if (status != EE_OK) {
+    return status;
+  }
+  UartLog_Printf("[EE] write trigger record OK\r\n");
+
+  // Set new page to ACTIVE
+  status = Ee_WriteMarker(new_page_addr, EE_SLOT_ACTIVE_OFFSET);
+  if (status != EE_OK) {
+    return status;
+  }
+  UartLog_Printf("[EE] set new page ACTIVE OK\r\n");
+
+  // Mark old page as VALID
+  status = Ee_WriteMarker(old_page_addr, EE_SLOT_VALID_OFFSET);
+  if (status != EE_OK) {
+    return status;
+  }
+  UartLog_Printf("[EE] set old page VALID OK\r\n");
+
+  // Mark old page as ERASING
+  status = Ee_WriteMarker(old_page_addr, EE_SLOT_ERASING_OFFSET);
+  if (status != EE_OK) {
+    return status;
+  }
+  UartLog_Printf("[EE] set old page ERASING OK\r\n");
+
+  // Erase old page
+  status = Ee_ErasePage(old_page_addr);
+  if (status != EE_OK) {
+    return status;
+  }
+  UartLog_Printf("[EE] erase old page OK\r\n");
+
+  // Update runtime control variables
+  active_page_addr = new_page_addr;
+  write_offset = new_write_offset;
+
+  // Print states after transfer
+  Ee_PrintPageStates();
+
+  // Print transfer result
+  UartLog_Printf("[EE] transfer done active_page=0x%08lX write_offset=%lu\r\n",
+                 (unsigned long)active_page_addr,
+                 (unsigned long)write_offset);
+
+  return EE_OK;
 }
 
 // Print current Page A and Page B states
@@ -327,10 +630,7 @@ EeStatus_t Ee_Read(uint16_t var_id, uint32_t *value)
 // Write a new append-only record
 EeStatus_t Ee_Write(uint16_t var_id, uint32_t value)
 {
-  uint32_t write_addr;
-  uint64_t raw;
-  const EeRecord_t *record;
-  HAL_StatusTypeDef hal_status;
+  EeStatus_t status;
 
   // Check initialization state
   if (initialized == 0U) {
@@ -348,56 +648,20 @@ EeStatus_t Ee_Write(uint16_t var_id, uint32_t value)
     return EE_NO_ACTIVE_PAGE;
   }
 
-  // Check free space
+  // Transfer page when active page is full
   if ((write_offset + EE_RECORD_SIZE) > EE_PAGE_SIZE) {
-    return EE_NO_FREE_PAGE;
+    status = Ee_TransferPage(var_id, value);
+    return status;
   }
 
-  // Calculate write address
-  write_addr = active_page_addr + write_offset;
-
-  // Check target double-word is erased
-  if (*(const volatile uint64_t *)write_addr != EE_ERASED_DOUBLEWORD) {
-    return EE_WRITE_ERROR;
+  // Program record at current active page
+  status = Ee_ProgramRecordAt(active_page_addr,
+                              &write_offset,
+                              var_id,
+                              value);
+  if (status != EE_OK) {
+    return status;
   }
-
-  // Build raw record
-  raw = Ee_BuildRecordRaw(var_id, value);
-
-  // Unlock Flash
-  hal_status = HAL_FLASH_Unlock();
-  if (hal_status != HAL_OK) {
-    return EE_WRITE_ERROR;
-  }
-
-  // Program one double-word record
-  hal_status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD,
-                                 write_addr,
-                                 raw);
-
-  // Lock Flash
-  (void)HAL_FLASH_Lock();
-
-  // Check program result
-  if (hal_status != HAL_OK) {
-    UartLog_Printf("[EE] record write failed addr=0x%08lX\r\n",
-                   (unsigned long)write_addr);
-    return EE_WRITE_ERROR;
-  }
-
-  // Verify written record
-  record = (const EeRecord_t *)write_addr;
-  if (Ee_IsRecordValid(record) == false) {
-    return EE_WRITE_ERROR;
-  }
-
-  // Check written value
-  if ((record->var_id != var_id) || (record->value != value)) {
-    return EE_WRITE_ERROR;
-  }
-
-  // Update write offset after successful program
-  write_offset += EE_RECORD_SIZE;
 
   return EE_OK;
 }

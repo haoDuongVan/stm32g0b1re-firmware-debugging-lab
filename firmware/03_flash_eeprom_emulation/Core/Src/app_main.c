@@ -24,7 +24,7 @@
 #define APP_TEST_MODE_FAULT_AFTER_PROGRAM     9
 
 // Set default test mode
-#define APP_TEST_MODE                         APP_TEST_MODE_REBOOT_READBACK
+#define APP_TEST_MODE                         APP_TEST_MODE_PAGE_TRANSFER
 
 // Define reboot readback test phase values
 #define APP_TEST_PHASE_AFTER_RESET            1U
@@ -32,6 +32,12 @@
 
 // Define reboot readback test value
 #define APP_TEST_REBOOT_BAUD_RATE             230400UL
+
+// Define page transfer test values
+#define APP_TEST_PAGE_TRANSFER_FILL_COUNT     (EE_RECORDS_PER_PAGE - 2U)
+#define APP_TEST_PAGE_TRANSFER_FINAL_BAUD     230400UL
+#define APP_TEST_PAGE_TRANSFER_TIMEOUT        1000UL
+#define APP_TEST_PAGE_TRANSFER_MODE           3UL
 
 // Define LED for heartbeat
 #define APP_LED_GPIO_Port                     GPIOA
@@ -47,6 +53,7 @@ static uint8_t format_test_done = 0U;
 static uint8_t write_readback_test_done = 0U;
 static uint8_t append_latest_test_done = 0U;
 static uint8_t reboot_readback_test_done = 0U;
+static uint8_t page_transfer_test_done = 0U;
 static uint8_t not_implemented_log_done = 0U;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -57,6 +64,7 @@ static void App_RunFormatDefault(void);
 static void App_RunWriteReadback(void);
 static void App_RunAppendLatest(void);
 static void App_RunRebootReadback(void);
+static void App_RunPageTransfer(void);
 static void App_RunNotImplemented(void);
 static void App_UpdateHeartbeat(void);
 
@@ -506,6 +514,183 @@ static void App_RunRebootReadback(void)
   UartLog_Printf("[TEST4] PASS\r\n");
 }
 
+// Run page transfer test
+static void App_RunPageTransfer(void)
+{
+  static uint8_t page_transfer_test_done = 0U;
+  EeStatus_t status;
+  uint32_t read_baud = 0U;
+  uint32_t read_timeout = 0U;
+  uint32_t read_mode = 0U;
+  uint32_t page_a_count = 0U;
+  uint32_t page_b_count = 0U;
+
+  // Run this test only once
+  if (page_transfer_test_done != 0U) {
+    return;
+  }
+
+  // Mark test as done
+  page_transfer_test_done = 1U;
+
+  // Format EEPROM area for deterministic test
+  status = Ee_Format();
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST5] format=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST5] FAIL\r\n");
+    return;
+  }
+
+  // Write timeout config
+  status = Ee_Write(CFG_TIMEOUT_MS, APP_TEST_PAGE_TRANSFER_TIMEOUT);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST5] write CFG_TIMEOUT_MS=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST5] FAIL\r\n");
+    return;
+  }
+
+  // Write mode config
+  status = Ee_Write(CFG_MODE, APP_TEST_PAGE_TRANSFER_MODE);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST5] write CFG_MODE=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST5] FAIL\r\n");
+    return;
+  }
+
+  // Print seed config result
+  UartLog_Printf("[TEST5] write seed configs OK\r\n");
+
+  // Fill active page with repeated baud rate records
+  for (uint32_t idx = 0U; idx < APP_TEST_PAGE_TRANSFER_FILL_COUNT; idx++) {
+    status = Ee_Write(CFG_BAUD_RATE, 9600UL + idx);
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST5] fill failed idx=%lu status=%s\r\n",
+                     (unsigned long)idx,
+                     Ee_StatusToString(status));
+      UartLog_Printf("[TEST5] FAIL\r\n");
+      return;
+    }
+  }
+
+  // Print fill result
+  UartLog_Printf("[TEST5] fill_records=%lu OK\r\n",
+                 (unsigned long)APP_TEST_PAGE_TRANSFER_FILL_COUNT);
+  UartLog_Printf("[TEST5] write_offset_before_transfer=%lu\r\n",
+                 (unsigned long)Ee_GetWriteOffset());
+
+  // Check active page is full before transfer
+  if (Ee_GetWriteOffset() != EE_PAGE_SIZE) {
+    UartLog_Printf("[TEST5] full_page_check=NG expected=%lu actual=%lu\r\n",
+                   (unsigned long)EE_PAGE_SIZE,
+                   (unsigned long)Ee_GetWriteOffset());
+    UartLog_Printf("[TEST5] FAIL\r\n");
+    return;
+  }
+
+  // Write one more record to trigger page transfer
+  status = Ee_Write(CFG_BAUD_RATE, APP_TEST_PAGE_TRANSFER_FINAL_BAUD);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST5] trigger write=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST5] FAIL\r\n");
+    return;
+  }
+  UartLog_Printf("[TEST5] write final CFG_BAUD_RATE=%lu OK\r\n",
+                 (unsigned long)APP_TEST_PAGE_TRANSFER_FINAL_BAUD);
+
+  // Print active page and write offset after transfer
+  UartLog_Printf("[TEST5] active_page_after_transfer=0x%08lX\r\n",
+                 (unsigned long)Ee_GetActivePageAddr());
+  UartLog_Printf("[TEST5] write_offset_after_transfer=%lu\r\n",
+                 (unsigned long)Ee_GetWriteOffset());
+
+  // Check active page after transfer
+  if (Ee_GetActivePageAddr() != EE_PAGE_B_ADDR) {
+    UartLog_Printf("[TEST5] active_page_check=NG expected=0x%08lX actual=0x%08lX\r\n",
+                   (unsigned long)EE_PAGE_B_ADDR,
+                   (unsigned long)Ee_GetActivePageAddr());
+    UartLog_Printf("[TEST5] FAIL\r\n");
+    return;
+  }
+
+  // Check write offset after transfer
+  if (Ee_GetWriteOffset() != (EE_HEADER_SIZE + (3U * EE_RECORD_SIZE))) {
+    UartLog_Printf("[TEST5] write_offset_check=NG expected=%lu actual=%lu\r\n",
+                   (unsigned long)(EE_HEADER_SIZE + (3U * EE_RECORD_SIZE)),
+                   (unsigned long)Ee_GetWriteOffset());
+    UartLog_Printf("[TEST5] FAIL\r\n");
+    return;
+  }
+
+  // Read baud rate after transfer
+  status = Ee_Read(CFG_BAUD_RATE, &read_baud);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST5] read CFG_BAUD_RATE=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST5] FAIL\r\n");
+    return;
+  }
+
+  // Read timeout after transfer
+  status = Ee_Read(CFG_TIMEOUT_MS, &read_timeout);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST5] read CFG_TIMEOUT_MS=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST5] FAIL\r\n");
+    return;
+  }
+
+  // Read mode after transfer
+  status = Ee_Read(CFG_MODE, &read_mode);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST5] read CFG_MODE=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST5] FAIL\r\n");
+    return;
+  }
+
+  // Print read values
+  UartLog_Printf("[TEST5] read CFG_BAUD_RATE=%lu OK\r\n", (unsigned long)read_baud);
+  UartLog_Printf("[TEST5] read CFG_TIMEOUT_MS=%lu OK\r\n", (unsigned long)read_timeout);
+  UartLog_Printf("[TEST5] read CFG_MODE=%lu OK\r\n", (unsigned long)read_mode);
+
+  // Check read values
+  if ((read_baud != APP_TEST_PAGE_TRANSFER_FINAL_BAUD) ||
+      (read_timeout != APP_TEST_PAGE_TRANSFER_TIMEOUT) ||
+      (read_mode != APP_TEST_PAGE_TRANSFER_MODE)) {
+    UartLog_Printf("[TEST5] value_check=NG\r\n");
+    UartLog_Printf("[TEST5] FAIL\r\n");
+    return;
+  }
+
+  // Count records in both pages
+  page_a_count = Ee_CountValidRecords(EE_PAGE_A_ADDR);
+  page_b_count = Ee_CountValidRecords(EE_PAGE_B_ADDR);
+
+  // Print page states and record counts
+  UartLog_Printf("[TEST5] page A state=%s valid_count=%lu\r\n",
+                 Ee_PageStateToString(Ee_GetPageState(EE_PAGE_A_ADDR)),
+                 (unsigned long)page_a_count);
+  UartLog_Printf("[TEST5] page B state=%s valid_count=%lu\r\n",
+                 Ee_PageStateToString(Ee_GetPageState(EE_PAGE_B_ADDR)),
+                 (unsigned long)page_b_count);
+
+  // Check final page states
+  if ((Ee_GetPageState(EE_PAGE_A_ADDR) != EE_PAGE_ERASED) ||
+      (Ee_GetPageState(EE_PAGE_B_ADDR) != EE_PAGE_ACTIVE)) {
+    UartLog_Printf("[TEST5] page_state_check=NG\r\n");
+    UartLog_Printf("[TEST5] FAIL\r\n");
+    return;
+  }
+
+  // Check valid record count in new active page
+  if (page_b_count != 3U) {
+    UartLog_Printf("[TEST5] page_b_count_check=NG expected=3 actual=%lu\r\n",
+                   (unsigned long)page_b_count);
+    UartLog_Printf("[TEST5] FAIL\r\n");
+    return;
+  }
+
+  // Print test result
+  UartLog_Printf("[TEST5] PASS\r\n");
+}
+
 // Print message for unimplemented test modes
 static void App_RunNotImplemented(void)
 {
@@ -565,6 +750,8 @@ void App_Run(void)
   App_RunAppendLatest();
 #elif APP_TEST_MODE == APP_TEST_MODE_REBOOT_READBACK
   App_RunRebootReadback();
+#elif APP_TEST_MODE == APP_TEST_MODE_PAGE_TRANSFER
+  App_RunPageTransfer();
 #else
   App_RunNotImplemented();
 #endif
