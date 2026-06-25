@@ -403,6 +403,9 @@ static EeStatus_t Ee_TransferPage(uint16_t var_id, uint32_t value)
   }
   UartLog_Printf("[EE] copied_records=%lu\r\n", (unsigned long)copied_count);
 
+  // Inject reset after copying latest records
+  EeFault_CheckAfterCopyLatestValues();
+
   // Write current new record to new page
   status = Ee_ProgramRecordAt(new_page_addr,
                               &new_write_offset,

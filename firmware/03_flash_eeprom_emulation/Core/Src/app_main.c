@@ -26,7 +26,7 @@
 #define APP_TEST_MODE_FAULT_AFTER_PROGRAM     10
 
 // Set default test mode
-#define APP_TEST_MODE                         APP_TEST_MODE_FAULT_AFTER_RECEIVE
+#define APP_TEST_MODE                         APP_TEST_MODE_FAULT_AFTER_COPY
 
 
 // Define reboot readback test phase values
@@ -67,6 +67,16 @@
 #define APP_TEST7_FILL_COUNT                  (EE_RECORDS_PER_PAGE - 3U)
 #define APP_TEST7_LAST_BAUD                   (9600UL + APP_TEST7_FILL_COUNT - 1U)
 
+// Define fault-after-copy test phase
+#define APP_TEST8_PHASE_AFTER_RESET           0x00000801UL
+
+// Define fault-after-copy test values
+#define APP_TEST8_TRIGGER_BAUD                230400UL
+#define APP_TEST8_TIMEOUT                     1000UL
+#define APP_TEST8_MODE                        3UL
+#define APP_TEST8_FILL_COUNT                  (EE_RECORDS_PER_PAGE - 3U)
+#define APP_TEST8_LAST_BAUD                   (9600UL + APP_TEST8_FILL_COUNT - 1U)
+
 // Define LED for heartbeat
 #define APP_LED_GPIO_Port                     GPIOA
 #define APP_LED_Pin                           GPIO_PIN_5
@@ -84,6 +94,7 @@ static uint8_t reboot_readback_test_done = 0U;
 static uint8_t page_transfer_test_done = 0U;
 static uint8_t page_transfer_reboot_test_done = 0U;
 static uint8_t fault_receive_test_done = 0U;
+static uint8_t fault_copy_test_done = 0U;
 static uint8_t not_implemented_log_done = 0U;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -97,6 +108,7 @@ static void App_RunRebootReadback(void);
 static void App_RunPageTransfer(void);
 static void App_RunPageTransferReboot(void);
 static void App_RunFaultAfterReceive(void);
+static void App_RunFaultAfterCopy(void);
 static void App_RunNotImplemented(void);
 static void App_UpdateHeartbeat(void);
 
@@ -1150,6 +1162,199 @@ static void App_RunFaultAfterReceive(void)
   UartLog_Printf("[TEST7] PASS\r\n");
 }
 
+// Run fault injection test after copying latest records
+static void App_RunFaultAfterCopy(void)
+{
+  EeStatus_t status;
+  uint32_t phase = 0U;
+  uint32_t read_baud = 0U;
+  uint32_t read_timeout = 0U;
+  uint32_t read_mode = 0U;
+
+  // Run this test only once per boot
+  if (fault_copy_test_done != 0U) {
+    return;
+  }
+
+  // Mark test as done for this boot
+  fault_copy_test_done = 1U;
+
+  // Initialize EEPROM module from current Flash state
+  status = Ee_Init();
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST8] init=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST8] FAIL\r\n");
+    return;
+  }
+
+  // Read test phase
+  status = Ee_Read(EE_VAR_ID_TEST_PHASE, &phase);
+
+  // Prepare fault injection when phase is not after-reset
+  if ((status != EE_OK) || (phase != APP_TEST8_PHASE_AFTER_RESET)) {
+    UartLog_Printf("[TEST8] phase=prepare\r\n");
+
+    // Format EEPROM area for deterministic test
+    status = Ee_Format();
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST8] format=NG status=%s\r\n", Ee_StatusToString(status));
+      UartLog_Printf("[TEST8] FAIL\r\n");
+      return;
+    }
+
+    // Write phase marker before filling page
+    status = Ee_Write(EE_VAR_ID_TEST_PHASE, APP_TEST8_PHASE_AFTER_RESET);
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST8] write TEST_PHASE=NG status=%s\r\n", Ee_StatusToString(status));
+      UartLog_Printf("[TEST8] FAIL\r\n");
+      return;
+    }
+    UartLog_Printf("[TEST8] write TEST_PHASE=after_reset OK\r\n");
+
+    // Write timeout config
+    status = Ee_Write(CFG_TIMEOUT_MS, APP_TEST8_TIMEOUT);
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST8] write CFG_TIMEOUT_MS=NG status=%s\r\n", Ee_StatusToString(status));
+      UartLog_Printf("[TEST8] FAIL\r\n");
+      return;
+    }
+
+    // Write mode config
+    status = Ee_Write(CFG_MODE, APP_TEST8_MODE);
+    if (status != EE_OK) {
+      UartLog_Printf("[TEST8] write CFG_MODE=NG status=%s\r\n", Ee_StatusToString(status));
+      UartLog_Printf("[TEST8] FAIL\r\n");
+      return;
+    }
+
+    // Print seed config result
+    UartLog_Printf("[TEST8] write seed configs OK\r\n");
+
+    // Fill active page with repeated baud rate records
+    for (uint32_t idx = 0U; idx < APP_TEST8_FILL_COUNT; idx++) {
+      status = Ee_Write(CFG_BAUD_RATE, 9600UL + idx);
+      if (status != EE_OK) {
+        UartLog_Printf("[TEST8] fill failed idx=%lu status=%s\r\n",
+                       (unsigned long)idx,
+                       Ee_StatusToString(status));
+        UartLog_Printf("[TEST8] FAIL\r\n");
+        return;
+      }
+    }
+
+    // Print fill result
+    UartLog_Printf("[TEST8] fill_records=%lu OK\r\n", (unsigned long)APP_TEST8_FILL_COUNT);
+    UartLog_Printf("[TEST8] write_offset_before_fault=%lu\r\n",
+                   (unsigned long)Ee_GetWriteOffset());
+
+    // Check active page is full before fault injection
+    if (Ee_GetWriteOffset() != EE_PAGE_SIZE) {
+      UartLog_Printf("[TEST8] full_page_check=NG expected=%lu actual=%lu\r\n",
+                     (unsigned long)EE_PAGE_SIZE,
+                     (unsigned long)Ee_GetWriteOffset());
+      UartLog_Printf("[TEST8] FAIL\r\n");
+      return;
+    }
+
+    // Enable fault injection after copied records
+    EeFault_SetMode(EE_FAULT_AFTER_COPY);
+
+    // Trigger page transfer and reset after copied records
+    UartLog_Printf("[TEST8] trigger write CFG_BAUD_RATE=%lu\r\n",
+                   (unsigned long)APP_TEST8_TRIGGER_BAUD);
+    status = Ee_Write(CFG_BAUD_RATE, APP_TEST8_TRIGGER_BAUD);
+
+    // This line should not be reached
+    UartLog_Printf("[TEST8] unexpected return status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST8] FAIL\r\n");
+    return;
+  }
+
+  // Continue test after software reset
+  UartLog_Printf("[TEST8] phase=after_reset\r\n");
+
+  // Print restored runtime state
+  UartLog_Printf("[TEST8] active_page_after_reset=0x%08lX\r\n",
+                 (unsigned long)Ee_GetActivePageAddr());
+  UartLog_Printf("[TEST8] write_offset_after_reset=%lu\r\n",
+                 (unsigned long)Ee_GetWriteOffset());
+
+  // Check active page is still Page A
+  if (Ee_GetActivePageAddr() != EE_PAGE_A_ADDR) {
+    UartLog_Printf("[TEST8] active_page_check=NG expected=0x%08lX actual=0x%08lX\r\n",
+                   (unsigned long)EE_PAGE_A_ADDR,
+                   (unsigned long)Ee_GetActivePageAddr());
+    UartLog_Printf("[TEST8] FAIL\r\n");
+    return;
+  }
+
+  // Check write offset is still full page
+  if (Ee_GetWriteOffset() != EE_PAGE_SIZE) {
+    UartLog_Printf("[TEST8] write_offset_check=NG expected=%lu actual=%lu\r\n",
+                   (unsigned long)EE_PAGE_SIZE,
+                   (unsigned long)Ee_GetWriteOffset());
+    UartLog_Printf("[TEST8] FAIL\r\n");
+    return;
+  }
+
+  // Check page states after recovery
+  if ((Ee_GetPageState(EE_PAGE_A_ADDR) != EE_PAGE_ACTIVE) ||
+      (Ee_GetPageState(EE_PAGE_B_ADDR) != EE_PAGE_ERASED)) {
+    UartLog_Printf("[TEST8] page_state_check=NG pageA=%s pageB=%s\r\n",
+                   Ee_PageStateToString(Ee_GetPageState(EE_PAGE_A_ADDR)),
+                   Ee_PageStateToString(Ee_GetPageState(EE_PAGE_B_ADDR)));
+    UartLog_Printf("[TEST8] FAIL\r\n");
+    return;
+  }
+
+  // Read baud rate after recovery
+  status = Ee_Read(CFG_BAUD_RATE, &read_baud);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST8] read CFG_BAUD_RATE=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST8] FAIL\r\n");
+    return;
+  }
+
+  // Read timeout after recovery
+  status = Ee_Read(CFG_TIMEOUT_MS, &read_timeout);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST8] read CFG_TIMEOUT_MS=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST8] FAIL\r\n");
+    return;
+  }
+
+  // Read mode after recovery
+  status = Ee_Read(CFG_MODE, &read_mode);
+  if (status != EE_OK) {
+    UartLog_Printf("[TEST8] read CFG_MODE=NG status=%s\r\n", Ee_StatusToString(status));
+    UartLog_Printf("[TEST8] FAIL\r\n");
+    return;
+  }
+
+  // Print read values
+  UartLog_Printf("[TEST8] read CFG_BAUD_RATE=%lu OK\r\n", (unsigned long)read_baud);
+  UartLog_Printf("[TEST8] read CFG_TIMEOUT_MS=%lu OK\r\n", (unsigned long)read_timeout);
+  UartLog_Printf("[TEST8] read CFG_MODE=%lu OK\r\n", (unsigned long)read_mode);
+
+  // Check old value is still preserved
+  if ((read_baud != APP_TEST8_LAST_BAUD) ||
+      (read_timeout != APP_TEST8_TIMEOUT) ||
+      (read_mode != APP_TEST8_MODE)) {
+    UartLog_Printf("[TEST8] value_check=NG expected_baud=%lu actual_baud=%lu\r\n",
+                   (unsigned long)APP_TEST8_LAST_BAUD,
+                   (unsigned long)read_baud);
+    UartLog_Printf("[TEST8] FAIL\r\n");
+    return;
+  }
+
+  // Print final page states
+  UartLog_Printf("[TEST8] page A state=%s\r\n", Ee_PageStateToString(Ee_GetPageState(EE_PAGE_A_ADDR)));
+  UartLog_Printf("[TEST8] page B state=%s\r\n", Ee_PageStateToString(Ee_GetPageState(EE_PAGE_B_ADDR)));
+
+  // Print test result
+  UartLog_Printf("[TEST8] PASS\r\n");
+}
+
 // Print message for unimplemented test modes
 static void App_RunNotImplemented(void)
 {
@@ -1215,6 +1420,8 @@ void App_Run(void)
   App_RunPageTransferReboot();
 #elif APP_TEST_MODE == APP_TEST_MODE_FAULT_AFTER_RECEIVE
   App_RunFaultAfterReceive();
+#elif APP_TEST_MODE == APP_TEST_MODE_FAULT_AFTER_COPY
+  App_RunFaultAfterCopy();
 #else
   App_RunNotImplemented();
 #endif
