@@ -9,6 +9,7 @@
 #include "bl_main.h"
 
 #include "bl_flash_layout.h"
+#include "bl_image.h"
 #include "bl_log.h"
 #include "main.h"
 
@@ -154,6 +155,57 @@ void BlMain_ApplyVectorTable(void)
   __ISB();
 }
 
+// Print application slot vector table validation result.
+static void BlMain_PrintSlotVectorCheck(BlImageSlotId_t slot_id,
+                                        const char *test_tag,
+                                        const char *test_name)
+{
+  BlImageVectorInfo_t vector_info;
+
+  BlImage_ValidateSlot(slot_id, &vector_info);
+
+  BlLog_Printf("\r\n");
+  BlLog_Printf("[BOOT] validate_slot=%s\r\n", vector_info.slot_name);
+  BlLog_Printf("[BOOT] slot_base=0x%08lX\r\n",
+                (unsigned long)vector_info.slot_base);
+  BlLog_Printf("[BOOT] slot_end=0x%08lX\r\n",
+                (unsigned long)vector_info.slot_end);
+
+  BlLog_Printf("[BOOT] initial_msp=0x%08lX\r\n",
+                (unsigned long)vector_info.initial_msp);
+  BlLog_Printf("[BOOT] reset_handler_raw=0x%08lX\r\n",
+                (unsigned long)vector_info.reset_handler_raw);
+  BlLog_Printf("[BOOT] reset_handler_addr=0x%08lX\r\n",
+                (unsigned long)vector_info.reset_handler_addr);
+
+  BlLog_Printf("[BOOT] msp_check=%s\r\n",
+                (vector_info.msp_check != 0U) ? "OK" : "NG");
+  BlLog_Printf("[BOOT] reset_thumb_check=%s\r\n",
+                (vector_info.reset_thumb_check != 0U) ? "OK" : "NG");
+  BlLog_Printf("[BOOT] reset_range_check=%s\r\n",
+                (vector_info.reset_range_check != 0U) ? "OK" : "NG");
+
+  if (vector_info.vector_check != 0U) {
+    BlLog_Printf("[BOOT] vector_check=OK\r\n");
+    BlLog_Printf("%s %s PASS\r\n", test_tag, test_name);
+  } else {
+    BlLog_Printf("[BOOT] vector_check=NG\r\n");
+    BlLog_Printf("%s %s FAIL\r\n", test_tag, test_name);
+  }
+}
+
+// Validate Slot A and Slot B vector tables.
+static void BlMain_RunSlotVectorChecks(void)
+{
+  BlMain_PrintSlotVectorCheck(BL_IMAGE_SLOT_A,
+                              "[TEST4]",
+                              "slot_a_vector_check");
+
+  BlMain_PrintSlotVectorCheck(BL_IMAGE_SLOT_B,
+                              "[TEST5]",
+                              "slot_b_vector_check");
+}
+
 // Initialize the bootloader log and run the boot self-check
 void BlMain_Init(UART_HandleTypeDef *debug_uart)
 {
@@ -162,6 +214,7 @@ void BlMain_Init(UART_HandleTypeDef *debug_uart)
   BlMain_PrintBootLog();
   BlMain_PrintFlashLayout();
   BlMain_RunBootCheck();
+  BlMain_RunSlotVectorChecks();
 }
 
 // Toggle the LED at a fixed interval as a heartbeat indicator

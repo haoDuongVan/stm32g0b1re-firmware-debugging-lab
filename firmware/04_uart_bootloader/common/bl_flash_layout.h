@@ -57,6 +57,23 @@
 #define BL_METADATA1_END_ADDR            (BL_METADATA1_BASE_ADDR + BL_METADATA_PAGE_SIZE - 1UL)
 
 /*
+ * SRAM layout for STM32G0B1RE.
+ *
+ * The initial MSP value stored in the application vector table usually points
+ * to the top of SRAM. Therefore, the valid upper bound is SRAM_LIMIT_ADDR
+ * instead of SRAM_END_ADDR.
+ *
+ * Example:
+ *
+ *   SRAM range      : 0x20000000 - 0x20023FFF
+ *   valid MSP limit : 0x20024000
+ */
+#define BL_SRAM_BASE_ADDR                0x20000000UL
+#define BL_SRAM_SIZE                     (144UL * 1024UL)
+#define BL_SRAM_END_ADDR                 (BL_SRAM_BASE_ADDR + BL_SRAM_SIZE - 1UL)
+#define BL_SRAM_LIMIT_ADDR               (BL_SRAM_BASE_ADDR + BL_SRAM_SIZE)
+
+/*
  * Compile-time layout checks.
  *
  * These checks intentionally fail the build if the layout is modified
