@@ -29,24 +29,14 @@ static const osMutexAttr_t uart_log_mutex_attributes = {
 
 /* Function definitions ------------------------------------------------------*/
 
-/*
- * Store the UART handle used for debug logs.
- *
- * Call this from main.c after MX_USART2_UART_Init().
- * This avoids including usart.h and follows the same style as the previous
- * project, where the app layer receives peripheral handles from main.c.
- */
+// Store the debug UART handle; called from main.c after MX_USART2_UART_Init()
 void App_Init(UART_HandleTypeDef *debug_uart)
 {
+  // Set the debug UART handle
   app_debug_uart = debug_uart;
 }
 
-/*
- * Create application RTOS objects.
- *
- * This function is called from main.c inside the USER CODE RTOS_THREADS block,
- * after osKernelInitialize() and before osKernelStart().
- */
+// Create RTOS objects, print boot log, and create tasks; called before osKernelStart()
 void App_CreateRtosObjects(void)
 {
   uart_log_mutex = osMutexNew(&uart_log_mutex_attributes);

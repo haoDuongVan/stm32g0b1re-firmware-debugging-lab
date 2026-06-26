@@ -10,12 +10,7 @@
 
 /* Function definitions ------------------------------------------------------*/
 
-/*
- * Convert an event type to a short text name for UART logs.
- *
- * This keeps WorkerTask logs readable without placing switch-case text
- * directly inside the task implementation.
- */
+// Convert an event type constant to a readable name string for UART logs
 const char *AppEvent_GetName(uint32_t type)
 {
   switch ((AppEventType_t)type)

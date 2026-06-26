@@ -108,11 +108,13 @@ static uint32_t AppTasks_SelectEventType(uint32_t sequence);
 
 /* Function definitions ------------------------------------------------------*/
 
+// Store the event queue handle used by all tasks
 void AppTasks_Init(osMessageQueueId_t event_queue)
 {
   app_event_queue = event_queue;
 }
 
+// Create all RTOS tasks and report creation result to the UART log
 void AppTasks_Create(void)
 {
   fast_task_handle = osThreadNew(StartFastTask, NULL, &fast_task_attributes);
@@ -133,6 +135,7 @@ void AppTasks_Create(void)
                  (monitor_task_handle != NULL) ? "OK" : "NG");
 }
 
+// Read all task counters and the queue depth into a snapshot for MonitorTask
 void AppTasks_GetCounterSnapshot(AppTaskCounterSnapshot_t *snapshot)
 {
   if (snapshot == NULL) {
@@ -182,6 +185,10 @@ static void AppTasks_SendEvent(uint32_t type, uint32_t value)
 
   status = osMessageQueuePut(app_event_queue, &event, 0U, 0U);
 
+  /*
+   * Queue full policy: drop the new event and increment dropped_count.
+   * Queue overflow must be measurable, not hidden.
+   */
   if (status != osOK) {
     dropped_count++;
   }

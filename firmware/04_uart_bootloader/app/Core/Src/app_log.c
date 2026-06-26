@@ -12,19 +12,15 @@
 #include <stdio.h>
 
 /* Private defines -----------------------------------------------------------*/
-#define APP_LOG_FORMAT_BUFFER_SIZE       0x100U    /* 256 bytes */
-#define APP_LOG_UART_TIMEOUT_MS          100U
+#define APP_LOG_FORMAT_BUFFER_SIZE       0x100U    // 256 bytes for one formatted message
+#define APP_LOG_UART_TIMEOUT_MS          100U      // ms
 
 /* Private variables ---------------------------------------------------------*/
 static UART_HandleTypeDef *debug_uart = NULL;
 
 /* Function definitions ------------------------------------------------------*/
 
-/**
- * @brief  Initialize application UART logger.
- * @param  debug_uart_handle UART handle used for debug output.
- * @retval None
- */
+// Store the UART handle used for all application log output
 void AppLog_Init(UART_HandleTypeDef *debug_uart_handle)
 {
   /*
@@ -34,11 +30,7 @@ void AppLog_Init(UART_HandleTypeDef *debug_uart_handle)
   debug_uart = debug_uart_handle;
 }
 
-/**
- * @brief  Print formatted log message through UART.
- * @param  format printf-style format string.
- * @retval None
- */
+// Format and transmit a log message over the debug UART
 void AppLog_Printf(const char *format, ...)
 {
   char format_buffer[APP_LOG_FORMAT_BUFFER_SIZE];
@@ -53,10 +45,12 @@ void AppLog_Printf(const char *format, ...)
     return;
   }
 
+  // Format the message into a local stack buffer
   va_start(args, format);
   len = vsnprintf(format_buffer, sizeof(format_buffer), format, args);
   va_end(args);
 
+  // vsnprintf returns a negative value on encoding errors
   if (len <= 0) {
     return;
   }

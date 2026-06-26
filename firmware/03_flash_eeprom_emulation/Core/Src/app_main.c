@@ -1725,7 +1725,7 @@ void App_Init(UART_HandleTypeDef *debug_uart)
 // Run application process
 void App_Run(void)
 {
-    // Print boot log
+  // Print boot log
   App_PrintBootLog();
 
   // Run selected test mode

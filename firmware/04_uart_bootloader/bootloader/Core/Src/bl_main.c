@@ -13,28 +13,20 @@
 #include "main.h"
 
 /* Private defines -----------------------------------------------------------*/
-/*
- * Define the GPIO pin and port for the LED.
- *
- * The actual CubeIDE-generated GPIO names are:
- *
- *   LED_GREEN_Pin
- *   LED_GREEN_GPIO_Port
- *
- * They are generated in Core/Inc/main.h.
- */
+
+// Define LED for heartbeat
 #define BL_LED_GPIO_Port                 GPIOA
 #define BL_LED_Pin                       GPIO_PIN_5
 
-/*
- * Define bootloader timing constants.
- */
-#define BL_HEARTBEAT_INTERVAL_MS         1000U
+// Define heartbeat period
+#define BL_HEARTBEAT_INTERVAL_MS         1000U   // ms
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t boot_check_done = 0U;
 
 /* Private functions ---------------------------------------------------------*/
+
+// Verify that all Flash layout addresses compile to the expected values; returns 1 if OK
 static int BlMain_CheckFlashLayout(void)
 {
   if (BL_BOOT_BASE_ADDR != 0x08000000UL) {
@@ -76,6 +68,7 @@ static int BlMain_CheckFlashLayout(void)
   return 1;
 }
 
+// Print project and board information
 static void BlMain_PrintBootLog(void)
 {
   BlLog_Printf("\r\n");
@@ -86,6 +79,7 @@ static void BlMain_PrintBootLog(void)
                 (unsigned long)HAL_RCC_GetSysClockFreq());
 }
 
+// Print Flash layout addresses and sizes
 static void BlMain_PrintFlashLayout(void)
 {
   BlLog_Printf("[BOOT] boot_base=0x%08lX size=%luKB\r\n",
@@ -107,6 +101,7 @@ static void BlMain_PrintFlashLayout(void)
                 (unsigned long)BL_METADATA1_BASE_ADDR);
 }
 
+// Check VTOR and Flash layout once after boot; runs only on first call
 static void BlMain_RunBootCheck(void)
 {
   uint32_t expected_vtor;
@@ -144,6 +139,8 @@ static void BlMain_RunBootCheck(void)
 }
 
 /* Function definitions ------------------------------------------------------*/
+
+// Set VTOR to the bootloader base address before the scheduler or any interrupt fires
 void BlMain_ApplyVectorTable(void)
 {
   /*
@@ -157,6 +154,7 @@ void BlMain_ApplyVectorTable(void)
   __ISB();
 }
 
+// Initialize the bootloader log and run the boot self-check
 void BlMain_Init(UART_HandleTypeDef *debug_uart)
 {
   BlLog_Init(debug_uart);
@@ -166,6 +164,7 @@ void BlMain_Init(UART_HandleTypeDef *debug_uart)
   BlMain_RunBootCheck();
 }
 
+// Toggle the LED at a fixed interval as a heartbeat indicator
 void BlMain_Run(void)
 {
   // Persists across calls to track when the LED was toggled last time
