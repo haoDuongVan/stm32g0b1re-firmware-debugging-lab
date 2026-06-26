@@ -1,0 +1,13 @@
+[APP] STM32 Dual-Slot Test Application
+[APP] Project: 04_uart_bootloader
+[APP] Board: NUCLEO-G0B1RE
+[APP] System clock: 16000000 Hz
+[APP] slot_name=B
+[APP] slot_base=0x08040000
+[APP] slot_end=0x0806FFFF
+
+[APP] vector_table=0x08040000
+[APP] expected_vtor=0x08040000
+[APP] actual_vtor=0x08040000
+[APP] vtor_check=OK
+[TEST3] app_slot_b_boot_check PASS
