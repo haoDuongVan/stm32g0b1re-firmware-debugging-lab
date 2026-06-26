@@ -1,0 +1,39 @@
+[BOOT] STM32 Dual-Slot UART Bootloader V1
+[BOOT] Project: 04_uart_bootloader
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 16000000 Hz
+[BOOT] boot_base=0x08000000 size=64KB
+[BOOT] slot_a_base=0x08010000 size=192KB
+[BOOT] slot_b_base=0x08040000 size=192KB
+[BOOT] metadata0=0x0807F000
+[BOOT] metadata1=0x0807F800
+
+[BOOT] expected_vtor=0x08000000
+[BOOT] actual_vtor=0x08000000
+[BOOT] vtor_check=OK
+[TEST0] bootloader_boot_check PASS
+[TEST1] flash_layout_check PASS
+
+[BOOT] validate_slot=A
+[BOOT] slot_base=0x08010000
+[BOOT] slot_end=0x0803FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08010A49
+[BOOT] reset_handler_addr=0x08010A48
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST4] slot_a_vector_check PASS
+
+[BOOT] validate_slot=B
+[BOOT] slot_base=0x08040000
+[BOOT] slot_end=0x0806FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08040A49
+[BOOT] reset_handler_addr=0x08040A48
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST5] slot_b_vector_check PASS
