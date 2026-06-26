@@ -3,6 +3,8 @@ Debug/
 Release/
 SlotA_Debug/
 SlotB_Debug/
+SlotA_Release/
+SlotB_Release/
 *.elf
 *.bin
 *.hex
@@ -15,4 +17,4 @@ SlotB_Debug/
 
 # IDE/cache
 .metadata/
-.settings/language.settings.xml
+**/.settings/language.settings.xml
