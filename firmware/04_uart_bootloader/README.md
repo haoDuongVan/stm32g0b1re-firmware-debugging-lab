@@ -1,714 +1,862 @@
-# Project 04 - STM32 Dual-Slot UART Bootloader
+# Project 04 — STM32 Dual-Slot UART OTA Bootloader
 
-This README is the design contract for Project 04.
+`04_uart_bootloader` is a practical STM32 bootloader project that implements a dual-slot A/B firmware update flow over UART.
 
-The purpose of this project is to build a UART bootloader on STM32G0B1RE with:
+The bootloader lives in a fixed Flash region, validates Slot A and Slot B vector tables, receives firmware packets from a Python host tool, writes the target slot, and uses metadata to boot a new image in a pending state. The application confirms itself after a successful boot, allowing the bootloader to keep or roll back the update.
 
-- fixed bootloader area
-- two application slots
-- CubeIDE `.elf` to `.bin` export flow
-- synchronous UART firmware update protocol
-- vector table validation
-- CRC verification
-- pending / confirm / rollback state machine
-- evidence-based tests
+This project was built and tested on a NUCLEO-G0B1RE board. The included evidence logs show the full update flow for both Slot A and Slot B.
 
-The project is intentionally split into V1 scope and V2 future work.
+---
 
-V1 is what this project will implement and test with logs.  
-V2 is documented as future work only and must not be claimed as completed.
+## 1. Final Status
+
+Completed features:
+
+- Fixed bootloader region
+- Independent Slot A and Slot B application builds
+- Slot vector table validation
+- Wrong-slot binary rejection
+- UART update mode with command parser
+- Flash erase / write / verify operations
+- Packet-based UART firmware transfer
+- Per-packet CRC32 validation
+- Python host updater using `pyserial`
+- Metadata-based active / confirmed / pending state
+- Pending boot count update
+- Application self-confirmation
+- Rollback to the last confirmed slot
+- Generic update target: Slot A or Slot B
+
+Final verified flow:
 
 ```txt
-firmware/04_uart_bootloader
+Host PC
+  -> enter UART update mode
+  -> erase target slot
+  -> send firmware as CRC-protected packets
+  -> set target slot as pending
+  -> bootloader boots pending image
+  -> application confirms itself
+  -> next reset boots confirmed image
 ```
 
 ---
 
-## 1. Project Goal
-
-The goal is not to make a minimal tutorial bootloader.
-
-The goal is to build a practical firmware update flow that can answer these questions with real logs:
-
-```txt
-Can the bootloader receive a firmware image over UART?
-Can it write the image to an inactive slot?
-Can it validate the image before booting it?
-Can it reject a binary built for the wrong slot?
-Can it boot a pending firmware and wait for confirmation?
-Can it roll back if the new firmware does not confirm boot success?
-Can it prove that Slot A is untouched while updating Slot B?
-Can it verify that VTOR remains correct after the application starts?
-```
-
----
-
-## 2. Target
+## 2. Hardware and Tools
 
 | Item | Value |
-| --- | --- |
+|---|---|
 | Board | NUCLEO-G0B1RE |
 | MCU | STM32G0B1RE |
-| Flash size | 512 KB |
-| Flash page size | 2048 bytes |
-| Bank mode | Dual-bank |
-| Bank 1 | `0x08000000 - 0x0803FFFF` |
-| Bank 2 | `0x08040000 - 0x0807FFFF` |
-| Debug UART | USART2, 115200 bps |
-| RTOS | Not used in V1 |
+| Flash | 512 KB |
+| SRAM | 144 KB |
 | IDE | STM32CubeIDE |
-| Payload format | `.bin` |
-| Update protocol | UART, synchronous ACK/NACK |
+| Programmer | STM32CubeProgrammer CLI |
+| Debug / update UART | USART2 |
+| UART pins | PA2 TX, PA3 RX |
+| Baudrate | 115200 |
+| LED | PA5 `LED_GREEN` |
+| Host updater | Python 3 + `pyserial` |
+| Optional console UI | `rich` |
 
 ---
 
-## 3. V1 Scope
-
-V1 implements:
+## 3. Repository Structure
 
 ```txt
-Fixed bootloader in Bank 1
-Application Slot A in Bank 1
-Application Slot B in Bank 2
-Two metadata pages at the end of Flash
-Separate linker configuration for Slot A and Slot B
-CubeIDE post-build export from .elf to .bin
-Synchronous UART protocol
-Erase/write inactive slot
-Firmware image CRC verification
-MSP validation
-Reset_Handler range validation
-Wrong-slot binary rejection
-Bootloader VTOR + MSP jump
-Application VTOR consistency log
-Pending slot boot
-Application boot confirmation
-Rollback if pending firmware is not confirmed
-Slot A untouched check after Slot B update
+04_uart_bootloader/
+├── bootloader/
+│   ├── Core/
+│   │   ├── Inc/
+│   │   │   ├── bl_image.h
+│   │   │   ├── bl_log.h
+│   │   │   ├── bl_main.h
+│   │   │   ├── bl_metadata.h
+│   │   │   ├── bl_slot.h
+│   │   │   └── bl_update.h
+│   │   └── Src/
+│   │       ├── bl_image.c
+│   │       ├── bl_log.c
+│   │       ├── bl_main.c
+│   │       ├── bl_metadata.c
+│   │       ├── bl_slot.c
+│   │       └── bl_update.c
+│   ├── bootloader.ioc
+│   └── STM32G0B1RETX_FLASH.ld
+│
+├── app/
+│   ├── Core/
+│   │   ├── Inc/
+│   │   │   ├── app_log.h
+│   │   │   ├── app_main.h
+│   │   │   └── app_metadata.h
+│   │   └── Src/
+│   │       ├── app_log.c
+│   │       ├── app_main.c
+│   │       └── app_metadata.c
+│   ├── linker/
+│   │   ├── STM32G0B1RETX_SLOT_A.ld
+│   │   └── STM32G0B1RETX_SLOT_B.ld
+│   └── app.ioc
+│
+├── common/
+│   ├── bl_flash_layout.h
+│   └── bl_metadata_format.h
+│
+├── tools/
+│   ├── build_all.bat
+│   ├── flash_all.bat
+│   ├── uart_packet_sender.py
+│   ├── ota_slot_a_m23.bat
+│   ├── ota_slot_b_m23.bat
+│   ├── ota_slot_b_m21.bat
+│   ├── send_app_slot_b_m20.bat
+│   ├── send_test_packet_m19.bat
+│   ├── generate_metadata.py
+│   └── generate_test_packet.py
+│
+├── BUILD_SETUP.md
+└── README.md
 ```
 
-V1 does not claim:
-
-```txt
-Full execute-from-RAM Flash driver
-UART continuous streaming during same-bank Flash erase/program
-BFB2 option byte boot swap
-Physical power-cut safe update
-Cryptographic firmware signature
-Anti-rollback security
-Firmware encryption
-Production OTA security model
-```
-
----
-
-## 4. V2 Future Work
-
-V2 may add:
-
-```txt
-Register-level Flash primitive executed fully from RAM
-objdump/map evidence proving the Flash critical path is in RAM
-Continuous UART streaming while Flash operation is running
-BFB2 / bank swap experiments
-Physical power-cut test during erase/program
-Firmware signing
-Firmware anti-rollback version policy
-Encrypted firmware payload
-Multi-image metadata format
-```
-
-These features are not part of V1 acceptance criteria.
-
----
-
-## 5. Flash Layout
-
-Project 04 uses a fixed bootloader and two application slots.
-
-```txt
-STM32G0B1RE Flash 512 KB
-
-Bank 1:
-  0x08000000 - 0x0800FFFF : Bootloader, 64 KB
-  0x08010000 - 0x0803FFFF : Slot A, 192 KB
-
-Bank 2:
-  0x08040000 - 0x0806FFFF : Slot B, 192 KB
-  0x08070000 - 0x0807EFFF : Reserved, 60 KB
-  0x0807F000 - 0x0807F7FF : Metadata Page 0, 2 KB
-  0x0807F800 - 0x0807FFFF : Metadata Page 1, 2 KB
-```
-
-Constants:
-
-```c
-#define BL_BOOT_BASE_ADDR          0x08000000UL
-#define BL_BOOT_SIZE               (64U * 1024U)
-
-#define BL_SLOT_A_BASE_ADDR        0x08010000UL
-#define BL_SLOT_A_SIZE             (192U * 1024U)
-
-#define BL_SLOT_B_BASE_ADDR        0x08040000UL
-#define BL_SLOT_B_SIZE             (192U * 1024U)
-
-#define BL_METADATA_PAGE0_ADDR     0x0807F000UL
-#define BL_METADATA_PAGE1_ADDR     0x0807F800UL
-#define BL_METADATA_PAGE_SIZE      2048U
-```
-
----
-
-## 6. Dual-Bank Asymmetry
-
-This layout is intentionally asymmetric.
-
-The bootloader always runs from Bank 1.
-
-When updating Slot B:
-
-```txt
-Bootloader instruction fetch: Bank 1
-Flash erase/program target:  Bank 2
-```
-
-This can benefit from dual-bank read-while-write behavior.
-
-This is the same underlying dual-bank idea used in Project 03, where Flash behavior was tested through EEPROM emulation and page transfer logs.
-
-When updating Slot A:
-
-```txt
-Bootloader instruction fetch: Bank 1
-Flash erase/program target:  Bank 1
-```
-
-This may have same-bank Flash blocking behavior.
-
-This is not a bug in the design.  
-It is a physical consequence of placing both bootloader and Slot A in Bank 1.
-
-V1 handles this by using a synchronous UART protocol:
-
-```txt
-Host sends one command or chunk.
-Bootloader performs erase/program/verify.
-Bootloader sends ACK or NACK.
-Host sends the next command only after ACK.
-```
-
-V1 does not claim that UART interrupt continues to run during same-bank Flash erase/program.
-
----
-
-## 7. Application Slot Builds
-
-The same application source can be used for Slot A and Slot B, but the two binaries must be built with different linker configuration.
-
-Slot A build:
-
-```txt
-FLASH ORIGIN      = 0x08010000
-FLASH LENGTH      = 192K
-VECT_TAB_OFFSET   = 0x00010000
-APP_SLOT_BASE     = 0x08010000
-APP_SLOT_ID       = A
-```
-
-Slot B build:
-
-```txt
-FLASH ORIGIN      = 0x08040000
-FLASH LENGTH      = 192K
-VECT_TAB_OFFSET   = 0x00040000
-APP_SLOT_BASE     = 0x08040000
-APP_SLOT_ID       = B
-```
-
-A `.bin` built for Slot A must not be accepted as a valid Slot B image.  
-A `.bin` built for Slot B must not be accepted as a valid Slot A image.
-
----
-
-## 8. ELF to BIN Export
-
-CubeIDE builds an `.elf` file.
-
-The UART bootloader payload is a raw `.bin` file.
-
-Post-build command example:
-
-```bash
-arm-none-eabi-objcopy -O binary "${BuildArtifactFileName}" "${BuildArtifactFileBaseName}.bin"
-```
-
-Expected outputs:
-
-```txt
-bootloader.elf
-bootloader.bin
-
-app_slot_a.elf
-app_slot_a.bin
-
-app_slot_b.elf
-app_slot_b.bin
-```
-
-The `.bin` file does not contain address metadata.  
-Therefore, the bootloader must know which slot the host intends to write.
-
----
-
-## 9. Firmware Image Validation
-
-Before booting a slot, the bootloader validates:
-
-```txt
-Initial MSP
-Reset_Handler address range
-Image size
-Image CRC
-Slot state in metadata
-```
-
-MSP validation:
-
-```txt
-Initial MSP must be inside SRAM.
-```
-
-Reset_Handler validation:
-
-```txt
-Slot A image:
-  Reset_Handler must be in 0x08010000 - 0x0803FFFF
-
-Slot B image:
-  Reset_Handler must be in 0x08040000 - 0x0806FFFF
-```
-
-This catches wrong-slot binaries.
-
-Image size validation:
-
-```txt
-The host must declare the image size in BEGIN_UPDATE.
-The bootloader checks image_size <= target_slot_size before erasing or writing anything.
-If image_size is larger than the selected slot, the update is rejected immediately.
-```
-
-This prevents a too-large `.bin` from overflowing into the reserved area, metadata pages, or another slot.
-
-Example failure:
-
-```txt
-app_slot_a.bin is written into Slot B.
-The binary CRC may still match.
-But Reset_Handler points to 0x08010xxx.
-Slot B requires Reset_Handler in 0x08040xxx - 0x0806xxxx.
-Bootloader rejects the image.
-```
-
----
-
-## 10. VTOR Contract
-
-Both bootloader and application participate in vector table setup.
-
-Bootloader responsibility before jump:
-
-```txt
-1. Read Initial MSP from slot_base + 0
-2. Read Reset_Handler from slot_base + 4
-3. Validate Initial MSP
-4. Validate Reset_Handler range
-5. Disable interrupts
-6. Set SCB->VTOR = slot_base
-7. Set MSP
-8. Jump to Reset_Handler
-```
-
-Application responsibility:
-
-```txt
-1. Build with the correct slot linker script
-2. Set SCB->VTOR again in SystemInit() using VECT_TAB_OFFSET
-3. Initialize UART
-4. Print final SCB->VTOR after startup
-```
-
-Expected Slot A application log:
-
-```txt
-[APP] Slot=A
-[APP] VTOR=0x08010000
-[APP] Boot OK
-```
-
-Expected Slot B application log:
-
-```txt
-[APP] Slot=B
-[APP] VTOR=0x08040000
-[APP] Boot OK
-```
-
-The final VTOR log is important because `SystemInit()` runs after bootloader jump.  
-If the application was built with a wrong `VECT_TAB_OFFSET`, it may overwrite `SCB->VTOR` with an incorrect value even after the bootloader set it correctly.
-
-TEST5 must not rely only on visual inspection.  
-The test log must print expected and actual VTOR values and end with `PASS` or `FAIL`.
-
-Example Slot A TEST5 log:
-
-```txt
-[TEST5] expected_vtor=0x08010000
-[TEST5] actual_vtor=0x08010000
-[TEST5] vtor_check=OK
-[TEST5] PASS
-```
-
-Example failure:
-
-```txt
-[TEST5] expected_vtor=0x08040000
-[TEST5] actual_vtor=0x08010000
-[TEST5] vtor_check=NG
-[TEST5] FAIL
-```
-
----
-
-## 11. UART Protocol V1
-
-V1 uses a synchronous command/response protocol.
-
-The host must wait for ACK/NACK after every command or data chunk.
-
-Example commands:
-
-```txt
-PING
-GET_INFO
-GET_METADATA
-ERASE_SLOT
-BEGIN_UPDATE
-WRITE_CHUNK
-END_UPDATE
-VERIFY_SLOT
-MARK_PENDING
-BOOT_SLOT
-CONFIRM_BOOT
-```
-
-V1 does not stream data continuously while Flash operations are in progress.
-
-This keeps the design predictable when updating Slot A in the same bank as the bootloader.
-
----
-
-## 12. Firmware Update Flow
-
-Normal update to inactive slot:
-
-```txt
-1. Bootloader boots current confirmed slot.
-2. Host sends BEGIN_UPDATE for inactive slot.
-3. Bootloader erases the inactive slot.
-4. Host sends firmware chunks.
-5. Bootloader writes chunks to Flash.
-6. Bootloader verifies image CRC.
-7. Bootloader validates vector table.
-8. Bootloader marks the slot as PENDING.
-9. System resets.
-10. Bootloader boots the pending slot.
-11. Application starts and confirms boot.
-12. Bootloader marks the slot as CONFIRMED.
-```
-
-Rollback flow:
-
-```txt
-1. Bootloader boots pending slot.
-2. Pending application crashes or resets before confirmation.
-3. Bootloader sees pending slot was not confirmed.
-4. Bootloader marks pending slot invalid or failed.
-5. Bootloader rolls back to previous confirmed slot.
-```
-
----
-
-## 13. Metadata State Machine
-
-Metadata is stored in two Flash pages at the end of Flash.
-
-The metadata design is inspired by Project 03:
-
-```txt
-Do not trust RAM state.
-Use magic value.
-Use sequence number.
-Use metadata CRC.
-Use two pages to avoid relying on one mutable location.
-```
-
-Suggested metadata fields:
-
-```c
-typedef enum
-{
-  BL_SLOT_A = 0,
-  BL_SLOT_B = 1,
-  BL_SLOT_NONE = 0xFFFFFFFFU
-} BlSlotId_t;
-
-typedef enum
-{
-  BL_SLOT_STATE_EMPTY = 0,
-  BL_SLOT_STATE_CONFIRMED,
-  BL_SLOT_STATE_PENDING,
-  BL_SLOT_STATE_TESTING,
-  BL_SLOT_STATE_FAILED,
-  BL_SLOT_STATE_INVALID
-} BlSlotState_t;
-
-typedef struct __attribute__((packed))
-{
-  uint32_t magic;
-  uint32_t sequence;
-
-  uint32_t active_slot;
-  uint32_t pending_slot;
-  uint32_t previous_slot;
-
-  uint32_t slot_a_state;
-  uint32_t slot_a_base;
-  uint32_t slot_a_size;
-  uint32_t slot_a_crc;
-
-  uint32_t slot_b_state;
-  uint32_t slot_b_base;
-  uint32_t slot_b_size;
-  uint32_t slot_b_crc;
-
-  uint32_t boot_attempt_count;
-  uint32_t metadata_crc;
-} BlMetadata_t;
-```
-
-The exact implementation can be simplified during coding, but the final project must not claim rollback safety without metadata evidence.
-
----
-
-## 14. Safety Checks
-
-The bootloader must check:
-
-```txt
-Slot base is valid
-Slot size is within allowed range
-Erase address is inside the selected slot
-Write address is inside the selected slot
-Chunk does not cross slot boundary
-Image CRC matches host-provided CRC
-Reset_Handler belongs to the target slot range
-Metadata CRC is valid
-Slot state allows boot
-```
-
-Boundary validation policy:
-
-```txt
-BEGIN_UPDATE:
-  Check declared image_size <= target_slot_size before erasing or writing.
-
-WRITE_CHUNK:
-  Check current_offset + chunk_size <= declared_image_size.
-  Check current_offset + chunk_size <= target_slot_size.
-  Check write_address is still inside the selected slot.
-```
-
-The boundary check must run for every `WRITE_CHUNK`, not only once at `BEGIN_UPDATE`.
-
-This prevents both accidental host bugs and malicious extra chunks after a valid BEGIN_UPDATE command.
-
-Important evidence test:
-
-```txt
-Slot A CRC before Slot B update
-Slot A CRC after Slot B update
-The two CRC values must match
-```
-
-For this test, the CRC must be recalculated by scanning the actual Slot A Flash region before and after the Slot B update.
-
-The test must not simply compare the `slot_a_crc` value stored in metadata, because metadata may remain unchanged even if a Flash erase/write bug accidentally corrupts Slot A.
-
-Required TEST12 evidence:
-
-```txt
-[TEST12] slot_a_crc_before=<crc calculated from Slot A Flash>
-[TEST12] update_slot_b=OK
-[TEST12] slot_a_crc_after=<crc recalculated from Slot A Flash>
-[TEST12] slot_a_untouched_check=OK
-[TEST12] PASS
-```
-
-This proves that updating Slot B does not accidentally erase or write Slot A.
-
----
-
-## 15. Test Plan
-
-The full test plan is split into phases.
-
-The phases are a roadmap, not a promise that every advanced test must be completed before the first useful result.
-
-### Phase 1 - Boot and Slot Validation
-
-```txt
-TEST0 bootloader_boot_check
-TEST1 flash_layout_check
-TEST2 validate_empty_slots
-TEST3 validate_slot_a_vector
-TEST4 jump_to_slot_a
-TEST5 verify_vtor_after_app_start_with_pass_fail
-TEST6 reject_wrong_slot_binary
-```
-
-### Phase 2 - BIN Export and UART Update
-
-```txt
-TEST7 cubeide_export_bin_check
-TEST8 uart_ping_command
-TEST9 erase_inactive_slot
-TEST10 write_firmware_chunks
-TEST11 verify_slot_crc
-TEST12 slot_a_untouched_after_slot_b_update
-```
-
-### Phase 3 - A/B Safe Update
-
-```txt
-TEST13 mark_pending_slot
-TEST14 boot_pending_slot
-TEST15 app_confirm_boot
-TEST16 rollback_if_not_confirmed
-TEST17 reject_invalid_crc
-```
-
----
-
-## 16. Evidence Requirements
-
-Evidence logs should be stored under:
+Evidence logs are stored separately, normally under:
 
 ```txt
 assets/logs/04_uart_bootloader/
 ```
 
-Screenshots should be stored under:
+or exported as:
 
 ```txt
-assets/screenshots/04_uart_bootloader/
+04_uart_bootloader-logs.zip
 ```
-
-Reports should be stored under:
-
-```txt
-assets/reports/04_uart_bootloader/
-```
-
-Each test should produce its own evidence file following the same naming pattern.
-
-Suggested important evidence files:
-
-```txt
-test0_bootloader_boot_check.log
-test1_flash_layout_check.log
-test5_verify_vtor_after_app_start.log
-test6_reject_wrong_slot_binary.log
-test12_slot_a_untouched_after_slot_b_update.log
-test16_rollback_if_not_confirmed.log
-test_summary.md
-```
-
-The list above highlights the most important logs, but it does not mean other tests can skip evidence.
 
 ---
 
-## 17. Blog Alignment
+## 4. Flash Layout
 
-The blog article for this project must match V1.
-
-The blog should emphasize:
+The Flash layout is defined in:
 
 ```txt
-Dual-slot safe update
-BIN payload generated from ELF
-Slot-specific linker script
-VTOR and MSP jump
-Wrong-slot binary rejection
-Synchronous UART protocol
-Pending / confirm / rollback
+common/bl_flash_layout.h
 ```
-
-The blog should not claim V1 has:
 
 ```txt
-Full execute-from-RAM Flash driver
-Continuous UART streaming during same-bank Flash erase
-Physical power-cut safety
-BFB2 bank swap
+STM32G0B1RE Flash: 512 KB
+
+0x08000000 - 0x0800FFFF : Bootloader       64 KB
+0x08010000 - 0x0803FFFF : Slot A           192 KB
+0x08040000 - 0x0806FFFF : Slot B           192 KB
+0x08070000 - 0x0807EFFF : Reserved         60 KB
+0x0807F000 - 0x0807F7FF : Metadata Page 0  2 KB
+0x0807F800 - 0x0807FFFF : Metadata Page 1  2 KB
 ```
 
-Execute-from-RAM should be written as an advanced note or V2 direction unless there is objdump/map evidence.
+Important constants:
+
+```c
+#define BL_BOOT_BASE_ADDR       0x08000000UL
+#define BL_BOOT_SIZE            (64UL * 1024UL)
+
+#define BL_SLOT_A_BASE_ADDR     0x08010000UL
+#define BL_SLOT_B_BASE_ADDR     0x08040000UL
+#define BL_SLOT_SIZE            (192UL * 1024UL)
+
+#define BL_METADATA0_BASE_ADDR  0x0807F000UL
+#define BL_METADATA1_BASE_ADDR  0x0807F800UL
+#define BL_METADATA_PAGE_SIZE   2048UL
+
+#define BL_SRAM_BASE_ADDR       0x20000000UL
+#define BL_SRAM_SIZE            (144UL * 1024UL)
+#define BL_SRAM_LIMIT_ADDR      0x20024000UL
+```
+
+Metadata Page 0 is used by the current implementation. Metadata Page 1 is reserved for future redundancy or wear-leveling work.
 
 ---
 
-## 18. Acceptance Criteria for V1
+## 5. Application Slot Builds
 
-The acceptance criteria are split into two levels.
+The same application source is built twice with different linker settings.
 
-This prevents the project from claiming the full safe-update state machine before the basic bootloader and UART update flow are proven.
+### Slot A
 
-### V1-Minimal Acceptance Criteria
+| Item | Value |
+|---|---|
+| Build config | `SlotA_Release` |
+| Output binary | `app/SlotA_Release/app_slot_a.bin` |
+| Flash origin | `0x08010000` |
+| Flash length | `192K` |
+| Required define | `APP_SLOT_A` |
+| VTOR offset | `VECT_TAB_OFFSET=0x00010000U` |
+| Expected vector table | `0x08010000` |
 
-V1-Minimal is considered complete when Phase 1 and Phase 2 are done.
+### Slot B
+
+| Item | Value |
+|---|---|
+| Build config | `SlotB_Release` |
+| Output binary | `app/SlotB_Release/app_slot_b.bin` |
+| Flash origin | `0x08040000` |
+| Flash length | `192K` |
+| Required define | `APP_SLOT_B` |
+| VTOR offset | `VECT_TAB_OFFSET=0x00040000U` |
+| Expected vector table | `0x08040000` |
+
+The Slot A and Slot B binaries are not interchangeable. A Slot A binary written to Slot B must fail Slot B vector validation because its reset handler still points into the Slot A address range.
+
+---
+
+## 6. Bootloader Modules
+
+| Module | Role |
+|---|---|
+| `bl_main.c` | Main boot flow, metadata decision, pending/rollback handling, jump to app |
+| `bl_image.c` | Vector table validation and application jump |
+| `bl_slot.c` | Flash erase/write/verify for Slot A and Slot B |
+| `bl_metadata.c` | Metadata read/write and CRC validation |
+| `bl_update.c` | UART update mode and command dispatcher |
+| `bl_log.c` | UART log output |
+
+The bootloader keeps `main.c` thin. The main application logic is placed in bootloader modules instead of Cube-generated files.
+
+---
+
+## 7. Application Modules
+
+| Module | Role |
+|---|---|
+| `app_main.c` | Test application boot log, VTOR check, metadata confirmation |
+| `app_metadata.c` | App-side metadata read/write/CRC logic |
+| `app_log.c` | UART log output |
+
+When the app boots from a pending slot, it confirms itself by writing:
 
 ```txt
-Bootloader builds and runs from 0x08000000
-Slot A app builds and runs from 0x08010000
-Slot B app builds and runs from 0x08040000
-CubeIDE exports .bin from .elf
-Bootloader validates MSP and Reset_Handler range
-Bootloader rejects wrong-slot binary
-Bootloader jumps to app with correct VTOR and MSP
-Application logs final SCB->VTOR
-TEST5 verifies expected_vtor vs actual_vtor with PASS/FAIL
-Bootloader uses synchronous UART PING/ACK flow
-Bootloader rejects image_size > target_slot_size before erase/write
-Bootloader checks WRITE_CHUNK boundary on every chunk
-Bootloader writes firmware chunks to inactive slot
-Bootloader verifies image CRC
-Slot A remains unchanged after Slot B update
-Evidence logs are saved for Phase 1 and Phase 2
-README, blog, project page, and notes do not claim features outside V1-Minimal
+active_slot    = current app slot
+confirmed_slot = current app slot
+boot_count     = 0
 ```
 
-### V1-Full Acceptance Criteria
+---
 
-V1-Full is considered complete when Phase 1, Phase 2, and Phase 3 are done.
+## 8. Metadata Format
+
+The shared metadata format is defined in:
 
 ```txt
-All V1-Minimal criteria are satisfied
-Metadata has magic, sequence, state, and CRC validation
-Pending slot can boot
-Application can confirm boot
-Bootloader can mark a pending slot as confirmed
-Bootloader can rollback when pending app does not confirm
-Bootloader rejects invalid CRC before marking a slot pending
-Evidence logs are saved for Phase 3
-README, blog, project page, and notes clearly distinguish V1-Full from V2 future work
+common/bl_metadata_format.h
 ```
+
+```c
+typedef struct
+{
+  uint32_t magic;
+  uint32_t version;
+  uint32_t active_slot;
+  uint32_t confirmed_slot;
+  uint32_t boot_count;
+  uint32_t reserved[3];
+  uint32_t crc32;
+} BlMetadata_t;
+```
+
+Constants:
+
+```c
+#define BL_METADATA_MAGIC    0x424C4D44UL   /* "BLMD" */
+#define BL_METADATA_VERSION  1UL
+#define BL_METADATA_SLOT_A   0x00000041UL   /* 'A' */
+#define BL_METADATA_SLOT_B   0x00000042UL   /* 'B' */
+```
+
+Typical states:
+
+### No valid metadata
+
+```txt
+metadata_magic=NG
+use_default_slot=A
+```
+
+### Confirmed Slot A
+
+```txt
+active_slot=A
+confirmed_slot=A
+boot_count=0
+update_state=CONFIRMED
+```
+
+### Pending Slot B
+
+```txt
+active_slot=B
+confirmed_slot=A
+boot_count=0 or 1 or 2
+update_state=PENDING
+```
+
+### Confirmed Slot B
+
+```txt
+active_slot=B
+confirmed_slot=B
+boot_count=0
+update_state=CONFIRMED
+```
+
+---
+
+## 9. Boot Flow
+
+```mermaid
+flowchart TD
+    R[Reset] --> B[Bootloader starts]
+    B --> C[Print boot and Flash layout]
+    C --> D[Validate Slot A vector]
+    D --> E[Validate Slot B vector]
+    E --> F{UART update request within 3 seconds?}
+
+    F -- Yes --> U[Enter update mode]
+    U --> U1[Erase/write/verify target slot]
+    U1 --> U2[Optionally set pending metadata]
+    U2 --> X[Exit update mode]
+
+    F -- No --> M[Read metadata]
+    X --> M
+
+    M --> N{Metadata valid?}
+    N -- No --> A[Select default Slot A]
+    N -- Yes --> P{active_slot != confirmed_slot?}
+
+    P -- No --> CFM[Boot confirmed slot]
+    P -- Yes --> BC{boot_count >= max?}
+
+    BC -- Yes --> RB[Rollback to confirmed slot]
+    RB --> CFM
+
+    BC -- No --> INC[Increment boot_count]
+    INC --> PEN[Boot pending slot]
+
+    A --> J[Jump to selected app]
+    CFM --> J
+    PEN --> J
+
+    J --> APP[Application starts]
+    APP --> CONF{Confirm needed?}
+    CONF -- Yes --> W[Write confirmed metadata]
+    CONF -- No --> RUN[Run normally]
+    W --> RUN
+```
+
+---
+
+## 10. Vector Validation
+
+Before jumping to an application, the bootloader validates the vector table.
+
+Checks:
+
+- Initial MSP is inside SRAM range
+- Reset handler has Thumb bit set
+- Reset handler address is inside the selected slot range
+
+Example valid Slot B vector:
+
+```txt
+[BOOT] validate_slot=B
+[BOOT] slot_base=0x08040000
+[BOOT] slot_end=0x0806FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08040DBD
+[BOOT] reset_handler_addr=0x08040DBC
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST5] slot_b_vector_check PASS
+```
+
+Wrong-slot example: Slot A binary written into Slot B must fail because its reset handler points back into Slot A.
+
+```txt
+[BOOT] reset_handler_raw=0x08010A49
+[BOOT] reset_handler_addr=0x08010A48
+[BOOT] reset_range_check=NG
+[BOOT] vector_check=NG
+[BOOT] reject_reason=reset_handler_points_to_slot_a
+[TEST6] wrong_slot_b_reject_check PASS
+```
+
+---
+
+## 11. UART Update Mode
+
+At boot, the bootloader waits for `u` or `U` for 3 seconds.
+
+```txt
+[BOOT] uart_update_window=3000ms
+[BOOT] send_u_to_enter_update_mode
+```
+
+If the host sends `u`, the bootloader enters update mode:
+
+```txt
+[BOOT] uart_update_request=YES
+[BOOT] update_mode=ENTER
+[TEST14] uart_update_mode_entry_check PASS
+```
+
+Available commands:
+
+```txt
+help
+info
+erase a
+erase b
+write-test a
+write-test b
+rx-packet a
+rx-packet b
+set-pending a
+set-pending b
+exit
+reboot
+```
+
+Command summary:
+
+| Command | Description |
+|---|---|
+| `help` | Print command list |
+| `info` | Print bootloader, slot and metadata addresses |
+| `erase a` / `erase b` | Erase selected application slot |
+| `write-test a` / `write-test b` | Write a 16-byte test pattern to selected slot and verify it |
+| `rx-packet a` / `rx-packet b` | Receive one binary packet and write it to selected slot |
+| `set-pending a` / `set-pending b` | Set selected slot as pending boot image |
+| `exit` | Leave update mode and continue normal boot |
+| `reboot` | Reset the MCU |
+
+---
+
+## 12. UART Packet Format
+
+The host sends firmware data using a simple binary packet format.
+
+```txt
+Offset  Size  Field
+0       4     magic
+4       4     slot offset
+8       4     payload length
+12      4     payload CRC32
+16      N     payload
+```
+
+Packet constants:
+
+```c
+#define BL_UPDATE_PACKET_MAGIC        0x31544B50UL  /* "PKT1" */
+#define BL_UPDATE_PACKET_HEADER_SIZE  16U
+#define BL_UPDATE_PACKET_MAX_PAYLOAD  256U
+```
+
+Each packet is checked for:
+
+- Magic value
+- Payload length
+- 8-byte alignment
+- CRC32 match
+- Flash write result
+- Flash verify result
+
+Example log:
+
+```txt
+[UPDATE] rx_packet_slot=B
+[UPDATE] packet_offset=0x00000100
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x8F1C0C9D
+[UPDATE] packet_crc_calculated=0x8F1C0C9D
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+```
+
+Important implementation detail: after receiving the 16-byte header, the bootloader reads the payload immediately before printing long logs. This avoids losing payload bytes when the host sends the full packet continuously.
+
+---
+
+## 13. Python Host Updater
+
+Host tool:
+
+```txt
+tools/uart_packet_sender.py
+```
+
+Dependencies:
+
+```bat
+py -3 -m pip install pyserial rich
+```
+
+Main options:
+
+| Option | Description |
+|---|---|
+| `--port COM3` | UART COM port |
+| `--baud 115200` | UART baudrate |
+| `--file <bin>` | Firmware binary to send |
+| `--target a` | Update Slot A |
+| `--target b` | Update Slot B |
+| `--set-pending` | Write pending metadata after upload |
+| `--make-test-file` | Generate an ASCII test file before sending |
+| `--test-size 1024` | Size of generated test file |
+| `--quiet-serial` | Hide raw bootloader UART log |
+
+Example: send test data to Slot B:
+
+```bat
+cd firmware\04_uart_bootloader\tools
+py -3 uart_packet_sender.py --port COM3 --file generated\uart_multi_packet_test_slot_b.bin --make-test-file --test-size 1024 --target b
+```
+
+Example: full OTA to Slot B:
+
+```bat
+cd firmware\04_uart_bootloader\tools
+py -3 uart_packet_sender.py --port COM3 --file ..\app\SlotB_Release\app_slot_b.bin --target b --set-pending
+```
+
+Example: full OTA to Slot A:
+
+```bat
+cd firmware\04_uart_bootloader\tools
+py -3 uart_packet_sender.py --port COM3 --file ..\app\SlotA_Release\app_slot_a.bin --target a --set-pending
+```
+
+The tool sends command characters with a small delay. This avoids UART receive overrun because the bootloader echoes command characters with blocking UART transmit.
+
+---
+
+## 14. Batch Scripts
+
+| Script | Purpose |
+|---|---|
+| `tools/build_all.bat` | Build bootloader, Slot A app and Slot B app using STM32CubeIDE CLI |
+| `tools/flash_all.bat` | Full SWD flash: bootloader + Slot A + Slot B |
+| `tools/send_test_packet_m19.bat` | Generate and send a 1024-byte test file to Slot B |
+| `tools/send_app_slot_b_m20.bat` | Send real `app_slot_b.bin` to Slot B without setting pending metadata |
+| `tools/ota_slot_b_m21.bat` | Older fixed Slot B OTA flow |
+| `tools/ota_slot_b_m23.bat` | Generic target flow for full OTA to Slot B |
+| `tools/ota_slot_a_m23.bat` | Generic target flow for full OTA to Slot A |
+
+Safety note for `ota_slot_a_m23.bat`: only run it after Slot B is already confirmed. If Slot A update fails, the bootloader can then roll back to Slot B.
+
+---
+
+## 15. Build
+
+The build script expects STM32CubeIDE CLI at:
+
+```bat
+C:\ST\STM32CubeIDE_1.18.0\STM32CubeIDE\stm32cubeidec.exe
+```
+
+Edit `tools/build_all.bat` if your STM32CubeIDE is installed elsewhere.
+
+Run:
+
+```bat
+cd firmware\04_uart_bootloader\tools
+build_all.bat
+```
+
+Expected outputs:
+
+```txt
+bootloader/Release/bootloader.bin
+app/SlotA_Release/app_slot_a.bin
+app/SlotB_Release/app_slot_b.bin
+```
+
+From the current evidence package:
+
+| Binary | Size |
+|---|---:|
+| `bootloader.bin` | 22068 bytes |
+| `app_slot_a.bin` | 12912 bytes |
+| `app_slot_b.bin` | 12912 bytes |
+
+---
+
+## 16. Flash Initial Image by SWD
+
+Run:
+
+```bat
+cd firmware\04_uart_bootloader\tools
+flash_all.bat
+```
+
+The script writes:
+
+```txt
+bootloader.bin  -> 0x08000000
+app_slot_a.bin  -> 0x08010000
+app_slot_b.bin  -> 0x08040000
+```
+
+Expected first boot checks:
+
+```txt
+[TEST0] bootloader_boot_check PASS
+[TEST1] flash_layout_check PASS
+[TEST4] slot_a_vector_check PASS
+[TEST5] slot_b_vector_check PASS
+```
+
+---
+
+## 17. Full OTA Flow: Slot A to Slot B
+
+Run:
+
+```bat
+cd firmware\04_uart_bootloader\tools
+ota_slot_b_m23.bat
+```
+
+What the script does:
+
+```txt
+1. Enter update mode
+2. erase b
+3. Send app_slot_b.bin as 51 packets
+4. set-pending b
+5. exit
+```
+
+Expected upload result:
+
+```txt
+[TEST14] uart_update_mode_entry_check PASS
+[TEST16] slot_erase_command_check PASS
+[TEST18] uart_binary_packet_receive_check PASS
+[TEST19] set_pending_command_check PASS
+```
+
+Expected pending boot:
+
+```txt
+[BOOT] active_slot=B
+[BOOT] confirmed_slot=A
+[BOOT] update_state=PENDING
+[TEST9] pending_metadata_check PASS
+[TEST12] pending_boot_count_update_check PASS
+[BOOT] selected_slot=B
+```
+
+Expected app confirmation:
+
+```txt
+[APP] slot_name=B
+[APP] confirm_required=YES
+[APP] confirm_metadata_write=OK
+[TEST13] app_confirm_image_check PASS
+```
+
+After one more reset:
+
+```txt
+[BOOT] active_slot=B
+[BOOT] confirmed_slot=B
+[BOOT] update_state=CONFIRMED
+[BOOT] selected_slot=B
+[APP] slot_name=B
+[APP] confirm_required=NO
+```
+
+---
+
+## 18. Full OTA Flow: Slot B to Slot A
+
+Run only after Slot B is confirmed.
+
+```bat
+cd firmware\04_uart_bootloader\tools
+ota_slot_a_m23.bat
+```
+
+What the script does:
+
+```txt
+1. Enter update mode
+2. erase a
+3. Send app_slot_a.bin as 51 packets
+4. set-pending a
+5. exit
+```
+
+Expected pending boot:
+
+```txt
+[BOOT] active_slot=A
+[BOOT] confirmed_slot=B
+[BOOT] update_state=PENDING
+[TEST9] pending_metadata_check PASS
+[TEST12] pending_boot_count_update_check PASS
+[BOOT] selected_slot=A
+```
+
+Expected confirmed state after application confirmation and reset:
+
+```txt
+[BOOT] active_slot=A
+[BOOT] confirmed_slot=A
+[BOOT] update_state=CONFIRMED
+[BOOT] selected_slot=A
+[APP] slot_name=A
+[TEST13] app_confirm_image_check PASS
+```
+
+---
+
+## 19. Rollback Behavior
+
+If the active slot is pending but does not confirm itself, the bootloader increments `boot_count` before jumping to it.
+
+When `boot_count >= 3`, rollback is triggered.
+
+Example rollback metadata:
+
+```txt
+active_slot=B
+confirmed_slot=A
+boot_count=3
+```
+
+Expected bootloader result:
+
+```txt
+[BOOT] update_state=PENDING
+[BOOT] rollback_required=YES
+[TEST10] rollback_decision_check PASS
+[BOOT] rollback_to_slot=A
+[BOOT] rollback_metadata_write=OK
+[TEST11] rollback_metadata_write_check PASS
+[BOOT] selected_slot=A
+```
+
+---
+
+## 20. Test Milestones
+
+| Test | Description | Evidence |
+|---|---|---|
+| TEST0 | Bootloader VTOR check | `boot_log.txt` |
+| TEST1 | Flash layout check | `boot_log.txt` |
+| TEST2 | Slot A app boot check | `app_slot_a_boot_log.txt`, `boot_slot_a_confirm_log.txt` |
+| TEST3 | Slot B app boot check | `app_slot_b_boot_log.txt`, `boot_slot_b_confirm_log.txt` |
+| TEST4 | Slot A vector check | `flash_all_log.txt` |
+| TEST5 | Slot B vector check | `slot_b_real_app_vector_pass_log.txt` |
+| TEST6 | Wrong-slot binary rejection | `wrong_slot_b_reject_log.txt` |
+| TEST7 | Metadata read/default fallback | `metadata_empty_fallback_log.txt` |
+| TEST8 | Metadata CRC check | `metadata_crc_slot_b_boot_log.txt` |
+| TEST9 | Pending metadata check | `metadata_pending_b_boot_log.txt`, `ota_target_a_log.txt`, `ota_target_b_log.txt` |
+| TEST10 | Rollback decision | `metadata_rollback_to_a_log.txt` |
+| TEST11 | Rollback metadata write | `rollback_metadata_write_log.txt` |
+| TEST12 | Pending boot count update | `pending_boot_count_auto_rollback_log.txt`, `ota_target_a_log.txt`, `ota_target_b_log.txt` |
+| TEST13 | App self-confirmation | `app_confirm_slot_b_log.txt`, `boot_slot_a_confirm_log.txt`, `boot_slot_b_confirm_log.txt` |
+| TEST14 | UART update mode entry | `uart_update_mode_entry_log.txt` |
+| TEST15 | UART command parser | `uart_command_parser_log.txt` |
+| TEST16 | Slot erase command | `uart_erase_slot_b_command_log.txt`, `ota_target_a_log.txt`, `ota_target_b_log.txt` |
+| TEST17 | Slot write-test command | `uart_write_test_slot_b_log.txt` |
+| TEST18 | UART binary packet receive | `uart_binary_packet_receive_log.txt`, `uart_multi_packet_sender_log.txt`, `ota_target_a_log.txt`, `ota_target_b_log.txt` |
+| TEST19 | Set pending command | `ota_target_a_log.txt`, `ota_target_b_log.txt` |
+
+---
+
+## 21. Evidence Log Index
+
+Important evidence logs:
+
+```txt
+boot_log.txt
+flash_all_log.txt
+wrong_slot_b_reject_log.txt
+metadata_empty_fallback_log.txt
+metadata_crc_slot_b_boot_log.txt
+metadata_pending_b_boot_log.txt
+metadata_rollback_to_a_log.txt
+rollback_metadata_write_log.txt
+rollback_metadata_persist_after_reset_log.txt
+uart_update_mode_entry_log.txt
+uart_update_window_normal_boot_log.txt
+uart_command_parser_log.txt
+uart_erase_slot_b_command_log.txt
+uart_write_test_slot_b_log.txt
+uart_binary_packet_receive_log.txt
+uart_multi_packet_sender_log.txt
+send_app_slot_b_m20_log.txt
+slot_b_real_app_vector_pass_log.txt
+ota_slot_b_m21_log.txt
+ota_target_b_log.txt
+ota_target_a_log.txt
+boot_slot_b_confirm_log.txt
+boot_slot_a_confirm_log.txt
+```
+
+These logs are useful for writing a blog post or portfolio article because they show not only success paths, but also rejection, pending state, rollback, and final confirmation states.
+
+---
+
+## 22. Safety Notes
+
+- Do not erase the only valid confirmed slot unless the other slot is already valid and confirmed.
+- `ota_slot_a_m23.bat` should be used only after Slot B is confirmed.
+- Slot A and Slot B binaries must be built with their own linker scripts.
+- The bootloader validates the target slot before setting it as pending.
+- The bootloader also checks the rollback slot and prints a warning if it is invalid.
+- The current metadata implementation writes Metadata Page 0 only.
+- The project does not implement cryptographic signature verification.
+- The project does not implement encryption.
+- The project does not implement production-grade anti-rollback version control.
+- The project does not claim power-cut-safe metadata redundancy.
+
+---
+
+## 23. Known Limitations and Future Work
+
+Possible future improvements:
+
+- Use both metadata pages for redundancy and power-cut recovery
+- Add image-level CRC for the entire firmware image, not only per-packet CRC
+- Add firmware version field and anti-rollback policy
+- Add cryptographic signature verification
+- Add encrypted payload support
+- Add automatic inactive-slot selection in the Python updater
+- Increase packet payload size from 256 bytes to 512 or 1024 bytes
+- Move Flash critical routines to RAM if continuous same-bank operation is required
+- Add a cleaner binary protocol with ACK/NACK codes instead of log-token parsing
+
+---
+
+## 24. Summary
+
+This project demonstrates a complete educational A/B UART bootloader flow on STM32:
+
+```txt
+Dual-slot layout
+UART firmware transfer
+CRC-protected packets
+Flash erase/write/verify
+Metadata pending/confirmed state
+Application self-confirmation
+Rollback support
+Generic update target A/B
+```
+
+The final milestone proves that the board can update from Slot A to Slot B and then from Slot B back to Slot A using the same generic UART update mechanism.
