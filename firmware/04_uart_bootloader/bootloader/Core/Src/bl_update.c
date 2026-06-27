@@ -10,6 +10,7 @@
 #include "bl_update.h"
 
 #include "bl_flash_layout.h"
+#include "bl_image.h"
 #include "bl_log.h"
 #include "bl_metadata.h"
 #include "bl_slot.h"
@@ -62,7 +63,7 @@
  * Set pending metadata test.
  */
 #define BL_UPDATE_SET_PENDING_TEST_TAG   "[TEST19]"
-#define BL_UPDATE_SET_PENDING_TEST_NAME  "set_pending_slot_b_check"
+#define BL_UPDATE_SET_PENDING_TEST_NAME  "set_pending_command_check"
 
 #define BL_UPDATE_PACKET_MAGIC           0x31544B50UL  /* "PKT1" */
 #define BL_UPDATE_PACKET_HEADER_SIZE     16U
@@ -85,7 +86,7 @@ static UART_HandleTypeDef *update_uart = NULL;
  * Size is a multiple of 8 to satisfy doubleword-alignment requirement.
  * Content: "DOUBLE01SLOTBTES" in ASCII.
  */
-static const uint8_t s_slot_b_test_pattern[16U] = {
+static const uint8_t s_write_test_pattern[16U] = {
   0x44U, 0x4FU, 0x55U, 0x42U, 0x4CU, 0x45U, 0x30U, 0x31U,
   0x53U, 0x4CU, 0x4FU, 0x54U, 0x42U, 0x54U, 0x45U, 0x53U
 };
@@ -98,12 +99,15 @@ static uint8_t  BlUpdate_CommandEquals(const char *cmd, const char *expected);
 static void     BlUpdate_HandleHelp(void);
 static void     BlUpdate_HandleInfo(void);
 static uint8_t  BlUpdate_HandleCommand(const char *cmd);
-static uint8_t  BlUpdate_ReadBinary(uint8_t *data, uint32_t size, uint32_t timeout_ms);
-static uint32_t BlUpdate_ReadLe32(const uint8_t *data);
-static uint32_t BlUpdate_UpdateCrc32(uint32_t crc, uint8_t byte);
-static uint32_t BlUpdate_CalculateCrc32(const uint8_t *data, uint32_t size);
-static void     BlUpdate_HandleRxTestSlotB(void);
-static void     BlUpdate_HandleSetPendingSlotB(void);
+static uint8_t      BlUpdate_ReadBinary(uint8_t *data, uint32_t size, uint32_t timeout_ms);
+static uint32_t     BlUpdate_ReadLe32(const uint8_t *data);
+static uint32_t     BlUpdate_UpdateCrc32(uint32_t crc, uint8_t byte);
+static uint32_t     BlUpdate_CalculateCrc32(const uint8_t *data, uint32_t size);
+static const char  *BlUpdate_SlotName(BlImageSlotId_t slot);
+static void         BlUpdate_HandleEraseSlot(BlImageSlotId_t slot);
+static void         BlUpdate_HandleWriteTest(BlImageSlotId_t slot);
+static void         BlUpdate_HandleRxPacket(BlImageSlotId_t slot);
+static void         BlUpdate_HandleSetPending(BlImageSlotId_t slot);
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -202,11 +206,15 @@ static void BlUpdate_HandleHelp(void)
   BlLog_Printf("[UPDATE] available_commands:\r\n");
   BlLog_Printf("[UPDATE]   help          - show command list\r\n");
   BlLog_Printf("[UPDATE]   info          - show bootloader and slot information\r\n");
+  BlLog_Printf("[UPDATE]   erase a       - erase Slot A\r\n");
   BlLog_Printf("[UPDATE]   erase b       - erase Slot B\r\n");
+  BlLog_Printf("[UPDATE]   write-test a  - write test pattern to Slot A then verify\r\n");
   BlLog_Printf("[UPDATE]   write-test b  - write test pattern to Slot B then verify\r\n");
-  BlLog_Printf("[UPDATE]   exit          - leave update mode and boot normally\r\n");
-  BlLog_Printf("[UPDATE]   rx-test b     - receive one binary packet and write Slot B\r\n");
+  BlLog_Printf("[UPDATE]   rx-packet a   - receive one binary packet and write Slot A\r\n");
+  BlLog_Printf("[UPDATE]   rx-packet b   - receive one binary packet and write Slot B\r\n");
+  BlLog_Printf("[UPDATE]   set-pending a - write metadata: active=A confirmed=B boot_count=0\r\n");
   BlLog_Printf("[UPDATE]   set-pending b - write metadata: active=B confirmed=A boot_count=0\r\n");
+  BlLog_Printf("[UPDATE]   exit          - leave update mode and boot normally\r\n");
   BlLog_Printf("[UPDATE]   reboot        - reset the MCU\r\n");
 }
 
@@ -259,87 +267,43 @@ static uint8_t BlUpdate_HandleCommand(const char *cmd)
     return 1U;
   }
 
+  if (BlUpdate_CommandEquals(cmd, "erase a") != 0U) {
+    BlUpdate_HandleEraseSlot(BL_IMAGE_SLOT_A);
+    return 1U;
+  }
+
   if (BlUpdate_CommandEquals(cmd, "erase b") != 0U) {
-    uint8_t erase_result;
+    BlUpdate_HandleEraseSlot(BL_IMAGE_SLOT_B);
+    return 1U;
+  }
 
-    BlLog_Printf("[UPDATE] erase_slot=B\r\n");
-    BlLog_Printf("[UPDATE] erase_base=0x%08lX\r\n",
-                  (unsigned long)BL_SLOT_B_BASE_ADDR);
-    BlLog_Printf("[UPDATE] erase_size=%luKB\r\n",
-                  (unsigned long)(BL_SLOT_SIZE / 1024UL));
-    BlLog_Printf("[UPDATE] erase_start=YES\r\n");
-
-    erase_result = BlSlot_Erase(BL_IMAGE_SLOT_B);
-
-    if (erase_result != 0U) {
-      BlLog_Printf("[UPDATE] erase_result=OK\r\n");
-      BlLog_Printf("%s %s PASS\r\n",
-                    BL_UPDATE_ERASE_TEST_TAG,
-                    BL_UPDATE_ERASE_TEST_NAME);
-    } else {
-      BlLog_Printf("[UPDATE] erase_result=NG\r\n");
-      BlLog_Printf("%s %s FAIL\r\n",
-                    BL_UPDATE_ERASE_TEST_TAG,
-                    BL_UPDATE_ERASE_TEST_NAME);
-    }
-
+  if (BlUpdate_CommandEquals(cmd, "write-test a") != 0U) {
+    BlUpdate_HandleWriteTest(BL_IMAGE_SLOT_A);
     return 1U;
   }
 
   if (BlUpdate_CommandEquals(cmd, "write-test b") != 0U) {
-    uint8_t write_result;
-    uint8_t verify_result;
-
-    BlLog_Printf("[UPDATE] write_test_slot=B\r\n");
-    BlLog_Printf("[UPDATE] write_test_base=0x%08lX\r\n",
-                  (unsigned long)BL_SLOT_B_BASE_ADDR);
-    BlLog_Printf("[UPDATE] write_test_offset=0x%08lX\r\n",
-                  (unsigned long)0UL);
-    BlLog_Printf("[UPDATE] write_test_size=%lu\r\n",
-                  (unsigned long)sizeof(s_slot_b_test_pattern));
-
-    write_result = BlSlot_Write(BL_IMAGE_SLOT_B,
-                                0UL,
-                                s_slot_b_test_pattern,
-                                (uint32_t)sizeof(s_slot_b_test_pattern));
-
-    if (write_result != 0U) {
-      BlLog_Printf("[UPDATE] write_test_program=OK\r\n");
-    } else {
-      BlLog_Printf("[UPDATE] write_test_program=NG\r\n");
-      BlLog_Printf("%s %s FAIL\r\n",
-                    BL_UPDATE_WRITE_TEST_TAG,
-                    BL_UPDATE_WRITE_TEST_NAME);
-      return 1U;
-    }
-
-    verify_result = BlSlot_Verify(BL_IMAGE_SLOT_B,
-                                  0UL,
-                                  s_slot_b_test_pattern,
-                                  (uint32_t)sizeof(s_slot_b_test_pattern));
-
-    if (verify_result != 0U) {
-      BlLog_Printf("[UPDATE] write_test_verify=OK\r\n");
-      BlLog_Printf("%s %s PASS\r\n",
-                    BL_UPDATE_WRITE_TEST_TAG,
-                    BL_UPDATE_WRITE_TEST_NAME);
-    } else {
-      BlLog_Printf("[UPDATE] write_test_verify=NG\r\n");
-      BlLog_Printf("%s %s FAIL\r\n",
-                    BL_UPDATE_WRITE_TEST_TAG,
-                    BL_UPDATE_WRITE_TEST_NAME);
-    }
-
+    BlUpdate_HandleWriteTest(BL_IMAGE_SLOT_B);
     return 1U;
   }
 
-  if (BlUpdate_CommandEquals(cmd, "rx-test b") != 0U) {
-    BlUpdate_HandleRxTestSlotB();
+  if (BlUpdate_CommandEquals(cmd, "rx-packet a") != 0U) {
+    BlUpdate_HandleRxPacket(BL_IMAGE_SLOT_A);
+    return 1U;
+  }
+
+  if (BlUpdate_CommandEquals(cmd, "rx-packet b") != 0U) {
+    BlUpdate_HandleRxPacket(BL_IMAGE_SLOT_B);
+    return 1U;
+  }
+
+  if (BlUpdate_CommandEquals(cmd, "set-pending a") != 0U) {
+    BlUpdate_HandleSetPending(BL_IMAGE_SLOT_A);
     return 1U;
   }
 
   if (BlUpdate_CommandEquals(cmd, "set-pending b") != 0U) {
-    BlUpdate_HandleSetPendingSlotB();
+    BlUpdate_HandleSetPending(BL_IMAGE_SLOT_B);
     return 1U;
   }
 
@@ -367,6 +331,79 @@ static uint8_t BlUpdate_HandleCommand(const char *cmd)
   BlLog_Printf("[UPDATE] hint=type_help\r\n");
 
   return 1U;
+}
+
+// Return the display name of a slot ("A" or "B")
+static const char *BlUpdate_SlotName(BlImageSlotId_t slot)
+{
+  return (slot == BL_IMAGE_SLOT_A) ? "A" : "B";
+}
+
+// Erase the given slot and report TEST16 result
+static void BlUpdate_HandleEraseSlot(BlImageSlotId_t slot)
+{
+  uint8_t erase_result;
+
+  BlLog_Printf("[UPDATE] erase_slot=%s\r\n",       BlUpdate_SlotName(slot));
+  BlLog_Printf("[UPDATE] erase_size=%luKB\r\n",    (unsigned long)(BL_SLOT_SIZE / 1024UL));
+  BlLog_Printf("[UPDATE] erase_start=YES\r\n");
+
+  erase_result = BlSlot_Erase(slot);
+
+  if (erase_result != 0U) {
+    BlLog_Printf("[UPDATE] erase_result=OK\r\n");
+    BlLog_Printf("%s %s PASS\r\n",
+                  BL_UPDATE_ERASE_TEST_TAG,
+                  BL_UPDATE_ERASE_TEST_NAME);
+  } else {
+    BlLog_Printf("[UPDATE] erase_result=NG\r\n");
+    BlLog_Printf("%s %s FAIL\r\n",
+                  BL_UPDATE_ERASE_TEST_TAG,
+                  BL_UPDATE_ERASE_TEST_NAME);
+  }
+}
+
+// Write and verify s_write_test_pattern at offset 0 in the given slot; report TEST17 result
+static void BlUpdate_HandleWriteTest(BlImageSlotId_t slot)
+{
+  uint8_t write_result;
+  uint8_t verify_result;
+
+  BlLog_Printf("[UPDATE] write_test_slot=%s\r\n",   BlUpdate_SlotName(slot));
+  BlLog_Printf("[UPDATE] write_test_offset=0x%08lX\r\n", (unsigned long)0UL);
+  BlLog_Printf("[UPDATE] write_test_size=%lu\r\n",  (unsigned long)sizeof(s_write_test_pattern));
+
+  write_result = BlSlot_Write(slot,
+                              0UL,
+                              s_write_test_pattern,
+                              (uint32_t)sizeof(s_write_test_pattern));
+
+  if (write_result != 0U) {
+    BlLog_Printf("[UPDATE] write_test_program=OK\r\n");
+  } else {
+    BlLog_Printf("[UPDATE] write_test_program=NG\r\n");
+    BlLog_Printf("%s %s FAIL\r\n",
+                  BL_UPDATE_WRITE_TEST_TAG,
+                  BL_UPDATE_WRITE_TEST_NAME);
+    return;
+  }
+
+  verify_result = BlSlot_Verify(slot,
+                                0UL,
+                                s_write_test_pattern,
+                                (uint32_t)sizeof(s_write_test_pattern));
+
+  if (verify_result != 0U) {
+    BlLog_Printf("[UPDATE] write_test_verify=OK\r\n");
+    BlLog_Printf("%s %s PASS\r\n",
+                  BL_UPDATE_WRITE_TEST_TAG,
+                  BL_UPDATE_WRITE_TEST_NAME);
+  } else {
+    BlLog_Printf("[UPDATE] write_test_verify=NG\r\n");
+    BlLog_Printf("%s %s FAIL\r\n",
+                  BL_UPDATE_WRITE_TEST_TAG,
+                  BL_UPDATE_WRITE_TEST_NAME);
+  }
 }
 
 // Receive exactly size bytes from UART within timeout_ms; returns 1 on success
@@ -444,8 +481,8 @@ static uint32_t BlUpdate_CalculateCrc32(const uint8_t *data, uint32_t size)
   return (crc ^ 0xFFFFFFFFUL);
 }
 
-// Receive one binary packet and program Slot B; prints TEST18 result
-static void BlUpdate_HandleRxTestSlotB(void)
+// Receive one binary packet and program the given slot; prints TEST18 result
+static void BlUpdate_HandleRxPacket(BlImageSlotId_t slot)
 {
   uint8_t  header[BL_UPDATE_PACKET_HEADER_SIZE];
   uint8_t  payload[BL_UPDATE_PACKET_MAX_PAYLOAD];
@@ -458,7 +495,7 @@ static void BlUpdate_HandleRxTestSlotB(void)
   uint8_t  write_result;
   uint8_t  verify_result;
 
-  BlLog_Printf("[UPDATE] rx_packet_slot=B\r\n");
+  BlLog_Printf("[UPDATE] rx_packet_slot=%s\r\n", BlUpdate_SlotName(slot));
   BlLog_Printf("[UPDATE] rx_packet_wait=START\r\n");
 
   read_result = BlUpdate_ReadBinary(header,
@@ -551,7 +588,7 @@ static void BlUpdate_HandleRxTestSlotB(void)
 
   BlLog_Printf("[UPDATE] packet_crc_check=OK\r\n");
 
-  write_result = BlSlot_Write(BL_IMAGE_SLOT_B, offset, payload, length);
+  write_result = BlSlot_Write(slot, offset, payload, length);
 
   if (write_result == 0U) {
     BlLog_Printf("[UPDATE] rx_packet_write=NG\r\n");
@@ -563,7 +600,7 @@ static void BlUpdate_HandleRxTestSlotB(void)
 
   BlLog_Printf("[UPDATE] rx_packet_write=OK\r\n");
 
-  verify_result = BlSlot_Verify(BL_IMAGE_SLOT_B, offset, payload, length);
+  verify_result = BlSlot_Verify(slot, offset, payload, length);
 
   if (verify_result == 0U) {
     BlLog_Printf("[UPDATE] rx_packet_verify=NG\r\n");
@@ -579,21 +616,62 @@ static void BlUpdate_HandleRxTestSlotB(void)
                 BL_UPDATE_PACKET_TEST_NAME);
 }
 
-// Write metadata setting active=B confirmed=A boot_count=0; prints TEST19 result
-static void BlUpdate_HandleSetPendingSlotB(void)
+/*
+ * Check target slot vector table and rollback slot vector table before writing
+ * metadata. If either is invalid, abort with FAIL — preventing a scenario where
+ * update fails and the rollback slot is also broken.
+ */
+static void BlUpdate_HandleSetPending(BlImageSlotId_t slot)
 {
-  BlMetadata_t meta;
-  uint8_t write_result;
+  BlImageSlotId_t    rollback_slot;
+  BlImageVectorInfo_t target_vec;
+  BlImageVectorInfo_t rollback_vec;
+  BlMetadata_t       meta;
+  uint8_t            write_result;
+  uint32_t           active_meta;
+  uint32_t           confirm_meta;
 
-  BlLog_Printf("[UPDATE] set_pending_active=B\r\n");
-  BlLog_Printf("[UPDATE] set_pending_confirmed=A\r\n");
+  rollback_slot = (slot == BL_IMAGE_SLOT_A) ? BL_IMAGE_SLOT_B : BL_IMAGE_SLOT_A;
+
+  if (slot == BL_IMAGE_SLOT_A) {
+    active_meta  = BL_METADATA_SLOT_A;
+    confirm_meta = BL_METADATA_SLOT_B;
+  } else {
+    active_meta  = BL_METADATA_SLOT_B;
+    confirm_meta = BL_METADATA_SLOT_A;
+  }
+
+  BlLog_Printf("[UPDATE] set_pending_active=%s\r\n",    BlUpdate_SlotName(slot));
+  BlLog_Printf("[UPDATE] set_pending_confirmed=%s\r\n", BlUpdate_SlotName(rollback_slot));
   BlLog_Printf("[UPDATE] set_pending_boot_count=0\r\n");
+
+  /* Validate target slot */
+  BlImage_ValidateSlot(slot, &target_vec);
+  BlLog_Printf("[UPDATE] set_pending_target_vector=%s\r\n",
+                target_vec.vector_check ? "OK" : "NG");
+
+  if (target_vec.vector_check == 0U) {
+    BlLog_Printf("[UPDATE] set_pending_target_check=NG\r\n");
+    BlLog_Printf("%s %s FAIL\r\n",
+                  BL_UPDATE_SET_PENDING_TEST_TAG,
+                  BL_UPDATE_SET_PENDING_TEST_NAME);
+    return;
+  }
+
+  /* Validate rollback slot — warn but do not abort */
+  BlImage_ValidateSlot(rollback_slot, &rollback_vec);
+  BlLog_Printf("[UPDATE] set_pending_rollback_vector=%s\r\n",
+                rollback_vec.vector_check ? "OK" : "NG");
+
+  if (rollback_vec.vector_check == 0U) {
+    BlLog_Printf("[UPDATE] set_pending_rollback_warn=YES\r\n");
+  }
 
   memset(&meta, 0, sizeof(meta));
   meta.magic          = BL_METADATA_MAGIC;
   meta.version        = BL_METADATA_VERSION;
-  meta.active_slot    = BL_METADATA_SLOT_B;
-  meta.confirmed_slot = BL_METADATA_SLOT_A;
+  meta.active_slot    = active_meta;
+  meta.confirmed_slot = confirm_meta;
   meta.boot_count     = 0UL;
 
   write_result = BlMetadata_Write(&meta);
