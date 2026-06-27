@@ -1,0 +1,417 @@
+[BOOT] STM32 Dual-Slot UART Bootloader V1
+[BOOT] Project: 04_uart_bootloader
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 16000000 Hz
+[BOOT] boot_base=0x08000000 size=64KB
+[BOOT] slot_a_base=0x08010000 size=192KB
+[BOOT] slot_b_base=0x08040000 size=192KB
+[BOOT] metadata0=0x0807F000
+[BOOT] metadata1=0x0807F800
+
+[BOOT] expected_vtor=0x08000000
+[BOOT] actual_vtor=0x08000000
+[BOOT] vtor_check=OK
+[TEST0] bootloader_boot_check PASS
+[TEST1] flash_layout_check PASS
+
+[BOOT] validate_slot=A
+[BOOT] slot_base=0x08010000
+[BOOT] slot_end=0x0803FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08010A49
+[BOOT] reset_handler_addr=0x08010A48
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST4] slot_a_vector_check PASS
+
+[BOOT] validate_slot=B
+[BOOT] slot_base=0x08040000
+[BOOT] slot_end=0x0806FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08040A49
+[BOOT] reset_handler_addr=0x08040A48
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST5] slot_b_vector_check PASS
+
+[BOOT] metadata_page=0x0807F000
+[BOOT] metadata_magic=OK
+[BOOT] active_slot=B
+[BOOT] confirmed_slot=A
+[BOOT] metadata_crc_stored=0x9FFD79FC
+[BOOT] metadata_crc_calculated=0x9FFD79FC
+[TEST7] metadata_read_check PASS
+[BOOT] metadata_crc_check=OK
+[TEST8] metadata_crc_check PASS
+[BOOT] update_state=PENDING
+[BOOT] pending_slot=B
+[BOOT] last_confirmed_slot=A
+[BOOT] boot_count=0
+[BOOT] pending_boot_max=3
+[TEST9] pending_metadata_check PASS
+[BOOT] rollback_required=NO
+[BOOT] pending_boot_count_update=START
+[BOOT] pending_boot_count_old=0
+[BOOT] pending_boot_count_new=1
+[BOOT] pending_boot_count_write=OK
+[TEST12] pending_boot_count_update_check PASS
+
+[BOOT] selected_slot=B
+[BOOT] selected_slot_vector_check=OK
+[BOOT] jump_slot=B
+[BOOT] jump_msp=0x20024000
+[BOOT] jump_reset_handler=0x08040A49
+[BOOT] jump_result=START
+
+[APP] STM32 Dual-Slot Test Application
+[APP] Project: 04_uart_bootloader
+[APP] Board: NUCLEO-G0B1RE
+[APP] System clock: 16000000 Hz
+[APP] slot_name=B
+[APP] slot_base=0x08040000
+[APP] slot_end=0x0806FFFF
+
+[APP] vector_table=0x08040000
+[APP] expected_vtor=0x08040000
+[APP] actual_vtor=0x08040000
+[APP] vtor_check=OK
+[TEST3] app_slot_b_boot_check PASS
+
+[BOOT] STM32 Dual-Slot UART Bootloader V1
+[BOOT] Project: 04_uart_bootloader
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 16000000 Hz
+[BOOT] boot_base=0x08000000 size=64KB
+[BOOT] slot_a_base=0x08010000 size=192KB
+[BOOT] slot_b_base=0x08040000 size=192KB
+[BOOT] metadata0=0x0807F000
+[BOOT] metadata1=0x0807F800
+
+[BOOT] expected_vtor=0x08000000
+[BOOT] actual_vtor=0x08000000
+[BOOT] vtor_check=OK
+[TEST0] bootloader_boot_check PASS
+[TEST1] flash_layout_check PASS
+
+[BOOT] validate_slot=A
+[BOOT] slot_base=0x08010000
+[BOOT] slot_end=0x0803FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08010A49
+[BOOT] reset_handler_addr=0x08010A48
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST4] slot_a_vector_check PASS
+
+[BOOT] validate_slot=B
+[BOOT] slot_base=0x08040000
+[BOOT] slot_end=0x0806FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08040A49
+[BOOT] reset_handler_addr=0x08040A48
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST5] slot_b_vector_check PASS
+
+[BOOT] metadata_page=0x0807F000
+[BOOT] metadata_magic=OK
+[BOOT] active_slot=B
+[BOOT] confirmed_slot=A
+[BOOT] metadata_crc_stored=0x3195E86D
+[BOOT] metadata_crc_calculated=0x3195E86D
+[TEST7] metadata_read_check PASS
+[BOOT] metadata_crc_check=OK
+[TEST8] metadata_crc_check PASS
+[BOOT] update_state=PENDING
+[BOOT] pending_slot=B
+[BOOT] last_confirmed_slot=A
+[BOOT] boot_count=1
+[BOOT] pending_boot_max=3
+[TEST9] pending_metadata_check PASS
+[BOOT] rollback_required=NO
+[BOOT] pending_boot_count_update=START
+[BOOT] pending_boot_count_old=1
+[BOOT] pending_boot_count_new=2
+[BOOT] pending_boot_count_write=OK
+[TEST12] pending_boot_count_update_check PASS
+
+[BOOT] selected_slot=B
+[BOOT] selected_slot_vector_check=OK
+[BOOT] jump_slot=B
+[BOOT] jump_msp=0x20024000
+[BOOT] jump_reset_handler=0x08040A49
+[BOOT] jump_result=START
+
+[APP] STM32 Dual-Slot Test Application
+[APP] Project: 04_uart_bootloader
+[APP] Board: NUCLEO-G0B1RE
+[APP] System clock: 16000000 Hz
+[APP] slot_name=B
+[APP] slot_base=0x08040000
+[APP] slot_end=0x0806FFFF
+
+[APP] vector_table=0x08040000
+[APP] expected_vtor=0x08040000
+[APP] actual_vtor=0x08040000
+[APP] vtor_check=OK
+[TEST3] app_slot_b_boot_check PASS
+
+[BOOT] STM32 Dual-Slot UART Bootloader V1
+[BOOT] Project: 04_uart_bootloader
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 16000000 Hz
+[BOOT] boot_base=0x08000000 size=64KB
+[BOOT] slot_a_base=0x08010000 size=192KB
+[BOOT] slot_b_base=0x08040000 size=192KB
+[BOOT] metadata0=0x0807F000
+[BOOT] metadata1=0x0807F800
+
+[BOOT] expected_vtor=0x08000000
+[BOOT] actual_vtor=0x08000000
+[BOOT] vtor_check=OK
+[TEST0] bootloader_boot_check PASS
+[TEST1] flash_layout_check PASS
+
+[BOOT] validate_slot=A
+[BOOT] slot_base=0x08010000
+[BOOT] slot_end=0x0803FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08010A49
+[BOOT] reset_handler_addr=0x08010A48
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST4] slot_a_vector_check PASS
+
+[BOOT] validate_slot=B
+[BOOT] slot_base=0x08040000
+[BOOT] slot_end=0x0806FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08040A49
+[BOOT] reset_handler_addr=0x08040A48
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST5] slot_b_vector_check PASS
+
+[BOOT] metadata_page=0x0807F000
+[BOOT] metadata_magic=OK
+[BOOT] active_slot=B
+[BOOT] confirmed_slot=A
+[BOOT] metadata_crc_stored=0x3195E86D
+[BOOT] metadata_crc_calculated=0x3195E86D
+[TEST7] metadata_read_check PASS
+[BOOT] metadata_crc_check=OK
+[TEST8] metadata_crc_check PASS
+[BOOT] update_state=PENDING
+[BOOT] pending_slot=B
+[BOOT] last_confirmed_slot=A
+[BOOT] boot_count=1
+[BOOT] pending_boot_max=3
+[TEST9] pending_metadata_check PASS
+[BOOT] rollback_required=NO
+[BOOT] pending_boot_count_update=START
+[BOOT] pending_boot_count_old=1
+[BOOT] pending_boot_count_new=2
+[BOOT] pending_boot_count_write=OK
+[TEST12] pending_boot_count_update_check PASS
+
+[BOOT] selected_slot=B
+[BOOT] selected_slot_vector_check=OK
+[BOOT] jump_slot=B
+[BOOT] jump_msp=0x20024000
+[BOOT] jump_reset_handler=0x08040A49
+[BOOT] jump_result=START
+
+[APP] STM32 Dual-Slot Test Application
+[APP] Project: 04_uart_bootloader
+[APP] Board: NUCLEO-G0B1RE
+[APP] System clock: 16000000 Hz
+[APP] slot_name=B
+[APP] slot_base=0x08040000
+[APP] slot_end=0x0806FFFF
+
+[APP] vector_table=0x08040000
+[APP] expected_vtor=0x08040000
+[APP] actual_vtor=0x08040000
+[APP] vtor_check=OK
+[TEST3] app_slot_b_boot_check PASS
+
+[BOOT] STM32 Dual-Slot UART Bootloader V1
+[BOOT] Project: 04_uart_bootloader
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 16000000 Hz
+[BOOT] boot_base=0x08000000 size=64KB
+[BOOT] slot_a_base=0x08010000 size=192KB
+[BOOT] slot_b_base=0x08040000 size=192KB
+[BOOT] metadata0=0x0807F000
+[BOOT] metadata1=0x0807F800
+
+[BOOT] expected_vtor=0x08000000
+[BOOT] actual_vtor=0x08000000
+[BOOT] vtor_check=OK
+[TEST0] bootloader_boot_check PASS
+[TEST1] flash_layout_check PASS
+
+[BOOT] validate_slot=A
+[BOOT] slot_base=0x08010000
+[BOOT] slot_end=0x0803FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08010A49
+[BOOT] reset_handler_addr=0x08010A48
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST4] slot_a_vector_check PASS
+
+[BOOT] validate_slot=B
+[BOOT] slot_base=0x08040000
+[BOOT] slot_end=0x0806FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08040A49
+[BOOT] reset_handler_addr=0x08040A48
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST5] slot_b_vector_check PASS
+
+[BOOT] metadata_page=0x0807F000
+[BOOT] metadata_magic=OK
+[BOOT] active_slot=B
+[BOOT] confirmed_slot=A
+[BOOT] metadata_crc_stored=0x185D5C9F
+[BOOT] metadata_crc_calculated=0x185D5C9F
+[TEST7] metadata_read_check PASS
+[BOOT] metadata_crc_check=OK
+[TEST8] metadata_crc_check PASS
+[BOOT] update_state=PENDING
+[BOOT] pending_slot=B
+[BOOT] last_confirmed_slot=A
+[BOOT] boot_count=2
+[BOOT] pending_boot_max=3
+[TEST9] pending_metadata_check PASS
+[BOOT] rollback_required=NO
+[BOOT] pending_boot_count_update=START
+[BOOT] pending_boot_count_old=2
+[BOOT] pending_boot_count_new=3
+[BOOT] pending_boot_count_write=OK
+[TEST12] pending_boot_count_update_check PASS
+
+[BOOT] selected_slot=B
+[BOOT] selected_slot_vector_check=OK
+[BOOT] jump_slot=B
+[BOOT] jump_msp=0x20024000
+[BOOT] jump_reset_handler=0x08040A49
+[BOOT] jump_result=START
+
+[APP] STM32 Dual-Slot Test Application
+[APP] Project: 04_uart_bootloader
+[APP] Board: NUCLEO-G0B1RE
+[APP] System clock: 16000000 Hz
+[APP] slot_name=B
+[APP] slot_base=0x08040000
+[APP] slot_end=0x0806FFFF
+
+[APP] vector_table=0x08040000
+[APP] expected_vtor=0x08040000
+[APP] actual_vtor=0x08040000
+[APP] vtor_check=OK
+[TEST3] app_slot_b_boot_check PASS
+
+[BOOT] STM32 Dual-Slot UART Bootloader V1
+[BOOT] Project: 04_uart_bootloader
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 16000000 Hz
+[BOOT] boot_base=0x08000000 size=64KB
+[BOOT] slot_a_base=0x08010000 size=192KB
+[BOOT] slot_b_base=0x08040000 size=192KB
+[BOOT] metadata0=0x0807F000
+[BOOT] metadata1=0x0807F800
+
+[BOOT] expected_vtor=0x08000000
+[BOOT] actual_vtor=0x08000000
+[BOOT] vtor_check=OK
+[TEST0] bootloader_boot_check PASS
+[TEST1] flash_layout_check PASS
+
+[BOOT] validate_slot=A
+[BOOT] slot_base=0x08010000
+[BOOT] slot_end=0x0803FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08010A49
+[BOOT] reset_handler_addr=0x08010A48
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST4] slot_a_vector_check PASS
+
+[BOOT] validate_slot=B
+[BOOT] slot_base=0x08040000
+[BOOT] slot_end=0x0806FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08040A49
+[BOOT] reset_handler_addr=0x08040A48
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST5] slot_b_vector_check PASS
+
+[BOOT] metadata_page=0x0807F000
+[BOOT] metadata_magic=OK
+[BOOT] active_slot=B
+[BOOT] confirmed_slot=A
+[BOOT] metadata_crc_stored=0xB635CD0E
+[BOOT] metadata_crc_calculated=0xB635CD0E
+[TEST7] metadata_read_check PASS
+[BOOT] metadata_crc_check=OK
+[TEST8] metadata_crc_check PASS
+[BOOT] update_state=PENDING
+[BOOT] pending_slot=B
+[BOOT] last_confirmed_slot=A
+[BOOT] boot_count=3
+[BOOT] pending_boot_max=3
+[TEST9] pending_metadata_check PASS
+[BOOT] rollback_required=YES
+[BOOT] rollback_to_slot=A
+[TEST10] rollback_decision_check PASS
+[BOOT] rollback_metadata_update=START
+[BOOT] rollback_metadata_active=A
+[BOOT] rollback_metadata_confirmed=A
+[BOOT] rollback_metadata_boot_count=0
+[BOOT] rollback_metadata_write=OK
+[TEST11] rollback_metadata_write_check PASS
+
+[BOOT] selected_slot=A
+[BOOT] selected_slot_vector_check=OK
+[BOOT] jump_slot=A
+[BOOT] jump_msp=0x20024000
+[BOOT] jump_reset_handler=0x08010A49
+[BOOT] jump_result=START
+
+[APP] STM32 Dual-Slot Test Application
+[APP] Project: 04_uart_bootloader
+[APP] Board: NUCLEO-G0B1RE
+[APP] System clock: 16000000 Hz
+[APP] slot_name=A
+[APP] slot_base=0x08010000
+[APP] slot_end=0x0803FFFF
+
+[APP] vector_table=0x08010000
+[APP] expected_vtor=0x08010000
+[APP] actual_vtor=0x08010000
+[APP] vtor_check=OK
+[TEST2] app_slot_a_boot_check PASS
