@@ -8,6 +8,7 @@
 import argparse
 import struct
 import sys
+import zlib
 
 
 BL_METADATA_MAGIC = 0x424C4D44      # "BLMD"
@@ -71,12 +72,8 @@ def main() -> int:
     reserved1 = 0
     reserved2 = 0
 
-    # CRC32 is not checked in the current firmware milestone.
-    # Keep it as 0 for now.
-    crc32 = 0
-
-    metadata = struct.pack(
-        "<IIIIIIIII",
+    payload = struct.pack(
+        "<IIIIIIII",
         BL_METADATA_MAGIC,
         BL_METADATA_VERSION,
         active_slot,
@@ -85,8 +82,11 @@ def main() -> int:
         reserved0,
         reserved1,
         reserved2,
-        crc32,
     )
+
+    crc32 = zlib.crc32(payload) & 0xFFFFFFFF
+
+    metadata = payload + struct.pack("<I", crc32)
 
     with open(args.output, "wb") as f:
         f.write(metadata)
@@ -98,6 +98,7 @@ def main() -> int:
     print(f"     active_slot    = {args.active.upper()}")
     print(f"     confirmed_slot = {args.confirmed.upper()}")
     print(f"     boot_count     = {args.boot_count}")
+    print(f"     crc32          = 0x{crc32:08X}")
     print(f"     size           = {len(metadata)} bytes")
 
     return 0

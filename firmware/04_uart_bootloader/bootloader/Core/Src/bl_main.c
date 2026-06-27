@@ -55,6 +55,12 @@
 #define BL_WRONG_SLOT_TEST_TAG           "[TEST6]"
 #define BL_WRONG_SLOT_TEST_NAME          "wrong_slot_b_reject_check"
 
+#define BL_METADATA_TEST_TAG             "[TEST7]"
+#define BL_METADATA_TEST_NAME            "metadata_read_check"
+
+#define BL_METADATA_CRC_TEST_TAG         "[TEST8]"
+#define BL_METADATA_CRC_TEST_NAME        "metadata_crc_check"
+
 /* Private variables ---------------------------------------------------------*/
 static uint8_t boot_check_done = 0U;
 
@@ -244,33 +250,70 @@ static void BlMain_RunBootCheck(void)
 static BlImageSlotId_t BlMain_RunMetadataCheck(void)
 {
   BlMetadata_t meta;
+  uint8_t metadata_header_valid;
+  uint8_t metadata_crc_valid;
+  uint32_t calculated_crc;
 
   BlMetadata_Read(&meta);
 
+  metadata_header_valid = BlMetadata_IsHeaderValid(&meta);
+  calculated_crc = BlMetadata_CalculateCrc(&meta);
+
   BlLog_Printf("\r\n");
   BlLog_Printf("[BOOT] metadata_page=0x%08lX\r\n",
-               (unsigned long)BL_METADATA0_BASE_ADDR);
+                (unsigned long)BL_METADATA0_BASE_ADDR);
 
-  if (BlMetadata_IsValid(&meta) == 0U) {
-    /*
-     * Empty Flash after mass erase is expected during early milestones.
-     * Use the compile-time default slot instead of stopping.
-     */
-    BlLog_Printf("[BOOT] metadata_magic=NG\r\n");
-    BlLog_Printf("[BOOT] use_default_slot=%s\r\n",
-                 (BL_DEFAULT_BOOT_SLOT == BL_IMAGE_SLOT_B) ? "B" : "A");
-    BlLog_Printf("[TEST7] metadata_read_check PASS\r\n");
+  if (metadata_header_valid != 0U) {
+    metadata_crc_valid = BlMetadata_IsCrcValid(&meta);
+
+    BlLog_Printf("[BOOT] metadata_magic=OK\r\n");
+    BlLog_Printf("[BOOT] active_slot=%c\r\n",
+                  (char)meta.active_slot);
+    BlLog_Printf("[BOOT] confirmed_slot=%c\r\n",
+                  (char)meta.confirmed_slot);
+
+    BlLog_Printf("[BOOT] metadata_crc_stored=0x%08lX\r\n",
+                  (unsigned long)meta.crc32);
+    BlLog_Printf("[BOOT] metadata_crc_calculated=0x%08lX\r\n",
+                  (unsigned long)calculated_crc);
+
+    BlLog_Printf("%s %s PASS\r\n",
+                  BL_METADATA_TEST_TAG,
+                  BL_METADATA_TEST_NAME);
+
+    if (metadata_crc_valid != 0U) {
+      BlLog_Printf("[BOOT] metadata_crc_check=OK\r\n");
+      BlLog_Printf("%s %s PASS\r\n",
+                    BL_METADATA_CRC_TEST_TAG,
+                    BL_METADATA_CRC_TEST_NAME);
+
+      if (meta.active_slot == BL_METADATA_SLOT_B) {
+        return BL_IMAGE_SLOT_B;
+      }
+
+      return BL_IMAGE_SLOT_A;
+    }
+
+    BlLog_Printf("[BOOT] metadata_crc_check=NG\r\n");
+    BlLog_Printf("%s %s FAIL\r\n",
+                  BL_METADATA_CRC_TEST_TAG,
+                  BL_METADATA_CRC_TEST_NAME);
+    BlLog_Printf("[BOOT] use_default_slot=A\r\n");
+
     return BL_DEFAULT_BOOT_SLOT;
   }
 
-  BlLog_Printf("[BOOT] metadata_magic=OK\r\n");
-  BlLog_Printf("[BOOT] active_slot=%c\r\n",
-               (meta.active_slot == BL_METADATA_SLOT_B) ? 'B' : 'A');
-  BlLog_Printf("[BOOT] confirmed_slot=%c\r\n",
-               (meta.confirmed_slot == BL_METADATA_SLOT_B) ? 'B' : 'A');
-  BlLog_Printf("[TEST7] metadata_read_check PASS\r\n");
+  /*
+   * Empty metadata page after mass erase is expected during bring-up.
+   * Bootloader falls back to the default slot instead of stopping.
+   */
+  BlLog_Printf("[BOOT] metadata_magic=NG\r\n");
+  BlLog_Printf("[BOOT] use_default_slot=A\r\n");
+  BlLog_Printf("%s %s PASS\r\n",
+                BL_METADATA_TEST_TAG,
+                BL_METADATA_TEST_NAME);
 
-  return (meta.active_slot == BL_METADATA_SLOT_B) ? BL_IMAGE_SLOT_B : BL_IMAGE_SLOT_A;
+  return BL_DEFAULT_BOOT_SLOT;
 }
 
 #if (BL_AUTO_JUMP_ENABLE != 0U)

@@ -46,7 +46,10 @@ typedef struct
 } BlMetadata_t;
 
 /* Function prototypes -------------------------------------------------------*/
-void    BlMetadata_Read(BlMetadata_t *meta);
-uint8_t BlMetadata_IsValid(const BlMetadata_t *meta);
+void     BlMetadata_Read(BlMetadata_t *meta);
+uint8_t  BlMetadata_IsHeaderValid(const BlMetadata_t *meta);
+uint32_t BlMetadata_CalculateCrc(const BlMetadata_t *meta);
+uint8_t  BlMetadata_IsCrcValid(const BlMetadata_t *meta);
+uint8_t  BlMetadata_IsValid(const BlMetadata_t *meta);
 
 #endif /* INC_BL_METADATA_H_ */

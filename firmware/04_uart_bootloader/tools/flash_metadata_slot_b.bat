@@ -144,6 +144,8 @@ echo.
 echo Expected UART result:
 echo   [BOOT] metadata_magic=OK
 echo   [BOOT] active_slot=B
+echo   [BOOT] metadata_crc_check=OK
+echo   [TEST8] metadata_crc_check PASS
 echo   [BOOT] selected_slot=B
 echo   [APP] slot_name=B
 echo   [TEST3] app_slot_b_boot_check PASS
