@@ -11,6 +11,7 @@
 
 #include "bl_flash_layout.h"
 #include "bl_log.h"
+#include "bl_metadata.h"
 #include "bl_slot.h"
 
 /* Private defines -----------------------------------------------------------*/
@@ -57,6 +58,12 @@
 #define BL_UPDATE_PACKET_TEST_TAG        "[TEST18]"
 #define BL_UPDATE_PACKET_TEST_NAME       "uart_binary_packet_receive_check"
 
+/*
+ * Set pending metadata test.
+ */
+#define BL_UPDATE_SET_PENDING_TEST_TAG   "[TEST19]"
+#define BL_UPDATE_SET_PENDING_TEST_NAME  "set_pending_slot_b_check"
+
 #define BL_UPDATE_PACKET_MAGIC           0x31544B50UL  /* "PKT1" */
 #define BL_UPDATE_PACKET_HEADER_SIZE     16U
 #define BL_UPDATE_PACKET_MAX_PAYLOAD     256U
@@ -96,6 +103,7 @@ static uint32_t BlUpdate_ReadLe32(const uint8_t *data);
 static uint32_t BlUpdate_UpdateCrc32(uint32_t crc, uint8_t byte);
 static uint32_t BlUpdate_CalculateCrc32(const uint8_t *data, uint32_t size);
 static void     BlUpdate_HandleRxTestSlotB(void);
+static void     BlUpdate_HandleSetPendingSlotB(void);
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -198,6 +206,7 @@ static void BlUpdate_HandleHelp(void)
   BlLog_Printf("[UPDATE]   write-test b  - write test pattern to Slot B then verify\r\n");
   BlLog_Printf("[UPDATE]   exit          - leave update mode and boot normally\r\n");
   BlLog_Printf("[UPDATE]   rx-test b     - receive one binary packet and write Slot B\r\n");
+  BlLog_Printf("[UPDATE]   set-pending b - write metadata: active=B confirmed=A boot_count=0\r\n");
   BlLog_Printf("[UPDATE]   reboot        - reset the MCU\r\n");
 }
 
@@ -326,6 +335,11 @@ static uint8_t BlUpdate_HandleCommand(const char *cmd)
 
   if (BlUpdate_CommandEquals(cmd, "rx-test b") != 0U) {
     BlUpdate_HandleRxTestSlotB();
+    return 1U;
+  }
+
+  if (BlUpdate_CommandEquals(cmd, "set-pending b") != 0U) {
+    BlUpdate_HandleSetPendingSlotB();
     return 1U;
   }
 
@@ -563,6 +577,38 @@ static void BlUpdate_HandleRxTestSlotB(void)
   BlLog_Printf("%s %s PASS\r\n",
                 BL_UPDATE_PACKET_TEST_TAG,
                 BL_UPDATE_PACKET_TEST_NAME);
+}
+
+// Write metadata setting active=B confirmed=A boot_count=0; prints TEST19 result
+static void BlUpdate_HandleSetPendingSlotB(void)
+{
+  BlMetadata_t meta;
+  uint8_t write_result;
+
+  BlLog_Printf("[UPDATE] set_pending_active=B\r\n");
+  BlLog_Printf("[UPDATE] set_pending_confirmed=A\r\n");
+  BlLog_Printf("[UPDATE] set_pending_boot_count=0\r\n");
+
+  memset(&meta, 0, sizeof(meta));
+  meta.magic          = BL_METADATA_MAGIC;
+  meta.version        = BL_METADATA_VERSION;
+  meta.active_slot    = BL_METADATA_SLOT_B;
+  meta.confirmed_slot = BL_METADATA_SLOT_A;
+  meta.boot_count     = 0UL;
+
+  write_result = BlMetadata_Write(&meta);
+
+  if (write_result != 0U) {
+    BlLog_Printf("[UPDATE] set_pending_write=OK\r\n");
+    BlLog_Printf("%s %s PASS\r\n",
+                  BL_UPDATE_SET_PENDING_TEST_TAG,
+                  BL_UPDATE_SET_PENDING_TEST_NAME);
+  } else {
+    BlLog_Printf("[UPDATE] set_pending_write=NG\r\n");
+    BlLog_Printf("%s %s FAIL\r\n",
+                  BL_UPDATE_SET_PENDING_TEST_TAG,
+                  BL_UPDATE_SET_PENDING_TEST_NAME);
+  }
 }
 
 /* Function definitions ------------------------------------------------------*/
