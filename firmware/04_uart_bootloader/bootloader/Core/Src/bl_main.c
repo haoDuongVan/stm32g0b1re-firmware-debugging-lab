@@ -32,15 +32,94 @@
 
 #define BL_JUMP_DELAY_MS                 100U    // ms
 
+/*
+ * Wrong-slot validation test.
+ *
+ * This test is used when a Slot A binary is intentionally written to the
+ * Slot B address. In that case:
+ *
+ *   - MSP is still valid
+ *   - Reset_Handler still has Thumb bit
+ *   - Reset_Handler address points to Slot A range
+ *   - But the image is being validated as Slot B
+ *
+ * Therefore, Slot B vector validation must fail, and the bootloader should
+ * report that the wrong-slot image was correctly rejected.
+ */
+#define BL_WRONG_SLOT_TEST_TAG           "[TEST6]"
+#define BL_WRONG_SLOT_TEST_NAME          "wrong_slot_b_reject_check"
+
 /* Private variables ---------------------------------------------------------*/
 static uint8_t boot_check_done = 0U;
 
 /* Private function prototypes -----------------------------------------------*/
+static uint8_t BlMain_IsSlotAWrittenToSlotB(const BlImageVectorInfo_t *vector_info);
+static void BlMain_PrintWrongSlotBRejectCheck(const BlImageVectorInfo_t *vector_info);
 #if (BL_AUTO_JUMP_TO_SLOT_A != 0U)
 static void BlMain_JumpToSlotA(void);
 #endif
 
 /* Private functions ---------------------------------------------------------*/
+
+// Return 1 if Slot B vector check failed because a Slot A binary was written there
+static uint8_t BlMain_IsSlotAWrittenToSlotB(const BlImageVectorInfo_t *vector_info)
+{
+  if (vector_info == NULL) {
+    return 0U;
+  }
+
+  // This check is only meaningful for Slot B validation
+  if (vector_info->slot_base != BL_SLOT_B_BASE_ADDR) {
+    return 0U;
+  }
+
+  /*
+   * A wrong-slot binary is different from an empty Flash area.
+   *
+   * Empty Flash usually has:
+   *   MSP           = 0xFFFFFFFF
+   *   Reset_Handler = 0xFFFFFFFF
+   *
+   * But app_slot_a.bin written to Slot B still has:
+   *   valid MSP
+   *   valid Thumb bit
+   *   Reset_Handler pointing to Slot A range
+   */
+  if (vector_info->msp_check == 0U) {
+    return 0U;
+  }
+
+  if (vector_info->reset_thumb_check == 0U) {
+    return 0U;
+  }
+
+  // reset_range_check must fail (Reset_Handler is not in Slot B)
+  if (vector_info->reset_range_check != 0U) {
+    return 0U;
+  }
+
+  // Reset_Handler must point into Slot A range
+  if (vector_info->reset_handler_addr < BL_SLOT_A_BASE_ADDR) {
+    return 0U;
+  }
+
+  if (vector_info->reset_handler_addr > BL_SLOT_A_END_ADDR) {
+    return 0U;
+  }
+
+  return 1U;
+}
+
+// Print TEST6 PASS if Slot B failed because a Slot A binary was written there
+static void BlMain_PrintWrongSlotBRejectCheck(const BlImageVectorInfo_t *vector_info)
+{
+  if (BlMain_IsSlotAWrittenToSlotB(vector_info) != 0U) {
+    BlLog_Printf("[BOOT] reject_reason=reset_handler_points_to_slot_a\r\n");
+    BlLog_Printf("%s %s PASS\r\n",
+                 BL_WRONG_SLOT_TEST_TAG,
+                 BL_WRONG_SLOT_TEST_NAME);
+  }
+}
 
 // Verify that all Flash layout addresses compile to the expected values; returns 1 if OK
 static int BlMain_CheckFlashLayout(void)
@@ -245,6 +324,14 @@ static void BlMain_PrintSlotVectorCheck(BlImageSlotId_t slot_id,
   } else {
     BlLog_Printf("[BOOT] vector_check=NG\r\n");
     BlLog_Printf("%s %s FAIL\r\n", test_tag, test_name);
+
+    /*
+     * If Slot B fails because a Slot A binary was written there, print a
+     * dedicated PASS result for the wrong-slot rejection test.
+     */
+    if (slot_id == BL_IMAGE_SLOT_B) {
+      BlMain_PrintWrongSlotBRejectCheck(&vector_info);
+    }
   }
 }
 
