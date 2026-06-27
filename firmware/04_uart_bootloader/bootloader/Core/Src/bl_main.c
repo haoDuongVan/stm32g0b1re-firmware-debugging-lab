@@ -619,7 +619,6 @@ void BlMain_Init(UART_HandleTypeDef *debug_uart)
 
   if (BlUpdate_WaitForEntry() != 0U) {
     BlUpdate_Run();
-    return;
   }
 
 #if (BL_AUTO_JUMP_ENABLE != 0U)
