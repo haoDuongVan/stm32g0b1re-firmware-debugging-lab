@@ -51,6 +51,25 @@
 #define BL_UPDATE_WRITE_TEST_TAG         "[TEST17]"
 #define BL_UPDATE_WRITE_TEST_NAME        "slot_write_test_command_check"
 
+/*
+ * UART binary packet receive test.
+ */
+#define BL_UPDATE_PACKET_TEST_TAG        "[TEST18]"
+#define BL_UPDATE_PACKET_TEST_NAME       "uart_binary_packet_receive_check"
+
+#define BL_UPDATE_PACKET_MAGIC           0x31544B50UL  /* "PKT1" */
+#define BL_UPDATE_PACKET_HEADER_SIZE     16U
+#define BL_UPDATE_PACKET_MAX_PAYLOAD     256U
+
+/*
+ * Long timeout for manual TeraTerm file selection.
+ * The bootloader waits up to 60 seconds after rx-test b for the header
+ * to arrive (time for the user to pick the file in TeraTerm).
+ * Once the file starts sending, payload must arrive within 10 seconds.
+ */
+#define BL_UPDATE_PACKET_HEADER_TIMEOUT_MS   60000U
+#define BL_UPDATE_PACKET_PAYLOAD_TIMEOUT_MS  10000U
+
 /* Private variables ---------------------------------------------------------*/
 static UART_HandleTypeDef *update_uart = NULL;
 
@@ -65,13 +84,18 @@ static const uint8_t s_slot_b_test_pattern[16U] = {
 };
 
 /* Private function prototypes -----------------------------------------------*/
-static void    BlUpdate_PrintPrompt(void);
-static uint8_t BlUpdate_ReadLine(char *cmd, uint32_t max_len);
-static char    BlUpdate_ToLower(char c);
-static uint8_t BlUpdate_CommandEquals(const char *cmd, const char *expected);
-static void    BlUpdate_HandleHelp(void);
-static void    BlUpdate_HandleInfo(void);
-static uint8_t BlUpdate_HandleCommand(const char *cmd);
+static void     BlUpdate_PrintPrompt(void);
+static uint8_t  BlUpdate_ReadLine(char *cmd, uint32_t max_len);
+static char     BlUpdate_ToLower(char c);
+static uint8_t  BlUpdate_CommandEquals(const char *cmd, const char *expected);
+static void     BlUpdate_HandleHelp(void);
+static void     BlUpdate_HandleInfo(void);
+static uint8_t  BlUpdate_HandleCommand(const char *cmd);
+static uint8_t  BlUpdate_ReadBinary(uint8_t *data, uint32_t size, uint32_t timeout_ms);
+static uint32_t BlUpdate_ReadLe32(const uint8_t *data);
+static uint32_t BlUpdate_UpdateCrc32(uint32_t crc, uint8_t byte);
+static uint32_t BlUpdate_CalculateCrc32(const uint8_t *data, uint32_t size);
+static void     BlUpdate_HandleRxTestSlotB(void);
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -173,6 +197,7 @@ static void BlUpdate_HandleHelp(void)
   BlLog_Printf("[UPDATE]   erase b       - erase Slot B\r\n");
   BlLog_Printf("[UPDATE]   write-test b  - write test pattern to Slot B then verify\r\n");
   BlLog_Printf("[UPDATE]   exit          - leave update mode and boot normally\r\n");
+  BlLog_Printf("[UPDATE]   rx-test b     - receive one binary packet and write Slot B\r\n");
   BlLog_Printf("[UPDATE]   reboot        - reset the MCU\r\n");
 }
 
@@ -299,6 +324,11 @@ static uint8_t BlUpdate_HandleCommand(const char *cmd)
     return 1U;
   }
 
+  if (BlUpdate_CommandEquals(cmd, "rx-test b") != 0U) {
+    BlUpdate_HandleRxTestSlotB();
+    return 1U;
+  }
+
   if (BlUpdate_CommandEquals(cmd, "exit") != 0U) {
     BlLog_Printf("[UPDATE] exit_to_normal_boot=YES\r\n");
     BlLog_Printf("[UPDATE] command_result=OK\r\n");
@@ -323,6 +353,216 @@ static uint8_t BlUpdate_HandleCommand(const char *cmd)
   BlLog_Printf("[UPDATE] hint=type_help\r\n");
 
   return 1U;
+}
+
+// Receive exactly size bytes from UART within timeout_ms; returns 1 on success
+static uint8_t BlUpdate_ReadBinary(uint8_t *data, uint32_t size, uint32_t timeout_ms)
+{
+  uint32_t start_tick;
+  uint32_t index;
+  HAL_StatusTypeDef status;
+
+  if ((data == NULL) || (size == 0UL)) {
+    return 0U;
+  }
+
+  start_tick = HAL_GetTick();
+  index = 0UL;
+
+  while (index < size) {
+    if ((HAL_GetTick() - start_tick) >= timeout_ms) {
+      return 0U;
+    }
+
+    status = HAL_UART_Receive(update_uart, &data[index], 1U, 10U);
+
+    if (status == HAL_OK) {
+      index++;
+    }
+  }
+
+  return 1U;
+}
+
+// Read a 32-bit little-endian value from a byte buffer
+static uint32_t BlUpdate_ReadLe32(const uint8_t *data)
+{
+  return ((uint32_t)data[0])              |
+         ((uint32_t)data[1] <<  8U) |
+         ((uint32_t)data[2] << 16U) |
+         ((uint32_t)data[3] << 24U);
+}
+
+// Update a running CRC32/ISO-HDLC value with one byte
+static uint32_t BlUpdate_UpdateCrc32(uint32_t crc, uint8_t byte)
+{
+  uint8_t bit;
+
+  crc ^= (uint32_t)byte;
+
+  for (bit = 0U; bit < 8U; bit++) {
+    if ((crc & 1UL) != 0UL) {
+      crc = (crc >> 1U) ^ 0xEDB88320UL;
+    } else {
+      crc = crc >> 1U;
+    }
+  }
+
+  return crc;
+}
+
+// Compute CRC32/ISO-HDLC over a buffer
+static uint32_t BlUpdate_CalculateCrc32(const uint8_t *data, uint32_t size)
+{
+  uint32_t crc;
+  uint32_t i;
+
+  if (data == NULL) {
+    return 0UL;
+  }
+
+  crc = 0xFFFFFFFFUL;
+
+  for (i = 0UL; i < size; i++) {
+    crc = BlUpdate_UpdateCrc32(crc, data[i]);
+  }
+
+  return (crc ^ 0xFFFFFFFFUL);
+}
+
+// Receive one binary packet and program Slot B; prints TEST18 result
+static void BlUpdate_HandleRxTestSlotB(void)
+{
+  uint8_t  header[BL_UPDATE_PACKET_HEADER_SIZE];
+  uint8_t  payload[BL_UPDATE_PACKET_MAX_PAYLOAD];
+  uint32_t magic;
+  uint32_t offset;
+  uint32_t length;
+  uint32_t stored_crc;
+  uint32_t calculated_crc;
+  uint8_t  read_result;
+  uint8_t  write_result;
+  uint8_t  verify_result;
+
+  BlLog_Printf("[UPDATE] rx_packet_slot=B\r\n");
+  BlLog_Printf("[UPDATE] rx_packet_wait=START\r\n");
+
+  read_result = BlUpdate_ReadBinary(header,
+                                    sizeof(header),
+                                    BL_UPDATE_PACKET_HEADER_TIMEOUT_MS);
+
+  if (read_result == 0U) {
+    BlLog_Printf("[UPDATE] rx_packet_header=TIMEOUT\r\n");
+    BlLog_Printf("%s %s FAIL\r\n",
+                  BL_UPDATE_PACKET_TEST_TAG,
+                  BL_UPDATE_PACKET_TEST_NAME);
+    return;
+  }
+
+  magic      = BlUpdate_ReadLe32(&header[0]);
+  offset     = BlUpdate_ReadLe32(&header[4]);
+  length     = BlUpdate_ReadLe32(&header[8]);
+  stored_crc = BlUpdate_ReadLe32(&header[12]);
+
+  /*
+   * Validate header fields silently before reading payload.
+   * TeraTerm sends the whole file continuously, so the payload bytes arrive
+   * immediately after the header. Any BlLog_Printf call here would stall the
+   * CPU long enough to overflow the tiny UART hardware FIFO and drop bytes.
+   * Print the header summary only after payload is safely buffered in RAM.
+   */
+  if (magic != BL_UPDATE_PACKET_MAGIC) {
+    BlLog_Printf("[UPDATE] packet_magic=0x%08lX\r\n",  (unsigned long)magic);
+    BlLog_Printf("[UPDATE] packet_magic_check=NG\r\n");
+    BlLog_Printf("%s %s FAIL\r\n",
+                  BL_UPDATE_PACKET_TEST_TAG,
+                  BL_UPDATE_PACKET_TEST_NAME);
+    return;
+  }
+
+  if ((length == 0UL) || (length > (uint32_t)BL_UPDATE_PACKET_MAX_PAYLOAD)) {
+    BlLog_Printf("[UPDATE] packet_length=%lu\r\n",      (unsigned long)length);
+    BlLog_Printf("[UPDATE] packet_length_check=NG\r\n");
+    BlLog_Printf("%s %s FAIL\r\n",
+                  BL_UPDATE_PACKET_TEST_TAG,
+                  BL_UPDATE_PACKET_TEST_NAME);
+    return;
+  }
+
+  if (((offset % 8UL) != 0UL) || ((length % 8UL) != 0UL)) {
+    BlLog_Printf("[UPDATE] packet_offset=0x%08lX\r\n",  (unsigned long)offset);
+    BlLog_Printf("[UPDATE] packet_length=%lu\r\n",      (unsigned long)length);
+    BlLog_Printf("[UPDATE] packet_alignment_check=NG\r\n");
+    BlLog_Printf("%s %s FAIL\r\n",
+                  BL_UPDATE_PACKET_TEST_TAG,
+                  BL_UPDATE_PACKET_TEST_NAME);
+    return;
+  }
+
+  read_result = BlUpdate_ReadBinary(payload,
+                                    length,
+                                    BL_UPDATE_PACKET_PAYLOAD_TIMEOUT_MS);
+
+  /* Now safe to log — payload is in RAM and UART receive is done. */
+  BlLog_Printf("[UPDATE] packet_magic=0x%08lX\r\n",      (unsigned long)magic);
+  BlLog_Printf("[UPDATE] packet_offset=0x%08lX\r\n",     (unsigned long)offset);
+  BlLog_Printf("[UPDATE] packet_length=%lu\r\n",          (unsigned long)length);
+  BlLog_Printf("[UPDATE] packet_crc_stored=0x%08lX\r\n", (unsigned long)stored_crc);
+  BlLog_Printf("[UPDATE] packet_magic_check=OK\r\n");
+  BlLog_Printf("[UPDATE] packet_length_check=OK\r\n");
+  BlLog_Printf("[UPDATE] packet_alignment_check=OK\r\n");
+
+  if (read_result == 0U) {
+    BlLog_Printf("[UPDATE] rx_packet_payload=TIMEOUT\r\n");
+    BlLog_Printf("%s %s FAIL\r\n",
+                  BL_UPDATE_PACKET_TEST_TAG,
+                  BL_UPDATE_PACKET_TEST_NAME);
+    return;
+  }
+
+  BlLog_Printf("[UPDATE] rx_packet_payload=OK\r\n");
+
+  calculated_crc = BlUpdate_CalculateCrc32(payload, length);
+
+  BlLog_Printf("[UPDATE] packet_crc_calculated=0x%08lX\r\n",
+                (unsigned long)calculated_crc);
+
+  if (stored_crc != calculated_crc) {
+    BlLog_Printf("[UPDATE] packet_crc_check=NG\r\n");
+    BlLog_Printf("%s %s FAIL\r\n",
+                  BL_UPDATE_PACKET_TEST_TAG,
+                  BL_UPDATE_PACKET_TEST_NAME);
+    return;
+  }
+
+  BlLog_Printf("[UPDATE] packet_crc_check=OK\r\n");
+
+  write_result = BlSlot_Write(BL_IMAGE_SLOT_B, offset, payload, length);
+
+  if (write_result == 0U) {
+    BlLog_Printf("[UPDATE] rx_packet_write=NG\r\n");
+    BlLog_Printf("%s %s FAIL\r\n",
+                  BL_UPDATE_PACKET_TEST_TAG,
+                  BL_UPDATE_PACKET_TEST_NAME);
+    return;
+  }
+
+  BlLog_Printf("[UPDATE] rx_packet_write=OK\r\n");
+
+  verify_result = BlSlot_Verify(BL_IMAGE_SLOT_B, offset, payload, length);
+
+  if (verify_result == 0U) {
+    BlLog_Printf("[UPDATE] rx_packet_verify=NG\r\n");
+    BlLog_Printf("%s %s FAIL\r\n",
+                  BL_UPDATE_PACKET_TEST_TAG,
+                  BL_UPDATE_PACKET_TEST_NAME);
+    return;
+  }
+
+  BlLog_Printf("[UPDATE] rx_packet_verify=OK\r\n");
+  BlLog_Printf("%s %s PASS\r\n",
+                BL_UPDATE_PACKET_TEST_TAG,
+                BL_UPDATE_PACKET_TEST_NAME);
 }
 
 /* Function definitions ------------------------------------------------------*/
