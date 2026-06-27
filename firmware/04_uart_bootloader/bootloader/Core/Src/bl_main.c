@@ -11,6 +11,7 @@
 #include "bl_flash_layout.h"
 #include "bl_image.h"
 #include "bl_log.h"
+#include "bl_metadata.h"
 #include "main.h"
 
 /* Private defines -----------------------------------------------------------*/
@@ -23,12 +24,17 @@
 #define BL_HEARTBEAT_INTERVAL_MS         1000U   // ms
 
 /*
- * Enable automatic jump to Slot A after bootloader self-checks.
+ * Enable automatic slot selection and jump after bootloader self-checks.
  *
  * Set to 0U when only testing bootloader logs/vector validation.
  * Set to 1U when testing bootloader -> application handoff.
  */
-#define BL_AUTO_JUMP_TO_SLOT_A           1U
+#define BL_AUTO_JUMP_ENABLE              1U
+
+/*
+ * Default boot slot used when metadata is empty or invalid.
+ */
+#define BL_DEFAULT_BOOT_SLOT             BL_IMAGE_SLOT_A
 
 #define BL_JUMP_DELAY_MS                 100U    // ms
 
@@ -55,8 +61,9 @@ static uint8_t boot_check_done = 0U;
 /* Private function prototypes -----------------------------------------------*/
 static uint8_t BlMain_IsSlotAWrittenToSlotB(const BlImageVectorInfo_t *vector_info);
 static void BlMain_PrintWrongSlotBRejectCheck(const BlImageVectorInfo_t *vector_info);
-#if (BL_AUTO_JUMP_TO_SLOT_A != 0U)
-static void BlMain_JumpToSlotA(void);
+static BlImageSlotId_t BlMain_RunMetadataCheck(void);
+#if (BL_AUTO_JUMP_ENABLE != 0U)
+static void BlMain_SelectAndJump(BlImageSlotId_t selected_slot);
 #endif
 
 /* Private functions ---------------------------------------------------------*/
@@ -233,42 +240,98 @@ static void BlMain_RunBootCheck(void)
   }
 }
 
-#if (BL_AUTO_JUMP_TO_SLOT_A != 0U)
-// Validate Slot A and jump to the application; logs result if validation or jump fails
-static void BlMain_JumpToSlotA(void)
+// Read metadata from Flash, print TEST7 result, and return the slot to boot
+static BlImageSlotId_t BlMain_RunMetadataCheck(void)
 {
-  BlImageVectorInfo_t vector_info;
+  BlMetadata_t meta;
 
-  BlImage_ValidateSlot(BL_IMAGE_SLOT_A, &vector_info);
+  BlMetadata_Read(&meta);
 
   BlLog_Printf("\r\n");
-  BlLog_Printf("[BOOT] jump_slot=%s\r\n", vector_info.slot_name);
-  BlLog_Printf("[BOOT] jump_msp=0x%08lX\r\n",
-                (unsigned long)vector_info.initial_msp);
-  BlLog_Printf("[BOOT] jump_reset_handler=0x%08lX\r\n",
-                (unsigned long)vector_info.reset_handler_raw);
+  BlLog_Printf("[BOOT] metadata_page=0x%08lX\r\n",
+               (unsigned long)BL_METADATA0_BASE_ADDR);
 
-  if (vector_info.vector_check == 0U) {
-    BlLog_Printf("[BOOT] jump_result=NG\r\n");
-    BlLog_Printf("[BOOT] reason=slot_a_vector_invalid\r\n");
+  if (BlMetadata_IsValid(&meta) == 0U) {
+    /*
+     * Empty Flash after mass erase is expected during early milestones.
+     * Use the compile-time default slot instead of stopping.
+     */
+    BlLog_Printf("[BOOT] metadata_magic=NG\r\n");
+    BlLog_Printf("[BOOT] use_default_slot=%s\r\n",
+                 (BL_DEFAULT_BOOT_SLOT == BL_IMAGE_SLOT_B) ? "B" : "A");
+    BlLog_Printf("[TEST7] metadata_read_check PASS\r\n");
+    return BL_DEFAULT_BOOT_SLOT;
+  }
+
+  BlLog_Printf("[BOOT] metadata_magic=OK\r\n");
+  BlLog_Printf("[BOOT] active_slot=%c\r\n",
+               (meta.active_slot == BL_METADATA_SLOT_B) ? 'B' : 'A');
+  BlLog_Printf("[BOOT] confirmed_slot=%c\r\n",
+               (meta.confirmed_slot == BL_METADATA_SLOT_B) ? 'B' : 'A');
+  BlLog_Printf("[TEST7] metadata_read_check PASS\r\n");
+
+  return (meta.active_slot == BL_METADATA_SLOT_B) ? BL_IMAGE_SLOT_B : BL_IMAGE_SLOT_A;
+}
+
+#if (BL_AUTO_JUMP_ENABLE != 0U)
+// Validate the selected slot and jump; try the other slot as fallback if selected is invalid
+static void BlMain_SelectAndJump(BlImageSlotId_t selected_slot)
+{
+  BlImageSlotId_t fallback_slot;
+  BlImageVectorInfo_t vector_info;
+
+  fallback_slot = (selected_slot == BL_IMAGE_SLOT_A) ? BL_IMAGE_SLOT_B : BL_IMAGE_SLOT_A;
+
+  BlLog_Printf("\r\n");
+  BlLog_Printf("[BOOT] selected_slot=%s\r\n",
+               (selected_slot == BL_IMAGE_SLOT_A) ? "A" : "B");
+
+  // Validate selected slot
+  BlImage_ValidateSlot(selected_slot, &vector_info);
+
+  if (vector_info.vector_check != 0U) {
+    BlLog_Printf("[BOOT] selected_slot_vector_check=OK\r\n");
+    BlLog_Printf("[BOOT] jump_slot=%s\r\n", vector_info.slot_name);
+    BlLog_Printf("[BOOT] jump_msp=0x%08lX\r\n",
+                 (unsigned long)vector_info.initial_msp);
+    BlLog_Printf("[BOOT] jump_reset_handler=0x%08lX\r\n",
+                 (unsigned long)vector_info.reset_handler_raw);
+    /*
+     * Give UART enough time to finish the last visible log before handoff.
+     * The logger itself uses blocking transmit, but this small delay makes
+     * the boot-to-app transition easier to read on TeraTerm.
+     */
+    BlLog_Printf("[BOOT] jump_result=START\r\n");
+    HAL_Delay(BL_JUMP_DELAY_MS);
+    (void)BlImage_JumpToImage(&vector_info);
+    BlLog_Printf("[BOOT] jump_result=FAIL\r\n");
     return;
   }
 
-  /*
-   * Give UART enough time to finish the last visible log before handoff.
-   * The logger itself uses blocking transmit, but this small delay makes
-   * the boot-to-app transition easier to read on TeraTerm.
-   */
-  BlLog_Printf("[BOOT] jump_result=START\r\n");
-  HAL_Delay(BL_JUMP_DELAY_MS);
+  // Selected slot invalid, try fallback
+  BlLog_Printf("[BOOT] selected_slot_vector_check=NG\r\n");
+  BlLog_Printf("[BOOT] fallback_slot=%s\r\n",
+               (fallback_slot == BL_IMAGE_SLOT_A) ? "A" : "B");
 
-  /*
-   * If this function succeeds, CPU execution continues from the application
-   * Reset_Handler and this function will not return.
-   */
-  if (BlImage_JumpToImage(&vector_info) == 0U) {
+  BlImage_ValidateSlot(fallback_slot, &vector_info);
+
+  if (vector_info.vector_check != 0U) {
+    BlLog_Printf("[BOOT] fallback_slot_vector_check=OK\r\n");
+    BlLog_Printf("[BOOT] jump_slot=%s\r\n", vector_info.slot_name);
+    BlLog_Printf("[BOOT] jump_msp=0x%08lX\r\n",
+                 (unsigned long)vector_info.initial_msp);
+    BlLog_Printf("[BOOT] jump_reset_handler=0x%08lX\r\n",
+                 (unsigned long)vector_info.reset_handler_raw);
+    BlLog_Printf("[BOOT] jump_result=START\r\n");
+    HAL_Delay(BL_JUMP_DELAY_MS);
+    (void)BlImage_JumpToImage(&vector_info);
     BlLog_Printf("[BOOT] jump_result=FAIL\r\n");
+    return;
   }
+
+  // Both slots invalid
+  BlLog_Printf("[BOOT] fallback_slot_vector_check=NG\r\n");
+  BlLog_Printf("[BOOT] no_valid_slot_found\r\n");
 }
 #endif
 
@@ -347,7 +410,7 @@ static void BlMain_RunSlotVectorChecks(void)
                               "slot_b_vector_check");
 }
 
-// Initialize the bootloader log and run the boot self-check
+// Initialize bootloader, run self-checks, read metadata, and jump to the active slot
 void BlMain_Init(UART_HandleTypeDef *debug_uart)
 {
   BlLog_Init(debug_uart);
@@ -357,8 +420,10 @@ void BlMain_Init(UART_HandleTypeDef *debug_uart)
   BlMain_RunBootCheck();
   BlMain_RunSlotVectorChecks();
 
-#if (BL_AUTO_JUMP_TO_SLOT_A != 0U)
-  BlMain_JumpToSlotA();
+#if (BL_AUTO_JUMP_ENABLE != 0U)
+  BlMain_SelectAndJump(BlMain_RunMetadataCheck());
+#else
+  (void)BlMain_RunMetadataCheck();
 #endif
 }
 
