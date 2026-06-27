@@ -22,8 +22,23 @@
 // Define heartbeat period
 #define BL_HEARTBEAT_INTERVAL_MS         1000U   // ms
 
+/*
+ * Enable automatic jump to Slot A after bootloader self-checks.
+ *
+ * Set to 0U when only testing bootloader logs/vector validation.
+ * Set to 1U when testing bootloader -> application handoff.
+ */
+#define BL_AUTO_JUMP_TO_SLOT_A           1U
+
+#define BL_JUMP_DELAY_MS                 100U    // ms
+
 /* Private variables ---------------------------------------------------------*/
 static uint8_t boot_check_done = 0U;
+
+/* Private function prototypes -----------------------------------------------*/
+#if (BL_AUTO_JUMP_TO_SLOT_A != 0U)
+static void BlMain_JumpToSlotA(void);
+#endif
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -139,6 +154,45 @@ static void BlMain_RunBootCheck(void)
   }
 }
 
+#if (BL_AUTO_JUMP_TO_SLOT_A != 0U)
+// Validate Slot A and jump to the application; logs result if validation or jump fails
+static void BlMain_JumpToSlotA(void)
+{
+  BlImageVectorInfo_t vector_info;
+
+  BlImage_ValidateSlot(BL_IMAGE_SLOT_A, &vector_info);
+
+  BlLog_Printf("\r\n");
+  BlLog_Printf("[BOOT] jump_slot=%s\r\n", vector_info.slot_name);
+  BlLog_Printf("[BOOT] jump_msp=0x%08lX\r\n",
+                (unsigned long)vector_info.initial_msp);
+  BlLog_Printf("[BOOT] jump_reset_handler=0x%08lX\r\n",
+                (unsigned long)vector_info.reset_handler_raw);
+
+  if (vector_info.vector_check == 0U) {
+    BlLog_Printf("[BOOT] jump_result=NG\r\n");
+    BlLog_Printf("[BOOT] reason=slot_a_vector_invalid\r\n");
+    return;
+  }
+
+  /*
+   * Give UART enough time to finish the last visible log before handoff.
+   * The logger itself uses blocking transmit, but this small delay makes
+   * the boot-to-app transition easier to read on TeraTerm.
+   */
+  BlLog_Printf("[BOOT] jump_result=START\r\n");
+  HAL_Delay(BL_JUMP_DELAY_MS);
+
+  /*
+   * If this function succeeds, CPU execution continues from the application
+   * Reset_Handler and this function will not return.
+   */
+  if (BlImage_JumpToImage(&vector_info) == 0U) {
+    BlLog_Printf("[BOOT] jump_result=FAIL\r\n");
+  }
+}
+#endif
+
 /* Function definitions ------------------------------------------------------*/
 
 // Set VTOR to the bootloader base address before the scheduler or any interrupt fires
@@ -215,6 +269,10 @@ void BlMain_Init(UART_HandleTypeDef *debug_uart)
   BlMain_PrintFlashLayout();
   BlMain_RunBootCheck();
   BlMain_RunSlotVectorChecks();
+
+#if (BL_AUTO_JUMP_TO_SLOT_A != 0U)
+  BlMain_JumpToSlotA();
+#endif
 }
 
 // Toggle the LED at a fixed interval as a heartbeat indicator

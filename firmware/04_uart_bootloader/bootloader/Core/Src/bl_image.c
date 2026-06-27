@@ -7,6 +7,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stddef.h>
+#include "stm32g0xx.h"
+#include "stm32g0xx_hal.h"
+
 #include "bl_image.h"
 
 #include "bl_flash_layout.h"
@@ -19,6 +22,11 @@
 #define BL_IMAGE_RESET_ADDR_MASK               0xFFFFFFFEUL
 
 #define BL_IMAGE_MSP_ALIGN_MASK                0x00000007UL
+
+/* Private typedef -----------------------------------------------------------*/
+
+// Application Reset_Handler function pointer type.
+typedef void (*BlImageEntryPoint_t)(void);
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -146,5 +154,84 @@ void BlImage_ValidateSlot(BlImageSlotId_t slot_id,
     vector_info->vector_check = 1U;
   } else {
     vector_info->vector_check = 0U;
+  }
+}
+
+// Tear down bootloader hardware state and jump to the application Reset_Handler
+uint8_t BlImage_JumpToImage(const BlImageVectorInfo_t *vector_info)
+{
+  BlImageEntryPoint_t app_entry;
+
+  if (vector_info == NULL) {
+    return 0U;
+  }
+
+  /*
+   * Do not jump if the vector table was not validated.
+   *
+   * The caller should call BlImage_ValidateSlot() first and print the detailed
+   * validation result before reaching this point.
+   */
+  if (vector_info->vector_check == 0U) {
+    return 0U;
+  }
+
+  app_entry = (BlImageEntryPoint_t)vector_info->reset_handler_raw;
+
+  /*
+   * Stop interrupts while changing the CPU execution context.
+   *
+   * Pending bootloader interrupts must not run after the application vector
+   * table and MSP are installed.
+   */
+  __disable_irq();
+
+  /*
+   * Deinitialize HAL state used by the bootloader.
+   *
+   * The application will run its own SystemInit(), HAL_Init(), clock setup,
+   * GPIO init and UART init again.
+   */
+  (void)HAL_DeInit();
+
+  // Stop SysTick before handing off to the application
+  SysTick->CTRL = 0UL;
+  SysTick->LOAD = 0UL;
+  SysTick->VAL  = 0UL;
+
+  // Clear any pending SysTick and PendSV exceptions
+  SCB->ICSR = SCB_ICSR_PENDSTCLR_Msk | SCB_ICSR_PENDSVCLR_Msk;
+
+  /*
+   * Disable and clear all NVIC interrupts.
+   *
+   * STM32G0 is Cortex-M0+, so one ICER/ICPR register is enough for this target.
+   */
+  NVIC->ICER[0] = 0xFFFFFFFFUL;
+  NVIC->ICPR[0] = 0xFFFFFFFFUL;
+
+  // Install application vector table and stack pointer
+  SCB->VTOR = vector_info->slot_base;
+  __DSB();
+  __ISB();
+
+  __set_MSP(vector_info->initial_msp);
+
+  /*
+   * Re-enable interrupts before entering the application.
+   *
+   * After this point, interrupts will use the application vector table.
+   */
+  __enable_irq();
+
+  /*
+   * Jump to application Reset_Handler.
+   *
+   * reset_handler_raw keeps bit0 set, which is required for Thumb state.
+   */
+  app_entry();
+
+  // Reset_Handler should never return
+  while (1) {
   }
 }

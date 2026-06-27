@@ -41,5 +41,6 @@ typedef struct
 /* Function prototypes -------------------------------------------------------*/
 void BlImage_ValidateSlot(BlImageSlotId_t slot_id,
                           BlImageVectorInfo_t *vector_info);
+uint8_t BlImage_JumpToImage(const BlImageVectorInfo_t *vector_info);
 
 #endif /* INC_BL_IMAGE_H_ */
