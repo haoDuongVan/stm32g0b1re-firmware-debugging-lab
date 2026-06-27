@@ -1,0 +1,82 @@
+[BOOT] STM32 Dual-Slot UART Bootloader V1
+[BOOT] Project: 04_uart_bootloader
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 16000000 Hz
+[BOOT] boot_base=0x08000000 size=64KB
+[BOOT] slot_a_base=0x08010000 size=192KB
+[BOOT] slot_b_base=0x08040000 size=192KB
+[BOOT] metadata0=0x0807F000
+[BOOT] metadata1=0x0807F800
+
+[BOOT] expected_vtor=0x08000000
+[BOOT] actual_vtor=0x08000000
+[BOOT] vtor_check=OK
+[TEST0] bootloader_boot_check PASS
+[TEST1] flash_layout_check PASS
+
+[BOOT] validate_slot=A
+[BOOT] slot_base=0x08010000
+[BOOT] slot_end=0x0803FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08010DBD
+[BOOT] reset_handler_addr=0x08010DBC
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST4] slot_a_vector_check PASS
+
+[BOOT] validate_slot=B
+[BOOT] slot_base=0x08040000
+[BOOT] slot_end=0x0806FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08040DBD
+[BOOT] reset_handler_addr=0x08040DBC
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST5] slot_b_vector_check PASS
+
+[BOOT] metadata_page=0x0807F000
+[BOOT] metadata_magic=OK
+[BOOT] active_slot=B
+[BOOT] confirmed_slot=B
+[BOOT] metadata_crc_stored=0x30543436
+[BOOT] metadata_crc_calculated=0x30543436
+[TEST7] metadata_read_check PASS
+[BOOT] metadata_crc_check=OK
+[TEST8] metadata_crc_check PASS
+[BOOT] update_state=CONFIRMED
+[BOOT] boot_count=0
+
+[BOOT] selected_slot=B
+[BOOT] selected_slot_vector_check=OK
+[BOOT] jump_slot=B
+[BOOT] jump_msp=0x20024000
+[BOOT] jump_reset_handler=0x08040DBD
+[BOOT] jump_result=START
+
+[APP] STM32 Dual-Slot Test Application
+[APP] Project: 04_uart_bootloader
+[APP] Board: NUCLEO-G0B1RE
+[APP] System clock: 16000000 Hz
+[APP] slot_name=B
+[APP] slot_base=0x08040000
+[APP] slot_end=0x0806FFFF
+
+[APP] vector_table=0x08040000
+[APP] expected_vtor=0x08040000
+[APP] actual_vtor=0x08040000
+[APP] vtor_check=OK
+[TEST3] app_slot_b_boot_check PASS
+
+[APP] metadata_page=0x0807F000
+[APP] metadata_valid=OK
+[APP] active_slot=B
+[APP] confirmed_slot=B
+[APP] boot_count=0
+[APP] app_slot=B
+[APP] confirm_required=NO
+[APP] confirm_state=ALREADY_CONFIRMED
+[TEST13] app_confirm_image_check PASS
