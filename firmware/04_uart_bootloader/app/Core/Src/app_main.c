@@ -9,6 +9,7 @@
 #include "app_main.h"
 
 #include "app_log.h"
+#include "app_metadata.h"
 #include "bl_flash_layout.h"
 #include "main.h"
 
@@ -34,6 +35,7 @@
 #define APP_SLOT_END_ADDR                BL_SLOT_A_END_ADDR
 #define APP_BOOT_TEST_TAG                "[TEST2]"
 #define APP_BOOT_TEST_NAME               "app_slot_a_boot_check"
+#define APP_METADATA_SLOT_VALUE          BL_METADATA_SLOT_A
 
 #elif defined(APP_SLOT_B)
 
@@ -42,10 +44,20 @@
 #define APP_SLOT_END_ADDR                BL_SLOT_B_END_ADDR
 #define APP_BOOT_TEST_TAG                "[TEST3]"
 #define APP_BOOT_TEST_NAME               "app_slot_b_boot_check"
+#define APP_METADATA_SLOT_VALUE          BL_METADATA_SLOT_B
 
 #else
 #error "APP_SLOT_A or APP_SLOT_B must be defined"
 #endif
+
+/*
+ * Application image confirmation test.
+ *
+ * After booting a pending image, the application must confirm itself so the
+ * bootloader does not roll back on the next reset.
+ */
+#define APP_CONFIRM_TEST_TAG             "[TEST13]"
+#define APP_CONFIRM_TEST_NAME            "app_confirm_image_check"
 
 #ifndef USER_VECT_TAB_ADDRESS
 #error "USER_VECT_TAB_ADDRESS must be defined for the application build"
@@ -159,6 +171,94 @@ static void AppMain_RunBootCheck(void)
   }
 }
 
+// Confirm this image in metadata if it is still marked pending
+static void AppMain_ConfirmImageIfNeeded(void)
+{
+  BlMetadata_t meta;
+  BlMetadata_t confirm_meta;
+  uint8_t write_result;
+
+  AppMetadata_Read(&meta);
+
+  AppLog_Printf("\r\n");
+  AppLog_Printf("[APP] metadata_page=0x%08lX\r\n",
+                 (unsigned long)BL_METADATA0_BASE_ADDR);
+
+  if (AppMetadata_IsValid(&meta) == 0U) {
+    /*
+     * No valid metadata means the bootloader did not write any.
+     * Nothing to confirm.
+     */
+    AppLog_Printf("[APP] metadata_valid=NG\r\n");
+    AppLog_Printf("[APP] confirm_required=NO\r\n");
+    AppLog_Printf("%s %s PASS\r\n",
+                   APP_CONFIRM_TEST_TAG,
+                   APP_CONFIRM_TEST_NAME);
+    return;
+  }
+
+  AppLog_Printf("[APP] metadata_valid=OK\r\n");
+  AppLog_Printf("[APP] active_slot=%c\r\n",
+                 (char)meta.active_slot);
+  AppLog_Printf("[APP] confirmed_slot=%c\r\n",
+                 (char)meta.confirmed_slot);
+  AppLog_Printf("[APP] boot_count=%lu\r\n",
+                 (unsigned long)meta.boot_count);
+  AppLog_Printf("[APP] app_slot=%s\r\n", APP_SLOT_NAME);
+
+  /*
+   * Only confirm metadata that points active_slot at this slot.
+   * If the bootloader somehow jumped here while active_slot points elsewhere,
+   * do not silently overwrite metadata that belongs to the other slot.
+   */
+  if (meta.active_slot != APP_METADATA_SLOT_VALUE) {
+    AppLog_Printf("[APP] confirm_required=NO\r\n");
+    AppLog_Printf("[APP] confirm_skip_reason=active_slot_mismatch\r\n");
+    AppLog_Printf("%s %s FAIL\r\n",
+                   APP_CONFIRM_TEST_TAG,
+                   APP_CONFIRM_TEST_NAME);
+    return;
+  }
+
+  if ((meta.confirmed_slot == APP_METADATA_SLOT_VALUE) &&
+      (meta.boot_count == 0UL)) {
+    AppLog_Printf("[APP] confirm_required=NO\r\n");
+    AppLog_Printf("[APP] confirm_state=ALREADY_CONFIRMED\r\n");
+    AppLog_Printf("%s %s PASS\r\n",
+                   APP_CONFIRM_TEST_TAG,
+                   APP_CONFIRM_TEST_NAME);
+    return;
+  }
+
+  confirm_meta                = meta;
+  confirm_meta.active_slot    = APP_METADATA_SLOT_VALUE;
+  confirm_meta.confirmed_slot = APP_METADATA_SLOT_VALUE;
+  confirm_meta.boot_count     = 0UL;
+
+  AppLog_Printf("[APP] confirm_required=YES\r\n");
+  AppLog_Printf("[APP] confirm_metadata_update=START\r\n");
+  AppLog_Printf("[APP] confirm_active_slot=%c\r\n",
+                 (char)confirm_meta.active_slot);
+  AppLog_Printf("[APP] confirm_confirmed_slot=%c\r\n",
+                 (char)confirm_meta.confirmed_slot);
+  AppLog_Printf("[APP] confirm_boot_count=%lu\r\n",
+                 (unsigned long)confirm_meta.boot_count);
+
+  write_result = AppMetadata_Write(&confirm_meta);
+
+  if (write_result != 0U) {
+    AppLog_Printf("[APP] confirm_metadata_write=OK\r\n");
+    AppLog_Printf("%s %s PASS\r\n",
+                   APP_CONFIRM_TEST_TAG,
+                   APP_CONFIRM_TEST_NAME);
+  } else {
+    AppLog_Printf("[APP] confirm_metadata_write=NG\r\n");
+    AppLog_Printf("%s %s FAIL\r\n",
+                   APP_CONFIRM_TEST_TAG,
+                   APP_CONFIRM_TEST_NAME);
+  }
+}
+
 /* Function definitions ------------------------------------------------------*/
 
 // Initialize application layer
@@ -168,6 +268,7 @@ void AppMain_Init(UART_HandleTypeDef *debug_uart)
 
   AppMain_PrintBootLog();
   AppMain_RunBootCheck();
+  AppMain_ConfirmImageIfNeeded();
 }
 
 // Toggle LED periodically
