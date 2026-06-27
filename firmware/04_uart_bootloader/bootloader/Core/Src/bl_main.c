@@ -82,6 +82,12 @@
 #define BL_ROLLBACK_TEST_TAG             "[TEST10]"
 #define BL_ROLLBACK_TEST_NAME            "rollback_decision_check"
 
+/*
+ * Rollback metadata write test.
+ */
+#define BL_ROLLBACK_WRITE_TEST_TAG       "[TEST11]"
+#define BL_ROLLBACK_WRITE_TEST_NAME      "rollback_metadata_write_check"
+
 /* Private variables ---------------------------------------------------------*/
 static uint8_t boot_check_done = 0U;
 
@@ -349,12 +355,42 @@ static BlImageSlotId_t BlMain_RunMetadataCheck(void)
                       BL_PENDING_TEST_NAME);
 
         if (meta.boot_count >= BL_PENDING_BOOT_MAX_COUNT) {
+          BlMetadata_t rollback_meta;
+          uint8_t write_result;
+
           BlLog_Printf("[BOOT] rollback_required=YES\r\n");
           BlLog_Printf("[BOOT] rollback_to_slot=%c\r\n",
                         (char)meta.confirmed_slot);
           BlLog_Printf("%s %s PASS\r\n",
                         BL_ROLLBACK_TEST_TAG,
                         BL_ROLLBACK_TEST_NAME);
+
+          rollback_meta                = meta;
+          rollback_meta.active_slot    = meta.confirmed_slot;
+          rollback_meta.confirmed_slot = meta.confirmed_slot;
+          rollback_meta.boot_count     = 0UL;
+
+          BlLog_Printf("[BOOT] rollback_metadata_update=START\r\n");
+          BlLog_Printf("[BOOT] rollback_metadata_active=%c\r\n",
+                        (char)rollback_meta.active_slot);
+          BlLog_Printf("[BOOT] rollback_metadata_confirmed=%c\r\n",
+                        (char)rollback_meta.confirmed_slot);
+          BlLog_Printf("[BOOT] rollback_metadata_boot_count=%lu\r\n",
+                        (unsigned long)rollback_meta.boot_count);
+
+          write_result = BlMetadata_Write(&rollback_meta);
+
+          if (write_result != 0U) {
+            BlLog_Printf("[BOOT] rollback_metadata_write=OK\r\n");
+            BlLog_Printf("%s %s PASS\r\n",
+                          BL_ROLLBACK_WRITE_TEST_TAG,
+                          BL_ROLLBACK_WRITE_TEST_NAME);
+          } else {
+            BlLog_Printf("[BOOT] rollback_metadata_write=NG\r\n");
+            BlLog_Printf("%s %s FAIL\r\n",
+                          BL_ROLLBACK_WRITE_TEST_TAG,
+                          BL_ROLLBACK_WRITE_TEST_NAME);
+          }
 
           return BlMain_MetadataSlotToImageSlot(meta.confirmed_slot);
         }

@@ -42,7 +42,7 @@ typedef struct
   uint32_t confirmed_slot;
   uint32_t boot_count;
   uint32_t reserved[3];
-  uint32_t crc32;          /* CRC32 of the record; not checked in this milestone */
+  uint32_t crc32;          /* CRC32 over all fields above; recalculated on every write */
 } BlMetadata_t;
 
 /* Function prototypes -------------------------------------------------------*/
@@ -51,5 +51,6 @@ uint8_t  BlMetadata_IsHeaderValid(const BlMetadata_t *meta);
 uint32_t BlMetadata_CalculateCrc(const BlMetadata_t *meta);
 uint8_t  BlMetadata_IsCrcValid(const BlMetadata_t *meta);
 uint8_t  BlMetadata_IsValid(const BlMetadata_t *meta);
+uint8_t  BlMetadata_Write(const BlMetadata_t *meta);
 
 #endif /* INC_BL_METADATA_H_ */
