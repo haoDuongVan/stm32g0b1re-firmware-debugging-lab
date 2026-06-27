@@ -61,12 +61,23 @@
 #define BL_METADATA_CRC_TEST_TAG         "[TEST8]"
 #define BL_METADATA_CRC_TEST_NAME        "metadata_crc_check"
 
+/*
+ * Pending metadata test.
+ *
+ * Pending means active_slot differs from confirmed_slot.
+ * The bootloader will attempt to boot the new image in active_slot,
+ * but the application must confirm it before the next reset.
+ */
+#define BL_PENDING_TEST_TAG              "[TEST9]"
+#define BL_PENDING_TEST_NAME             "pending_metadata_check"
+
 /* Private variables ---------------------------------------------------------*/
 static uint8_t boot_check_done = 0U;
 
 /* Private function prototypes -----------------------------------------------*/
 static uint8_t BlMain_IsSlotAWrittenToSlotB(const BlImageVectorInfo_t *vector_info);
 static void BlMain_PrintWrongSlotBRejectCheck(const BlImageVectorInfo_t *vector_info);
+static uint8_t BlMain_IsPendingMetadata(const BlMetadata_t *meta);
 static BlImageSlotId_t BlMain_RunMetadataCheck(void);
 #if (BL_AUTO_JUMP_ENABLE != 0U)
 static void BlMain_SelectAndJump(BlImageSlotId_t selected_slot);
@@ -117,6 +128,20 @@ static uint8_t BlMain_IsSlotAWrittenToSlotB(const BlImageVectorInfo_t *vector_in
   }
 
   if (vector_info->reset_handler_addr > BL_SLOT_A_END_ADDR) {
+    return 0U;
+  }
+
+  return 1U;
+}
+
+// Return 1 if active_slot differs from confirmed_slot
+static uint8_t BlMain_IsPendingMetadata(const BlMetadata_t *meta)
+{
+  if (meta == NULL) {
+    return 0U;
+  }
+
+  if (meta->active_slot == meta->confirmed_slot) {
     return 0U;
   }
 
@@ -286,6 +311,19 @@ static BlImageSlotId_t BlMain_RunMetadataCheck(void)
       BlLog_Printf("%s %s PASS\r\n",
                     BL_METADATA_CRC_TEST_TAG,
                     BL_METADATA_CRC_TEST_NAME);
+
+      if (BlMain_IsPendingMetadata(&meta) != 0U) {
+        BlLog_Printf("[BOOT] update_state=PENDING\r\n");
+        BlLog_Printf("[BOOT] pending_slot=%c\r\n",
+                      (char)meta.active_slot);
+        BlLog_Printf("[BOOT] last_confirmed_slot=%c\r\n",
+                      (char)meta.confirmed_slot);
+        BlLog_Printf("%s %s PASS\r\n",
+                      BL_PENDING_TEST_TAG,
+                      BL_PENDING_TEST_NAME);
+      } else {
+        BlLog_Printf("[BOOT] update_state=CONFIRMED\r\n");
+      }
 
       if (meta.active_slot == BL_METADATA_SLOT_B) {
         return BL_IMAGE_SLOT_B;
