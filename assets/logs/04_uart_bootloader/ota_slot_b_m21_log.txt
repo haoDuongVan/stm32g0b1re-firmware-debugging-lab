@@ -1,0 +1,1137 @@
+============================================================
+ Project 04 - Milestone 21 - Full OTA Slot B
+============================================================
+ port = COM3
+ file = ..\app\SlotB_Release\app_slot_b.bin
+============================================================
+
+STEP 1: Press the RESET button on the board NOW.
+STEP 2: Then press any key here within 2 seconds to start the script.
+
+Press any key to continue . . .
+
+╭────────────────────────────────────────── Project 04 — UART Packet Sender ───────────────────────────────────────────╮
+│ port      COM3                                                                                                       │
+│ baud      115200                                                                                                     │
+│ file      ..\app\SlotB_Release\app_slot_b.bin                                                                        │
+│ size      12912 bytes                                                                                                │
+│ packets   51                                                                                                         │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+────────────────────────────────────────────────── enter update mode ───────────────────────────────────────────────────
+  ▶ reset the board now — sending 'u' for 10 s
+] STM32 Dual-Slot UART Bootloade[BOOT] uart_update_request=YES
+[BOOT] update_mode=ENTER
+[TEST14] uart_update_mode_entry_check PASS
+
+[UPDATE] command_mode=READY
+[UPDATE] waiting_command...
+[UPDATE] available_commands:
+[UPDATE]   help            ✔ update mode entered
+- show command list
+[UPDATE]   info          - show bootloader and slot information
+[UPDATE]   erase b       - erase Slot B
+[UPDATE]   write-test b  - write test pattern to Slot B then verify
+[UPDATE]   exit          - leave update mode and boot normally
+[UPDATE]   rx-test b     - receive one binary packet and write Slot B
+[UPDATE]   set-pending b - write metadata: active=B confirmed=A boot_count=0
+[UPDATE]   reboot        - reset the MCU
+
+UPDATE>
+
+UPDATE> ───────────────────────────────────────────────────── erase slot B ─────────────────────────────────────────────────────
+  ▶ erasing Slot B  (192 KB)
+  CMD: erase b
+erase b
+[UPDATE] rx_command=erase b
+[UPDATE] erase_slot=B
+[UPDATE] erase_base=0x08040000
+[UPDATE] erase_size=192KB
+[UPDATE] erase_start=YES
+[UPDATE] erase_result=OK
+[TEST16] slot_erase_command_check PASS
+
+UPDAT  ✔ Slot B erased
+───────────────────────────────────────────────────── send packets ─────────────────────────────────────────────────────
+  ▶ sending 12912 bytes as 51 packet(s)
+  PKT 1/51  offset=0x00000000  size=256
+E>   CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000000
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x0FD73FC1
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x0FD73FC1
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 2/51  offset=0x00000100  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000100
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x2C6712EB
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x2C6712EB
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 3/51  offset=0x00000200  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000200
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x5DFD554A
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x5DFD554A
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 4/51  offset=0x00000300  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000300
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x248C71C5
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x248C71C5
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 5/51  offset=0x00000400  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000400
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x5E009A03
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x5E009A03
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 6/51  offset=0x00000500  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000500
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x70542193
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x70542193
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 7/51  offset=0x00000600  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000600
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xE03B584E
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xE03B584E
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 8/51  offset=0x00000700  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000700
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xD557345D
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xD557345D
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 9/51  offset=0x00000800  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000800
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x8B5662FF
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x8B5662FF
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 10/51  offset=0x00000900  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000900
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xBFB11AB1
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xBFB11AB1
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 11/51  offset=0x00000A00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000A00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xA768540C
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xA768540C
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 12/51  offset=0x00000B00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000B00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x4F787138
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x4F787138
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 13/51  offset=0x00000C00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000C00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xEC6542CC
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xEC6542CC
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 14/51  offset=0x00000D00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000D00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x47379102
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x47379102
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 15/51  offset=0x00000E00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000E00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x60F85322
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x60F85322
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 16/51  offset=0x00000F00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000F00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xD5AADD1C
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xD5AADD1C
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 17/51  offset=0x00001000  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00001000
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x5CC5599E
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x5CC5599E
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 18/51  offset=0x00001100  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00001100
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x719557F3
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x719557F3
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 19/51  offset=0x00001200  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00001200
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xE75B2CF2
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xE75B2CF2
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 20/51  offset=0x00001300  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00001300
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x8901C115
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x8901C115
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 21/51  offset=0x00001400  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00001400
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xD01C5683
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xD01C5683
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 22/51  offset=0x00001500  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00001500
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xD1A07364
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xD1A07364
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 23/51  offset=0x00001600  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00001600
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x4B194E56
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x4B194E56
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 24/51  offset=0x00001700  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00001700
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x826D2EAF
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x826D2EAF
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 25/51  offset=0x00001800  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00001800
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x85FE43B0
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x85FE43B0
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 26/51  offset=0x00001900  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00001900
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x389AFE0F
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x389AFE0F
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 27/51  offset=0x00001A00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00001A00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x455B3903
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x455B3903
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 28/51  offset=0x00001B00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00001B00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x1626A1E0
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x1626A1E0
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 29/51  offset=0x00001C00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00001C00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xD146133E
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xD146133E
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 30/51  offset=0x00001D00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00001D00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x3A796FB6
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x3A796FB6
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 31/51  offset=0x00001E00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00001E00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xAFEDFC0B
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xAFEDFC0B
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 32/51  offset=0x00001F00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00001F00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x7B3C1693
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x7B3C1693
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 33/51  offset=0x00002000  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00002000
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xFCE830F7
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xFCE830F7
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 34/51  offset=0x00002100  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00002100
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xA0D0B336
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xA0D0B336
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 35/51  offset=0x00002200  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00002200
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x3779AA7D
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x3779AA7D
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 36/51  offset=0x00002300  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00002300
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x0D04F0D6
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x0D04F0D6
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 37/51  offset=0x00002400  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00002400
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x0FC8F4BA
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x0FC8F4BA
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 38/51  offset=0x00002500  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00002500
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xC327E758
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xC327E758
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 39/51  offset=0x00002600  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00002600
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x30F29EDE
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x30F29EDE
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 40/51  offset=0x00002700  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00002700
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x2819D20D
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x2819D20D
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 41/51  offset=0x00002800  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00002800
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xA69672E7
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xA69672E7
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 42/51  offset=0x00002900  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00002900
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x32AFFB4C
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x32AFFB4C
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 43/51  offset=0x00002A00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00002A00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x17CE4BE2
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x17CE4BE2
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 44/51  offset=0x00002B00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00002B00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xD5FFFB19
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xD5FFFB19
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 45/51  offset=0x00002C00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00002C00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x7614773E
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x7614773E
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 46/51  offset=0x00002D00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00002D00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xEA6706FA
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xEA6706FA
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 47/51  offset=0x00002E00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00002E00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xFE6B63E4
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xFE6B63E4
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 48/51  offset=0x00002F00  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00002F00
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x43267639
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x43267639
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 49/51  offset=0x00003000  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00003000
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xFF17BE86
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xFF17BE86
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 50/51  offset=0x00003100  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00003100
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x5B894B11
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x5B894B11
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 51/51  offset=0x00003200  size=112
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00003200
+[UPDATE] packet_length=112
+[UPDATE] packet_crc_stored=0x05B6121A
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x05B6121A
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   ✔ all 51 packet(s) written and verified
+───────────────────────────────────────────────── set pending metadata ─────────────────────────────────────────────────
+  ▶ writing metadata: active=B  confirmed=A  boot_count=0
+  CMD: set-pending b
+set-pending b
+[UPDATE] rx_command=set-pending b
+[UPDATE] set_pending_active=B
+[UPDATE] set_pending_confirmed=A
+[UPDATE] set_pending_boot_count=0
+[UPDATE] set_pending_write=OK
+[TEST19] set_pending_slot_b_check PASS
+
+UPDATE>   ✔ metadata written — next reset will boot Slot B as pending
+─────────────────────────────────────────────────── exit update mode ───────────────────────────────────────────────────
+  ▶ sending exit
+  CMD: exit
+exit
+[UPDATE] rx_command=exit
+[UPDATE] exit_to_normal_boot=YES
+[UPDATE] command_result=OK
+[TEST15] uart_command_parser_check PASS
+[UPDATE] command_mode=EXIT
+
+[BOOT] metadata_page=0x0807F000
+[BOOT] metadata_magic=OK
+[BOOT] active_slot=B
+[BOOT] confirmed_slot=A
+[BOOT] metadata_crc_stored=0x9FFD79FC
+[BOOT] metadata_crc_calculated=0x9FFD79FC
+[TEST7] metadata_read_check PASS
+[BOOT] metadata_crc_check=OK
+[TEST8] metadata_crc_check PASS
+[BOOT] update_state=PENDING
+[BOOT] pending_slot=B
+[BOOT] last_confirmed_slot=A
+[BOOT] boot_count=0
+[BOOT] pending_boot_max=3
+[TEST9] pending_metadata_check PASS
+[BOOT] rollback_required=NO
+[BOOT] pending_boot_count_update=START
+[BOOT] pending_boot_count_old=0
+[BOOT] pending_boot_count_new=1
+[BOOT] pending_boot_count_write=OK
+[TEST12] pending_boot_count_update_check PASS
+
+[BOOT] selected_slot=B
+[BOOT] selected_slot_vector_check=OK
+[BOOT] jump_slot=B
+[BOOT] jump_msp=0x2002  ✔ bootloader continued normal boot
+
+╭────────────────────────────────────────────────── Update finished ───────────────────────────────────────────────────╮
+│ packets sent    51                                                                                                   │
+│ bytes written   13056                                                                                                │
+│ slot            B                                                                                                    │
+│ result          PASS                                                                                                 │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+
+[OK] OTA complete. Now reset the board WITHOUT pressing 'u'.
+     Board should boot Slot B and confirm the image.
+Press any key to continue . . .
