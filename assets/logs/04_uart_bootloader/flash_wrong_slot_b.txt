@@ -1,0 +1,225 @@
+
+===============================================================================
+Project 04 wrong-slot flash started
+===============================================================================
+PROJECT_ROOT = C:\Users\haodu\dev\embedded\repo\stm32g0b1re-firmware-debugging-lab\firmware\04_uart_bootloader\tools\..
+PROGRAMMER_CLI = C:\ST\STM32CubeIDE_1.18.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.cubeprogrammer.win32_2.2.100.202412061334\tools\bin\STM32_Programmer_CLI.exe
+
+BOOT_BIN       = C:\Users\haodu\dev\embedded\repo\stm32g0b1re-firmware-debugging-lab\firmware\04_uart_bootloader\tools\..\bootloader\Release\bootloader.bin
+APP_A_BIN      = C:\Users\haodu\dev\embedded\repo\stm32g0b1re-firmware-debugging-lab\firmware\04_uart_bootloader\tools\..\app\SlotA_Release\app_slot_a.bin
+
+Flash plan:
+  bootloader.bin -> 0x08000000
+  app_slot_a.bin -> 0x08010000
+  app_slot_a.bin -> 0x08040000   [INTENTIONAL WRONG-SLOT]
+
+
+[FLASH] Erase all Flash
+      -------------------------------------------------------------------
+                       STM32CubeProgrammer v2.19.0                  
+      -------------------------------------------------------------------
+
+ST-LINK SN  : 066FFF534871754867243911
+ST-LINK FW  : V2J46M31
+Board       : NUCLEO-G0B1RE
+Voltage     : 3.25V
+SWD freq    : 4000 KHz
+Connect mode: Normal
+Reset mode  : Software reset
+Device ID   : 0x467
+Revision ID : Rev Z
+Device name : STM32G0B0xx/B1xx/C1xx
+Flash size  : 512 KBytes
+Device type : MCU
+Device CPU  : Cortex-M0+
+BL Version  : 0x92
+
+
+Mass erase ... 
+
+Mass erase successfully achieved
+
+[FLASH] bootloader.bin -> 0x08000000
+      -------------------------------------------------------------------
+                       STM32CubeProgrammer v2.19.0                  
+      -------------------------------------------------------------------
+
+ST-LINK SN  : 066FFF534871754867243911
+ST-LINK FW  : V2J46M31
+Board       : NUCLEO-G0B1RE
+Voltage     : 3.25V
+SWD freq    : 4000 KHz
+Connect mode: Normal
+Reset mode  : Software reset
+Device ID   : 0x467
+Revision ID : Rev Z
+Device name : STM32G0B0xx/B1xx/C1xx
+Flash size  : 512 KBytes
+Device type : MCU
+Device CPU  : Cortex-M0+
+BL Version  : 0x92
+
+Opening and parsing file: bootloader.bin
+
+
+Memory Programming ...
+  File          : bootloader.bin
+  Size          : 12.23 KB 
+  Address       : 0x08000000 
+
+
+
+Erasing memory corresponding to sector 0:
+Erasing internal memory sectors [0 6]
+Download in Progress:
+北北北北北北北北北北北北北北北北北北北北北北北北北 0%圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹 100%
+
+File download complete
+Time elapsed during download operation: 00:00:00.426
+
+
+
+Verifying ...
+
+
+Read progress:
+北北北北北北北北北北北北北北北北北北北北北北北北北 50%圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹 100%
+
+Download verified successfully 
+
+
+
+[FLASH] app_slot_a.bin -> 0x08010000
+      -------------------------------------------------------------------
+                       STM32CubeProgrammer v2.19.0                  
+      -------------------------------------------------------------------
+
+ST-LINK SN  : 066FFF534871754867243911
+ST-LINK FW  : V2J46M31
+Board       : NUCLEO-G0B1RE
+Voltage     : 3.25V
+SWD freq    : 4000 KHz
+Connect mode: Normal
+Reset mode  : Software reset
+Device ID   : 0x467
+Revision ID : Rev Z
+Device name : STM32G0B0xx/B1xx/C1xx
+Flash size  : 512 KBytes
+Device type : MCU
+Device CPU  : Cortex-M0+
+BL Version  : 0x92
+
+Opening and parsing file: app_slot_a.bin
+
+
+Memory Programming ...
+  File          : app_slot_a.bin
+  Size          : 10.65 KB 
+  Address       : 0x08010000 
+
+
+
+Erasing memory corresponding to sector 0:
+Erasing internal memory sectors [32 37]
+Download in Progress:
+北北北北北北北北北北北北北北北北北北北北北北北北北 0%圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹 100%
+
+File download complete
+Time elapsed during download operation: 00:00:00.378
+
+
+
+Verifying ...
+
+
+Read progress:
+北北北北北北北北北北北北北北北北北北北北北北北北北 50%圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹 100%
+
+Download verified successfully 
+
+
+
+[FLASH] app_slot_a.bin -> 0x08040000 [INTENTIONAL WRONG-SLOT]
+      -------------------------------------------------------------------
+                       STM32CubeProgrammer v2.19.0                  
+      -------------------------------------------------------------------
+
+ST-LINK SN  : 066FFF534871754867243911
+ST-LINK FW  : V2J46M31
+Board       : NUCLEO-G0B1RE
+Voltage     : 3.25V
+SWD freq    : 4000 KHz
+Connect mode: Normal
+Reset mode  : Software reset
+Device ID   : 0x467
+Revision ID : Rev Z
+Device name : STM32G0B0xx/B1xx/C1xx
+Flash size  : 512 KBytes
+Device type : MCU
+Device CPU  : Cortex-M0+
+BL Version  : 0x92
+
+Opening and parsing file: app_slot_a.bin
+
+
+Memory Programming ...
+  File          : app_slot_a.bin
+  Size          : 10.65 KB 
+  Address       : 0x08040000 
+
+
+
+Erasing memory corresponding to sector 0:
+Erasing internal memory sectors [128 133]
+Download in Progress:
+北北北北北北北北北北北北北北北北北北北北北北北北北 0%圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹 100%
+
+File download complete
+Time elapsed during download operation: 00:00:00.381
+
+
+
+Verifying ...
+
+
+Read progress:
+北北北北北北北北北北北北北北北北北北北北北北北北北 50%圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹圹 100%
+
+Download verified successfully 
+
+
+
+[FLASH] Reset target
+      -------------------------------------------------------------------
+                       STM32CubeProgrammer v2.19.0                  
+      -------------------------------------------------------------------
+
+ST-LINK SN  : 066FFF534871754867243911
+ST-LINK FW  : V2J46M31
+Board       : NUCLEO-G0B1RE
+Voltage     : 3.25V
+SWD freq    : 4000 KHz
+Connect mode: Normal
+Reset mode  : Software reset
+Device ID   : 0x467
+Revision ID : Rev Z
+Device name : STM32G0B0xx/B1xx/C1xx
+Flash size  : 512 KBytes
+Device type : MCU
+Device CPU  : Cortex-M0+
+BL Version  : 0x92
+
+
+MCU Reset
+
+Software reset is performed
+
+===============================================================================
+Project 04 wrong-slot flash finished successfully
+===============================================================================
+
+Expected UART result:
+  [TEST4] slot_a_vector_check PASS
+  [TEST5] slot_b_vector_check FAIL
+  [TEST6] wrong_slot_b_reject_check PASS
+
