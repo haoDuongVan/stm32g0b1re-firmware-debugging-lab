@@ -88,6 +88,12 @@
 #define BL_ROLLBACK_WRITE_TEST_TAG       "[TEST11]"
 #define BL_ROLLBACK_WRITE_TEST_NAME      "rollback_metadata_write_check"
 
+/*
+ * Pending boot count update test.
+ */
+#define BL_PENDING_COUNT_TEST_TAG        "[TEST12]"
+#define BL_PENDING_COUNT_TEST_NAME       "pending_boot_count_update_check"
+
 /* Private variables ---------------------------------------------------------*/
 static uint8_t boot_check_done = 0U;
 
@@ -396,6 +402,39 @@ static BlImageSlotId_t BlMain_RunMetadataCheck(void)
         }
 
         BlLog_Printf("[BOOT] rollback_required=NO\r\n");
+
+        /*
+         * Increment boot_count before jumping to the pending slot.
+         * If the pending image crashes or resets without confirming, the next
+         * boot will see the incremented count and eventually trigger rollback.
+         */
+        {
+          BlMetadata_t pending_meta;
+          uint8_t write_result;
+
+          pending_meta            = meta;
+          pending_meta.boot_count = meta.boot_count + 1UL;
+
+          BlLog_Printf("[BOOT] pending_boot_count_update=START\r\n");
+          BlLog_Printf("[BOOT] pending_boot_count_old=%lu\r\n",
+                        (unsigned long)meta.boot_count);
+          BlLog_Printf("[BOOT] pending_boot_count_new=%lu\r\n",
+                        (unsigned long)pending_meta.boot_count);
+
+          write_result = BlMetadata_Write(&pending_meta);
+
+          if (write_result != 0U) {
+            BlLog_Printf("[BOOT] pending_boot_count_write=OK\r\n");
+            BlLog_Printf("%s %s PASS\r\n",
+                          BL_PENDING_COUNT_TEST_TAG,
+                          BL_PENDING_COUNT_TEST_NAME);
+          } else {
+            BlLog_Printf("[BOOT] pending_boot_count_write=NG\r\n");
+            BlLog_Printf("%s %s FAIL\r\n",
+                          BL_PENDING_COUNT_TEST_TAG,
+                          BL_PENDING_COUNT_TEST_NAME);
+          }
+        }
 
         return BlMain_MetadataSlotToImageSlot(meta.active_slot);
       }
