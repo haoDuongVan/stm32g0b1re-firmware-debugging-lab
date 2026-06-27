@@ -71,6 +71,17 @@
 #define BL_PENDING_TEST_TAG              "[TEST9]"
 #define BL_PENDING_TEST_NAME             "pending_metadata_check"
 
+/*
+ * Maximum number of pending boot attempts allowed before rollback.
+ */
+#define BL_PENDING_BOOT_MAX_COUNT        3UL
+
+/*
+ * Rollback decision test.
+ */
+#define BL_ROLLBACK_TEST_TAG             "[TEST10]"
+#define BL_ROLLBACK_TEST_NAME            "rollback_decision_check"
+
 /* Private variables ---------------------------------------------------------*/
 static uint8_t boot_check_done = 0U;
 
@@ -78,6 +89,7 @@ static uint8_t boot_check_done = 0U;
 static uint8_t BlMain_IsSlotAWrittenToSlotB(const BlImageVectorInfo_t *vector_info);
 static void BlMain_PrintWrongSlotBRejectCheck(const BlImageVectorInfo_t *vector_info);
 static uint8_t BlMain_IsPendingMetadata(const BlMetadata_t *meta);
+static BlImageSlotId_t BlMain_MetadataSlotToImageSlot(uint32_t metadata_slot);
 static BlImageSlotId_t BlMain_RunMetadataCheck(void);
 #if (BL_AUTO_JUMP_ENABLE != 0U)
 static void BlMain_SelectAndJump(BlImageSlotId_t selected_slot);
@@ -146,6 +158,16 @@ static uint8_t BlMain_IsPendingMetadata(const BlMetadata_t *meta)
   }
 
   return 1U;
+}
+
+// Convert a BL_METADATA_SLOT_x constant to the corresponding BlImageSlotId_t
+static BlImageSlotId_t BlMain_MetadataSlotToImageSlot(uint32_t metadata_slot)
+{
+  if (metadata_slot == BL_METADATA_SLOT_B) {
+    return BL_IMAGE_SLOT_B;
+  }
+
+  return BL_IMAGE_SLOT_A;
 }
 
 // Print TEST6 PASS if Slot B failed because a Slot A binary was written there
@@ -318,18 +340,35 @@ static BlImageSlotId_t BlMain_RunMetadataCheck(void)
                       (char)meta.active_slot);
         BlLog_Printf("[BOOT] last_confirmed_slot=%c\r\n",
                       (char)meta.confirmed_slot);
+        BlLog_Printf("[BOOT] boot_count=%lu\r\n",
+                      (unsigned long)meta.boot_count);
+        BlLog_Printf("[BOOT] pending_boot_max=%lu\r\n",
+                      (unsigned long)BL_PENDING_BOOT_MAX_COUNT);
         BlLog_Printf("%s %s PASS\r\n",
                       BL_PENDING_TEST_TAG,
                       BL_PENDING_TEST_NAME);
-      } else {
-        BlLog_Printf("[BOOT] update_state=CONFIRMED\r\n");
+
+        if (meta.boot_count >= BL_PENDING_BOOT_MAX_COUNT) {
+          BlLog_Printf("[BOOT] rollback_required=YES\r\n");
+          BlLog_Printf("[BOOT] rollback_to_slot=%c\r\n",
+                        (char)meta.confirmed_slot);
+          BlLog_Printf("%s %s PASS\r\n",
+                        BL_ROLLBACK_TEST_TAG,
+                        BL_ROLLBACK_TEST_NAME);
+
+          return BlMain_MetadataSlotToImageSlot(meta.confirmed_slot);
+        }
+
+        BlLog_Printf("[BOOT] rollback_required=NO\r\n");
+
+        return BlMain_MetadataSlotToImageSlot(meta.active_slot);
       }
 
-      if (meta.active_slot == BL_METADATA_SLOT_B) {
-        return BL_IMAGE_SLOT_B;
-      }
+      BlLog_Printf("[BOOT] update_state=CONFIRMED\r\n");
+      BlLog_Printf("[BOOT] boot_count=%lu\r\n",
+                    (unsigned long)meta.boot_count);
 
-      return BL_IMAGE_SLOT_A;
+      return BlMain_MetadataSlotToImageSlot(meta.active_slot);
     }
 
     BlLog_Printf("[BOOT] metadata_crc_check=NG\r\n");
