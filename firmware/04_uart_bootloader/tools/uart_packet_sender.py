@@ -6,7 +6,8 @@
 #
 # Usage:
 #   py -3 uart_packet_sender.py --port COM3 --file generated\test.bin --make-test-file --test-size 1024
-#   py -3 uart_packet_sender.py --port COM3 --file app_slot_b.bin
+#   py -3 uart_packet_sender.py --port COM3 --file app_slot_b.bin --target b
+#   py -3 uart_packet_sender.py --port COM3 --file app_slot_a.bin --target a --set-pending
 #
 
 import argparse
@@ -37,8 +38,8 @@ TEST16_PASS = b"[TEST16] slot_erase_command_check PASS"
 TEST16_FAIL = b"[TEST16] slot_erase_command_check FAIL"
 TEST18_PASS = b"[TEST18] uart_binary_packet_receive_check PASS"
 TEST18_FAIL = b"[TEST18] uart_binary_packet_receive_check FAIL"
-TEST19_PASS = b"[TEST19] set_pending_slot_b_check PASS"
-TEST19_FAIL = b"[TEST19] set_pending_slot_b_check FAIL"
+TEST19_PASS = b"[TEST19] set_pending_command_check PASS"
+TEST19_FAIL = b"[TEST19] set_pending_command_check FAIL"
 APP_TOKEN   = b"[APP]"
 
 
@@ -214,29 +215,29 @@ def enter_update_mode(sess: SerialSession) -> None:
     raise TimeoutError("failed to enter update mode within 10 seconds")
 
 
-def erase_slot_b(sess: SerialSession) -> None:
-    divider("erase slot B")
-    step("erasing Slot B  (192 KB)")
+def erase_slot(sess: SerialSession, target: str) -> None:
+    divider(f"erase slot {target.upper()}")
+    step(f"erasing Slot {target.upper()}  (192 KB)")
 
     sess.wait_for_prompt(10.0)
-    sess.send_command("erase b")
+    sess.send_command(f"erase {target}")
 
     token, _ = sess.wait_for_any([TEST16_PASS, TEST16_FAIL], 60.0)
 
     if token == TEST16_PASS:
-        ok("Slot B erased")
+        ok(f"Slot {target.upper()} erased")
         return
 
-    raise RuntimeError("erase Slot B failed: bootloader reported TEST16 FAIL")
+    raise RuntimeError(f"erase Slot {target.upper()} failed: bootloader reported TEST16 FAIL")
 
 
-def send_file_as_packets(sess: SerialSession, image_path: str) -> int:
+def send_file_as_packets(sess: SerialSession, image_path: str, target: str) -> int:
     with open(image_path, "rb") as f:
         image = f.read()
 
     total_packets = (len(image) + PACKET_PAYLOAD_SIZE - 1) // PACKET_PAYLOAD_SIZE
     divider("send packets")
-    step(f"sending {len(image)} bytes as {total_packets} packet(s)")
+    step(f"sending {len(image)} bytes as {total_packets} packet(s)  →  Slot {target.upper()}")
 
     offset = 0
     packet_index = 0
@@ -249,7 +250,7 @@ def send_file_as_packets(sess: SerialSession, image_path: str) -> int:
         console.print(f"  [dim]PKT {packet_index + 1}/{total_packets}[/dim]  offset=[cyan]0x{offset:08X}[/cyan]  size=[cyan]{len(payload)}[/cyan]")
 
         sess.wait_for_prompt(10.0)
-        sess.send_command("rx-test b")
+        sess.send_command(f"rx-packet {target}")
         sess.wait_for(b"[UPDATE] rx_packet_wait=START", 10.0)
 
         # Send header + payload in one write. The bootloader reads the payload
@@ -268,19 +269,20 @@ def send_file_as_packets(sess: SerialSession, image_path: str) -> int:
     return packet_index
 
 
-def set_pending_slot_b(sess: SerialSession) -> None:
+def set_pending(sess: SerialSession, target: str) -> None:
+    rollback = "b" if target == "a" else "a"
     divider("set pending metadata")
-    step("writing metadata: active=B  confirmed=A  boot_count=0")
+    step(f"writing metadata: active={target.upper()}  confirmed={rollback.upper()}  boot_count=0")
 
     sess.wait_for_prompt(10.0)
-    sess.send_command("set-pending b")
+    sess.send_command(f"set-pending {target}")
 
     token, _ = sess.wait_for_any([TEST19_PASS, TEST19_FAIL], 10.0)
 
     if token == TEST19_PASS:
-        ok("metadata written — next reset will boot Slot B as pending")
+        ok(f"metadata written — next reset will boot Slot {target.upper()} as pending")
     else:
-        raise RuntimeError("set-pending b failed: bootloader reported TEST19 FAIL")
+        raise RuntimeError(f"set-pending {target} failed: bootloader reported TEST19 FAIL")
 
 
 def exit_update_mode(sess: SerialSession) -> None:
@@ -310,10 +312,13 @@ def main() -> int:
     parser.add_argument("--port", required=True, help="COM port, e.g. COM5")
     parser.add_argument("--baud", type=int, default=115200, help="UART baud rate")
     parser.add_argument("--file", required=True, help="binary file to send")
+    parser.add_argument("--target", choices=["a", "b"], default="b",
+                        help="target slot: 'a' or 'b' (default: b)")
     parser.add_argument("--make-test-file", action="store_true", help="generate ASCII test file before sending")
     parser.add_argument("--test-size", type=int, default=1024, help="test file size in bytes")
     parser.add_argument("--quiet-serial", action="store_true", help="do not print bootloader serial log")
-    parser.add_argument("--set-pending",  action="store_true", help="after upload, write pending metadata (active=B confirmed=A)")
+    parser.add_argument("--set-pending",  action="store_true",
+                        help="after upload, write pending metadata (active=target confirmed=other)")
 
     args = parser.parse_args()
 
@@ -324,6 +329,8 @@ def main() -> int:
         error(f"file not found: {args.file}")
         return 1
 
+    target = args.target.lower()
+
     file_size = os.path.getsize(args.file)
     total_packets = (file_size + PACKET_PAYLOAD_SIZE - 1) // PACKET_PAYLOAD_SIZE
 
@@ -332,6 +339,7 @@ def main() -> int:
     info.add_column()
     info.add_row("port",    args.port)
     info.add_row("baud",    str(args.baud))
+    info.add_row("target",  f"Slot {target.upper()}")
     info.add_row("file",    args.file)
     info.add_row("size",    f"{file_size} bytes")
     info.add_row("packets", str(total_packets))
@@ -359,10 +367,10 @@ def main() -> int:
             sess = SerialSession(ser, echo_serial=(not args.quiet_serial))
 
             enter_update_mode(sess)
-            erase_slot_b(sess)
-            packet_count = send_file_as_packets(sess, args.file)
+            erase_slot(sess, target)
+            packet_count = send_file_as_packets(sess, args.file, target)
             if args.set_pending:
-                set_pending_slot_b(sess)
+                set_pending(sess, target)
             exit_update_mode(sess)
 
     except (TimeoutError, RuntimeError) as exc:
@@ -381,7 +389,7 @@ def main() -> int:
     summary.add_column()
     summary.add_row("packets sent",  str(packet_count))
     summary.add_row("bytes written", str(packet_count * PACKET_PAYLOAD_SIZE))
-    summary.add_row("slot",          "B")
+    summary.add_row("slot",          f"Slot {target.upper()}")
     summary.add_row("result",        Text("PASS", style="bold green"))
 
     console.print()
