@@ -19,6 +19,16 @@ extern "C" {
 /* Function prototypes -------------------------------------------------------*/
 uint8_t BlSlot_Erase(BlImageSlotId_t slot);
 
+uint8_t BlSlot_Write(BlImageSlotId_t slot,
+                     uint32_t offset,
+                     const uint8_t *data,
+                     uint32_t size);
+
+uint8_t BlSlot_Verify(BlImageSlotId_t slot,
+                      uint32_t offset,
+                      const uint8_t *data,
+                      uint32_t size);
+
 #ifdef __cplusplus
 }
 #endif

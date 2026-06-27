@@ -45,8 +45,24 @@
 #define BL_UPDATE_ERASE_TEST_TAG         "[TEST16]"
 #define BL_UPDATE_ERASE_TEST_NAME        "slot_erase_command_check"
 
+/*
+ * Slot write test command.
+ */
+#define BL_UPDATE_WRITE_TEST_TAG         "[TEST17]"
+#define BL_UPDATE_WRITE_TEST_NAME        "slot_write_test_command_check"
+
 /* Private variables ---------------------------------------------------------*/
 static UART_HandleTypeDef *update_uart = NULL;
+
+/*
+ * 16-byte test pattern written to the start of Slot B by 'write-test b'.
+ * Size is a multiple of 8 to satisfy doubleword-alignment requirement.
+ * Content: "DOUBLE01SLOTBTES" in ASCII.
+ */
+static const uint8_t s_slot_b_test_pattern[16U] = {
+  0x44U, 0x4FU, 0x55U, 0x42U, 0x4CU, 0x45U, 0x30U, 0x31U,
+  0x53U, 0x4CU, 0x4FU, 0x54U, 0x42U, 0x54U, 0x45U, 0x53U
+};
 
 /* Private function prototypes -----------------------------------------------*/
 static void    BlUpdate_PrintPrompt(void);
@@ -152,11 +168,12 @@ static uint8_t BlUpdate_CommandEquals(const char *cmd, const char *expected)
 static void BlUpdate_HandleHelp(void)
 {
   BlLog_Printf("[UPDATE] available_commands:\r\n");
-  BlLog_Printf("[UPDATE]   help    - show command list\r\n");
-  BlLog_Printf("[UPDATE]   info    - show bootloader and slot information\r\n");
-  BlLog_Printf("[UPDATE]   erase b - erase Slot B\r\n");
-  BlLog_Printf("[UPDATE]   exit    - leave update mode and boot normally\r\n");
-  BlLog_Printf("[UPDATE]   reboot  - reset the MCU\r\n");
+  BlLog_Printf("[UPDATE]   help          - show command list\r\n");
+  BlLog_Printf("[UPDATE]   info          - show bootloader and slot information\r\n");
+  BlLog_Printf("[UPDATE]   erase b       - erase Slot B\r\n");
+  BlLog_Printf("[UPDATE]   write-test b  - write test pattern to Slot B then verify\r\n");
+  BlLog_Printf("[UPDATE]   exit          - leave update mode and boot normally\r\n");
+  BlLog_Printf("[UPDATE]   reboot        - reset the MCU\r\n");
 }
 
 // Print bootloader and Flash layout information
@@ -230,6 +247,53 @@ static uint8_t BlUpdate_HandleCommand(const char *cmd)
       BlLog_Printf("%s %s FAIL\r\n",
                     BL_UPDATE_ERASE_TEST_TAG,
                     BL_UPDATE_ERASE_TEST_NAME);
+    }
+
+    return 1U;
+  }
+
+  if (BlUpdate_CommandEquals(cmd, "write-test b") != 0U) {
+    uint8_t write_result;
+    uint8_t verify_result;
+
+    BlLog_Printf("[UPDATE] write_test_slot=B\r\n");
+    BlLog_Printf("[UPDATE] write_test_base=0x%08lX\r\n",
+                  (unsigned long)BL_SLOT_B_BASE_ADDR);
+    BlLog_Printf("[UPDATE] write_test_offset=0x%08lX\r\n",
+                  (unsigned long)0UL);
+    BlLog_Printf("[UPDATE] write_test_size=%lu\r\n",
+                  (unsigned long)sizeof(s_slot_b_test_pattern));
+
+    write_result = BlSlot_Write(BL_IMAGE_SLOT_B,
+                                0UL,
+                                s_slot_b_test_pattern,
+                                (uint32_t)sizeof(s_slot_b_test_pattern));
+
+    if (write_result != 0U) {
+      BlLog_Printf("[UPDATE] write_test_program=OK\r\n");
+    } else {
+      BlLog_Printf("[UPDATE] write_test_program=NG\r\n");
+      BlLog_Printf("%s %s FAIL\r\n",
+                    BL_UPDATE_WRITE_TEST_TAG,
+                    BL_UPDATE_WRITE_TEST_NAME);
+      return 1U;
+    }
+
+    verify_result = BlSlot_Verify(BL_IMAGE_SLOT_B,
+                                  0UL,
+                                  s_slot_b_test_pattern,
+                                  (uint32_t)sizeof(s_slot_b_test_pattern));
+
+    if (verify_result != 0U) {
+      BlLog_Printf("[UPDATE] write_test_verify=OK\r\n");
+      BlLog_Printf("%s %s PASS\r\n",
+                    BL_UPDATE_WRITE_TEST_TAG,
+                    BL_UPDATE_WRITE_TEST_NAME);
+    } else {
+      BlLog_Printf("[UPDATE] write_test_verify=NG\r\n");
+      BlLog_Printf("%s %s FAIL\r\n",
+                    BL_UPDATE_WRITE_TEST_TAG,
+                    BL_UPDATE_WRITE_TEST_NAME);
     }
 
     return 1U;
