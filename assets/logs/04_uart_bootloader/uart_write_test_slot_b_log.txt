@@ -1,0 +1,112 @@
+[BOOT] STM32 Dual-Slot UART Bootloader V1
+[BOOT] Project: 04_uart_bootloader
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 16000000 Hz
+[BOOT] boot_base=0x08000000 size=64KB
+[BOOT] slot_a_base=0x08010000 size=192KB
+[BOOT] slot_b_base=0x08040000 size=192KB
+[BOOT] metadata0=0x0807F000
+[BOOT] metadata1=0x0807F800
+
+[BOOT] expected_vtor=0x08000000
+[BOOT] actual_vtor=0x08000000
+[BOOT] vtor_check=OK
+[TEST0] bootloader_boot_check PASS
+[TEST1] flash_layout_check PASS
+
+[BOOT] validate_slot=A
+[BOOT] slot_base=0x08010000
+[BOOT] slot_end=0x0803FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08010DBD
+[BOOT] reset_handler_addr=0x08010DBC
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST4] slot_a_vector_check PASS
+
+[BOOT] validate_slot=B
+[BOOT] slot_base=0x08040000
+[BOOT] slot_end=0x0806FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08040DBD
+[BOOT] reset_handler_addr=0x08040DBC
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST5] slot_b_vector_check PASS
+
+[BOOT] uart_update_window=3000ms
+[BOOT] send_u_to_enter_update_mode
+[BOOT] uart_update_request=YES
+[BOOT] update_mode=ENTER
+[TEST14] uart_update_mode_entry_check PASS
+
+[UPDATE] command_mode=READY
+[UPDATE] waiting_command...
+[UPDATE] available_commands:
+[UPDATE]   help          - show command list
+[UPDATE]   info          - show bootloader and slot information
+[UPDATE]   erase b       - erase Slot B
+[UPDATE]   write-test b  - write test pattern to Slot B then verify
+[UPDATE]   exit          - leave update mode and boot normally
+[UPDATE]   reboot        - reset the MCU
+
+UPDATE> erase b
+[UPDATE] rx_command=erase b
+[UPDATE] erase_slot=B
+[UPDATE] erase_base=0x08040000
+[UPDATE] erase_size=192KB
+[UPDATE] erase_start=YES
+[UPDATE] erase_result=OK
+[TEST16] slot_erase_command_check PASS
+
+UPDATE> write-test b
+[UPDATE] rx_command=write-test b
+[UPDATE] write_test_slot=B
+[UPDATE] write_test_base=0x08040000
+[UPDATE] write_test_offset=0x00000000
+[UPDATE] write_test_size=16
+[UPDATE] write_test_program=OK
+[UPDATE] write_test_verify=OK
+[TEST17] slot_write_test_command_check PASS
+
+UPDATE> exit
+[UPDATE] rx_command=exit
+[UPDATE] exit_to_normal_boot=YES
+[UPDATE] command_result=OK
+[TEST15] uart_command_parser_check PASS
+[UPDATE] command_mode=EXIT
+
+[BOOT] metadata_page=0x0807F000
+[BOOT] metadata_magic=NG
+[BOOT] use_default_slot=A
+[TEST7] metadata_read_check PASS
+
+[BOOT] selected_slot=A
+[BOOT] selected_slot_vector_check=OK
+[BOOT] jump_slot=A
+[BOOT] jump_msp=0x20024000
+[BOOT] jump_reset_handler=0x08010DBD
+[BOOT] jump_result=START
+
+[APP] STM32 Dual-Slot Test Application
+[APP] Project: 04_uart_bootloader
+[APP] Board: NUCLEO-G0B1RE
+[APP] System clock: 16000000 Hz
+[APP] slot_name=A
+[APP] slot_base=0x08010000
+[APP] slot_end=0x0803FFFF
+
+[APP] vector_table=0x08010000
+[APP] expected_vtor=0x08010000
+[APP] actual_vtor=0x08010000
+[APP] vtor_check=OK
+[TEST2] app_slot_a_boot_check PASS
+
+[APP] metadata_page=0x0807F000
+[APP] metadata_valid=NG
+[APP] confirm_required=NO
+[TEST13] app_confirm_image_check PASS
