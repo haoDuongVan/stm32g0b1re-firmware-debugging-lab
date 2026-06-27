@@ -1,0 +1,176 @@
+============================================================
+ Project 04 - Milestone 19 - UART multi-packet sender
+============================================================
+ port      = COM3
+ baud      = 115200
+ file      = generated\uart_multi_packet_test_slot_b.bin
+ test_size = 1024 bytes
+============================================================
+
+STEP 1: Press the RESET button on the board NOW.
+STEP 2: Then press any key here within 2 seconds to start the script.
+        (Script will send 'u' immediately to catch the 3-second update window)
+
+Press any key to continue . . .
+  ✔ test file generated: generated\uart_multi_packet_test_slot_b.bin (1024 bytes)
+
+╭────────────────────────────────────────── Project 04 — UART Packet Sender ───────────────────────────────────────────╮
+│ port      COM3                                                                                                       │
+│ baud      115200                                                                                                     │
+│ file      generated\uart_multi_packet_test_slot_b.bin                                                                │
+│ size      1024 bytes                                                                                                 │
+│ packets   4                                                                                                          │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+────────────────────────────────────────────────── enter update mode ───────────────────────────────────────────────────
+  ▶ reset the board now — sending 'u' for 10 s
+
+[BOOT] STM32 Dual-Slot UART Bootloader V1
+[BOOT] Project: 04_uart_bootloader
+[BOOT] Board: NU[BOOT] uart_update_request=YES
+[BOOT] update_mode=ENTER
+[TEST14] uart_update_mode_entry_check PASS
+
+[UPDATE] command_mode=READY
+[UPDATE] waiting_command...  ✔ update mode entered
+
+[UPDATE] available_commands:
+[UPDATE]   help          - show command list
+[UPDATE]   info          - show bootloader and slot information
+[UPDATE]   erase b       - erase Slot B
+[UPDATE]   write-test b  - write test pattern to Slot B then verify
+[UPDATE]   exit          - leave update mode and boot normally
+[UPDATE]   rx-test b     - receive one binary packet and write Slot B
+[UPDATE]   reboot        - reset the MCU
+
+UPDATE>
+
+UPDATE> ───────────────────────────────────────────────────── erase slot B ─────────────────────────────────────────────────────
+  ▶ erasing Slot B  (192 KB)
+  CMD: erase b
+erase b
+[UPDATE] rx_command=erase b
+[UPDATE] erase_slot=B
+[UPDATE] erase_base=0x08040000
+[UPDATE] erase_size=192KB
+[UPDATE] erase_start=YES
+[UPDATE] erase_result=OK
+[TEST16] slot_erase_command_check PASS
+
+UPDATE>   ✔ Slot B erased
+───────────────────────────────────────────────────── send packets ─────────────────────────────────────────────────────
+  ▶ sending 1024 bytes as 4 packet(s)
+  PKT 1/4  offset=0x00000000  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000000
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xD8758F68
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xD8758F68
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 2/4  offset=0x00000100  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000100
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x8F1C0C9D
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x8F1C0C9D
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 3/4  offset=0x00000200  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000200
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0xB9B1BA8E
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0xB9B1BA8E
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   PKT 4/4  offset=0x00000300  size=256
+  CMD: rx-test b
+rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000300
+[UPDATE] packet_length=256
+[UPDATE] packet_crc_stored=0x05EE107D
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x05EE107D
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>   ✔ all 4 packet(s) written and verified
+─────────────────────────────────────────────────── exit update mode ───────────────────────────────────────────────────
+  ▶ sending exit
+  CMD: exit
+exit
+[UPDATE] rx_command=exit
+[UPDATE] exit_to_normal_boot=YES
+[UPDATE] command_result=OK
+[TEST15] uart_command_parser_check PASS
+[UPDATE] command_mode=EXIT
+
+[BOOT] metadata_page=0x0807F000
+[BOOT] metadata_magic=NG
+[BOOT] use_default_slot=A
+[TEST7] metadata_read_check PASS
+
+[BOOT] selected_slot=A
+[BOOT] selected_slot_vector_check=OK
+[BOOT] jump_slot=A
+[BOOT] jump_msp=0x20024000
+[BOOT] jump_reset_handler=0x08010DBD
+[BOOT] jump_result=START
+  ✔ bootloader continued normal boot
+
+╭────────────────────────────────────────────────── Update finished ───────────────────────────────────────────────────╮
+│ packets sent    4                                                                                                    │
+│ bytes written   1024                                                                                                 │
+│ slot            B                                                                                                    │
+│ result          PASS                                                                                                 │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+
+[OK] Milestone 19 send finished. Check log above for TEST18 x4 PASS.
+Press any key to continue . . .
