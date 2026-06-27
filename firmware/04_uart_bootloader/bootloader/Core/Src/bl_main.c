@@ -12,6 +12,7 @@
 #include "bl_image.h"
 #include "bl_log.h"
 #include "bl_metadata.h"
+#include "bl_update.h"
 #include "main.h"
 
 /* Private defines -----------------------------------------------------------*/
@@ -605,15 +606,21 @@ static void BlMain_RunSlotVectorChecks(void)
                               "slot_b_vector_check");
 }
 
-// Initialize bootloader, run self-checks, read metadata, and jump to the active slot
+// Initialize bootloader, run self-checks, optionally enter update mode, then jump
 void BlMain_Init(UART_HandleTypeDef *debug_uart)
 {
   BlLog_Init(debug_uart);
+  BlUpdate_Init(debug_uart);
 
   BlMain_PrintBootLog();
   BlMain_PrintFlashLayout();
   BlMain_RunBootCheck();
   BlMain_RunSlotVectorChecks();
+
+  if (BlUpdate_WaitForEntry() != 0U) {
+    BlUpdate_Run();
+    return;
+  }
 
 #if (BL_AUTO_JUMP_ENABLE != 0U)
   BlMain_SelectAndJump(BlMain_RunMetadataCheck());
