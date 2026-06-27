@@ -1,0 +1,85 @@
+[BOOT] STM32 Dual-Slot UART Bootloader V1
+[BOOT] Project: 04_uart_bootloader
+[BOOT] Board: NUCLEO-G0B1RE
+[BOOT] System clock: 16000000 Hz
+[BOOT] boot_base=0x08000000 size=64KB
+[BOOT] slot_a_base=0x08010000 size=192KB
+[BOOT] slot_b_base=0x08040000 size=192KB
+[BOOT] metadata0=0x0807F000
+[BOOT] metadata1=0x0807F800
+
+[BOOT] expected_vtor=0x08000000
+[BOOT] actual_vtor=0x08000000
+[BOOT] vtor_check=OK
+[TEST0] bootloader_boot_check PASS
+[TEST1] flash_layout_check PASS
+
+[BOOT] validate_slot=A
+[BOOT] slot_base=0x08010000
+[BOOT] slot_end=0x0803FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08010DBD
+[BOOT] reset_handler_addr=0x08010DBC
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST4] slot_a_vector_check PASS
+
+[BOOT] validate_slot=B
+[BOOT] slot_base=0x08040000
+[BOOT] slot_end=0x0806FFFF
+[BOOT] initial_msp=0x20024000
+[BOOT] reset_handler_raw=0x08040DBD
+[BOOT] reset_handler_addr=0x08040DBC
+[BOOT] msp_check=OK
+[BOOT] reset_thumb_check=OK
+[BOOT] reset_range_check=OK
+[BOOT] vector_check=OK
+[TEST5] slot_b_vector_check PASS
+
+[BOOT] uart_update_window=3000ms
+[BOOT] send_u_to_enter_update_mode
+[BOOT] uart_update_request=YES
+[BOOT] update_mode=ENTER
+[TEST14] uart_update_mode_entry_check PASS
+
+[UPDATE] command_mode=READY
+[UPDATE] waiting_command...
+[UPDATE] available_commands:
+[UPDATE]   help          - show command list
+[UPDATE]   info          - show bootloader and slot information
+[UPDATE]   erase b       - erase Slot B
+[UPDATE]   write-test b  - write test pattern to Slot B then verify
+[UPDATE]   exit          - leave update mode and boot normally
+[UPDATE]   rx-test b     - receive one binary packet and write Slot B
+[UPDATE]   reboot        - reset the MCU
+
+UPDATE> erase b
+[UPDATE] rx_command=erase b
+[UPDATE] erase_slot=B
+[UPDATE] erase_base=0x08040000
+[UPDATE] erase_size=192KB
+[UPDATE] erase_start=YES
+[UPDATE] erase_result=OK
+[TEST16] slot_erase_command_check PASS
+
+UPDATE> rx-test b
+[UPDATE] rx_command=rx-test b
+[UPDATE] rx_packet_slot=B
+[UPDATE] rx_packet_wait=START
+[UPDATE] packet_magic=0x31544B50
+[UPDATE] packet_offset=0x00000000
+[UPDATE] packet_length=64
+[UPDATE] packet_crc_stored=0x1D55818D
+[UPDATE] packet_magic_check=OK
+[UPDATE] packet_length_check=OK
+[UPDATE] packet_alignment_check=OK
+[UPDATE] rx_packet_payload=OK
+[UPDATE] packet_crc_calculated=0x1D55818D
+[UPDATE] packet_crc_check=OK
+[UPDATE] rx_packet_write=OK
+[UPDATE] rx_packet_verify=OK
+[TEST18] uart_binary_packet_receive_check PASS
+
+UPDATE>
