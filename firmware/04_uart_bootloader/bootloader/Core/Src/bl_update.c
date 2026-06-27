@@ -11,6 +11,7 @@
 
 #include "bl_flash_layout.h"
 #include "bl_log.h"
+#include "bl_slot.h"
 
 /* Private defines -----------------------------------------------------------*/
 
@@ -37,6 +38,12 @@
  */
 #define BL_UPDATE_CMD_TEST_TAG           "[TEST15]"
 #define BL_UPDATE_CMD_TEST_NAME          "uart_command_parser_check"
+
+/*
+ * Slot erase command test.
+ */
+#define BL_UPDATE_ERASE_TEST_TAG         "[TEST16]"
+#define BL_UPDATE_ERASE_TEST_NAME        "slot_erase_command_check"
 
 /* Private variables ---------------------------------------------------------*/
 static UART_HandleTypeDef *update_uart = NULL;
@@ -145,10 +152,11 @@ static uint8_t BlUpdate_CommandEquals(const char *cmd, const char *expected)
 static void BlUpdate_HandleHelp(void)
 {
   BlLog_Printf("[UPDATE] available_commands:\r\n");
-  BlLog_Printf("[UPDATE]   help   - show command list\r\n");
-  BlLog_Printf("[UPDATE]   info   - show bootloader and slot information\r\n");
-  BlLog_Printf("[UPDATE]   exit   - leave update mode and boot normally\r\n");
-  BlLog_Printf("[UPDATE]   reboot - reset the MCU\r\n");
+  BlLog_Printf("[UPDATE]   help    - show command list\r\n");
+  BlLog_Printf("[UPDATE]   info    - show bootloader and slot information\r\n");
+  BlLog_Printf("[UPDATE]   erase b - erase Slot B\r\n");
+  BlLog_Printf("[UPDATE]   exit    - leave update mode and boot normally\r\n");
+  BlLog_Printf("[UPDATE]   reboot  - reset the MCU\r\n");
 }
 
 // Print bootloader and Flash layout information
@@ -197,6 +205,33 @@ static uint8_t BlUpdate_HandleCommand(const char *cmd)
     BlLog_Printf("%s %s PASS\r\n",
                   BL_UPDATE_CMD_TEST_TAG,
                   BL_UPDATE_CMD_TEST_NAME);
+    return 1U;
+  }
+
+  if (BlUpdate_CommandEquals(cmd, "erase b") != 0U) {
+    uint8_t erase_result;
+
+    BlLog_Printf("[UPDATE] erase_slot=B\r\n");
+    BlLog_Printf("[UPDATE] erase_base=0x%08lX\r\n",
+                  (unsigned long)BL_SLOT_B_BASE_ADDR);
+    BlLog_Printf("[UPDATE] erase_size=%luKB\r\n",
+                  (unsigned long)(BL_SLOT_SIZE / 1024UL));
+    BlLog_Printf("[UPDATE] erase_start=YES\r\n");
+
+    erase_result = BlSlot_Erase(BL_IMAGE_SLOT_B);
+
+    if (erase_result != 0U) {
+      BlLog_Printf("[UPDATE] erase_result=OK\r\n");
+      BlLog_Printf("%s %s PASS\r\n",
+                    BL_UPDATE_ERASE_TEST_TAG,
+                    BL_UPDATE_ERASE_TEST_NAME);
+    } else {
+      BlLog_Printf("[UPDATE] erase_result=NG\r\n");
+      BlLog_Printf("%s %s FAIL\r\n",
+                    BL_UPDATE_ERASE_TEST_TAG,
+                    BL_UPDATE_ERASE_TEST_NAME);
+    }
+
     return 1U;
   }
 
