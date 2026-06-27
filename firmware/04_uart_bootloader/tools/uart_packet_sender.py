@@ -37,6 +37,8 @@ TEST16_PASS = b"[TEST16] slot_erase_command_check PASS"
 TEST16_FAIL = b"[TEST16] slot_erase_command_check FAIL"
 TEST18_PASS = b"[TEST18] uart_binary_packet_receive_check PASS"
 TEST18_FAIL = b"[TEST18] uart_binary_packet_receive_check FAIL"
+TEST19_PASS = b"[TEST19] set_pending_slot_b_check PASS"
+TEST19_FAIL = b"[TEST19] set_pending_slot_b_check FAIL"
 APP_TOKEN   = b"[APP]"
 
 
@@ -266,6 +268,21 @@ def send_file_as_packets(sess: SerialSession, image_path: str) -> int:
     return packet_index
 
 
+def set_pending_slot_b(sess: SerialSession) -> None:
+    divider("set pending metadata")
+    step("writing metadata: active=B  confirmed=A  boot_count=0")
+
+    sess.wait_for_prompt(10.0)
+    sess.send_command("set-pending b")
+
+    token, _ = sess.wait_for_any([TEST19_PASS, TEST19_FAIL], 10.0)
+
+    if token == TEST19_PASS:
+        ok("metadata written — next reset will boot Slot B as pending")
+    else:
+        raise RuntimeError("set-pending b failed: bootloader reported TEST19 FAIL")
+
+
 def exit_update_mode(sess: SerialSession) -> None:
     divider("exit update mode")
     step("sending exit")
@@ -296,6 +313,7 @@ def main() -> int:
     parser.add_argument("--make-test-file", action="store_true", help="generate ASCII test file before sending")
     parser.add_argument("--test-size", type=int, default=1024, help="test file size in bytes")
     parser.add_argument("--quiet-serial", action="store_true", help="do not print bootloader serial log")
+    parser.add_argument("--set-pending",  action="store_true", help="after upload, write pending metadata (active=B confirmed=A)")
 
     args = parser.parse_args()
 
@@ -343,6 +361,8 @@ def main() -> int:
             enter_update_mode(sess)
             erase_slot_b(sess)
             packet_count = send_file_as_packets(sess, args.file)
+            if args.set_pending:
+                set_pending_slot_b(sess)
             exit_update_mode(sess)
 
     except (TimeoutError, RuntimeError) as exc:
