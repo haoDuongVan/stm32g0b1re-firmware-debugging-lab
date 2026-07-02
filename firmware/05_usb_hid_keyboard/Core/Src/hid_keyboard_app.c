@@ -7,10 +7,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "hid_keyboard_app.h"
-#include "hid_keyboard_report.h"
-#include "key_table.h"
+#include "hid_keyboard_convert.h"
+#include "key_event_queue.h"
 #include "usbd_hid.h"
 #include "stm32g0xx_hal.h"
+#include <stddef.h>
 
 /* Private variables ---------------------------------------------------------*/
 static volatile UsbHidTxState_t gHidTxState = USB_HID_TX_IDLE;
@@ -87,44 +88,47 @@ void UsbHidTransport_TxCpltCallback(void)
 }
 
 /*
- * One-shot test: wait 2 s, send key 'a' (keyLoc = 4) via key table, release after 50 ms.
- * State transitions are gated on SendReport returning true so no report is dropped
- * if the endpoint is still busy. Replaced in M5 with ring buffer drainer.
+ * Initialise all keyboard subsystems and push the M5 test events.
+ * Called once from main after MX_USB_Device_Init.
+ */
+void HID_Keyboard_Init(void)
+{
+  KeyEvent_t event;
+
+  UsbHidTransport_Init();
+  KeyEventQueue_Init();
+  HidKeyboardConvert_Init();
+
+  /* M5 test: push key-down and key-release for keyLoc 4 ('a') */
+  event.type   = KEY_EVENT_ON;
+  event.keyLoc = 4U;
+  (void)KeyEventQueue_Push(&event);
+
+  event.type   = KEY_EVENT_OFF;
+  event.keyLoc = 4U;
+  (void)KeyEventQueue_Push(&event);
+}
+
+/*
+ * Main loop handler.
+ * State 0: wait 2 s for USB enumeration before draining the queue.
+ * State 1: drain one event per call via HidKeyboardConvert_Run.
+ * Replaced in M6 when matrix scan pushes real events.
  */
 void HID_Keyboard_App(void)
 {
-  uint32_t               now;
-  HidKeyboardReport_t    report;
-  const KeyTableEntry_t *entry;
-
-  now = HAL_GetTick();
-
   switch (testState) {
   case 0U:
-    /* Wait 2 s after power-on, then look up keyLoc 4 → 'a' and send key-down */
-    if (now >= 2000U) {
-      entry = KeyTable_Get(4U);
-
-      if ((entry != NULL) && (entry->kind == KEY_KIND_NORMAL)) {
-        HidKeyboardReport_SetKey(&report, entry->modifier, entry->usage);
-
-        if (UsbHidTransport_SendReport(HidKeyboardReport_GetData(&report))) {
-          testTick  = now;
-          testState = 1U;
-        }
-      }
+    /* Give USB host 2 s to enumerate before sending the first report */
+    if (HAL_GetTick() >= 2000U)
+    {
+      testTick  = HAL_GetTick();
+      testState = 1U;
     }
     break;
 
   case 1U:
-    /* Release all keys after 50 ms */
-    if ((now - testTick) >= 50U) {
-      HidKeyboardReport_Clear(&report);
-
-      if (UsbHidTransport_SendReport(HidKeyboardReport_GetData(&report))) {
-        testState = 2U;
-      }
-    }
+    HidKeyboardConvert_Run();
     break;
 
   default:

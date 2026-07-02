@@ -92,7 +92,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USB_Device_Init();
   /* USER CODE BEGIN 2 */
-  UsbHidTransport_Init();
+  HID_Keyboard_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */

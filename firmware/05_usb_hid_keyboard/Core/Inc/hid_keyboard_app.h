@@ -37,6 +37,7 @@ bool UsbHidTransport_SendReport(const uint8_t report[USB_HID_KEYBOARD_REPORT_SIZ
 void UsbHidTransport_TxCpltCallback(void);
 
 /* Application */
+void HID_Keyboard_Init(void);
 void HID_Keyboard_App(void);
 
 #endif /* INC_HID_KEYBOARD_APP_H_ */
