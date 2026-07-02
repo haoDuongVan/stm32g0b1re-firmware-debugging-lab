@@ -9,6 +9,7 @@
 #include "hid_keyboard_app.h"
 #include "hid_keyboard_convert.h"
 #include "key_event_queue.h"
+#include "matrix_scan.h"
 #include "usbd_hid.h"
 #include "stm32g0xx_hal.h"
 #include <stddef.h>
@@ -17,7 +18,7 @@
 static volatile UsbHidTxState_t gHidTxState = USB_HID_TX_IDLE;
 
 static uint8_t  testState = 0U;
-static uint32_t testTick  = 0U;
+static uint8_t  testSent  = 0U;  /* guard: ON+OFF events pushed for current press */
 
 /* External variables --------------------------------------------------------*/
 extern USBD_HandleTypeDef hUsbDeviceFS;
@@ -88,47 +89,65 @@ void UsbHidTransport_TxCpltCallback(void)
 }
 
 /*
- * Initialise all keyboard subsystems and push the M5 test events.
+ * Initialise all keyboard subsystems.
  * Called once from main after MX_USB_Device_Init.
  */
 void HID_Keyboard_Init(void)
 {
-  KeyEvent_t event;
-
   UsbHidTransport_Init();
   KeyEventQueue_Init();
   HidKeyboardConvert_Init();
-
-  /* M5 test: push key-down and key-release for keyLoc 4 ('a') */
-  event.type   = KEY_EVENT_ON;
-  event.keyLoc = 4U;
-  (void)KeyEventQueue_Push(&event);
-
-  event.type   = KEY_EVENT_OFF;
-  event.keyLoc = 4U;
-  (void)KeyEventQueue_Push(&event);
+  MatrixScan_Init();
 }
 
 /*
- * Main loop handler.
- * State 0: wait 2 s for USB enumeration before draining the queue.
- * State 1: drain one event per call via HidKeyboardConvert_Run.
- * Replaced in M6 when matrix scan pushes real events.
+ * Main loop handler — M6 raw matrix scan test.
+ * State 0: wait 2 s for USB enumeration.
+ * State 1: scan keypad; track keyLoc 4 ('a') press/release; convert and send.
  */
 void HID_Keyboard_App(void)
 {
+  uint16_t   rawState;
+  KeyEvent_t event;
+
   switch (testState) {
   case 0U:
     /* Give USB host 2 s to enumerate before sending the first report */
     if (HAL_GetTick() >= 2000U)
     {
-      testTick  = HAL_GetTick();
       testState = 1U;
     }
     break;
 
   case 1U:
+    rawState = MatrixScan_ReadRaw();
+
+    /* Watch keyLoc 4 (row 1, col 0 → bit 4) */
+    if ((rawState & (1U << 4U)) != 0U)
+    {
+      /* Key is held down — push ON+OFF once per press */
+      if (testSent == 0U)
+      {
+        event.type   = KEY_EVENT_ON;
+        event.keyLoc = 4U;
+        (void)KeyEventQueue_Push(&event);
+
+        event.type   = KEY_EVENT_OFF;
+        event.keyLoc = 4U;
+        (void)KeyEventQueue_Push(&event);
+
+        testSent = 1U;
+      }
+    }
+    else
+    {
+      /* Key released — allow the next press to generate events */
+      testSent = 0U;
+    }
+
     HidKeyboardConvert_Run();
+
+    HAL_Delay(5U);  /* ~5 ms pacing between scans */
     break;
 
   default:
