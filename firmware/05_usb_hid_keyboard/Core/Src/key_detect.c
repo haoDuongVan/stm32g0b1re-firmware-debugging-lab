@@ -10,6 +10,7 @@
 
 #include "matrix_scan.h"
 #include "key_event_queue.h"
+#include <stdbool.h>
 
 /* Private defines -----------------------------------------------------------*/
 #define KEY_DETECT_SCAN_BUFFER_NUM  4U
@@ -17,6 +18,13 @@
 /* Private variables ---------------------------------------------------------*/
 static uint16_t gScanBuffer[KEY_DETECT_SCAN_BUFFER_NUM];
 static uint16_t gKeyStatus;
+
+/*
+ * Set when two or more keys are pressed simultaneously.
+ * While active, all normal key detection is suppressed until every
+ * physical key has been released (no-diode ghost-key safety policy).
+ */
+static bool gSimultaneousErrorActive;
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -36,6 +44,37 @@ static void KeyDetect_PushEvent(KeyEventType_t type, uint8_t keyLoc)
   event.keyLoc = keyLoc;
 
   (void)KeyEventQueue_Push(&event);
+}
+
+static void KeyDetect_PushErrorRollOver(void)
+{
+  KeyDetect_PushEvent(KEY_EVENT_ERROR, KEY_LOC_ERROR_ROLLOVER);
+}
+
+static void KeyDetect_ResetScanBuffer(void)
+{
+  uint8_t i;
+
+  for (i = 0U; i < KEY_DETECT_SCAN_BUFFER_NUM; i++)
+  {
+    gScanBuffer[i] = 0U;
+  }
+}
+
+static void KeyDetect_ReleaseAllKeys(void)
+{
+  uint8_t keyLoc;
+
+  for (keyLoc = 0U; keyLoc < MATRIX_KEY_NUM; keyLoc++)
+  {
+    uint16_t bit = (uint16_t)(1U << keyLoc);
+
+    if ((gKeyStatus & bit) != 0U)
+    {
+      gKeyStatus &= (uint16_t)(~bit);
+      KeyDetect_PushEvent(KEY_EVENT_OFF, keyLoc);
+    }
+  }
 }
 
 static void KeyDetect_CheckKeyOff(uint16_t stableOffMask)
@@ -74,7 +113,7 @@ static void KeyDetect_CheckKeyOn(uint16_t stableOnMask)
 
 /* Function definitions ------------------------------------------------------*/
 
-// Clear scan buffers and key status; call once after MatrixScan_Init
+// Clear scan buffers, key status, and error flag; call once after MatrixScan_Init
 void KeyDetect_Init(void)
 {
   uint8_t i;
@@ -84,7 +123,8 @@ void KeyDetect_Init(void)
     gScanBuffer[i] = 0U;
   }
 
-  gKeyStatus = 0U;
+  gKeyStatus              = 0U;
+  gSimultaneousErrorActive = false;
 }
 
 void KeyDetect_Run(void)
@@ -92,8 +132,46 @@ void KeyDetect_Run(void)
   uint16_t rawState;
   uint16_t stableOnMask;
   uint16_t stableOffMask;
+  uint8_t  pressedCount;
 
-  rawState = MatrixScan_ReadRaw();
+  rawState     = MatrixScan_ReadRaw();
+  pressedCount = MatrixScan_CountPressed(rawState);
+
+  /*
+   * No-diode matrix safety policy:
+   * If two or more keys are pressed at the same scan, do not try to guess.
+   * Send ErrorRollOver once, then wait until all keys are released.
+   */
+  if (pressedCount >= 2U)
+  {
+    if (!gSimultaneousErrorActive)
+    {
+      KeyDetect_PushErrorRollOver();
+      gSimultaneousErrorActive = true;
+    }
+
+    return;
+  }
+
+  /*
+   * After a simultaneous error, wait for every key to be released before
+   * resuming normal detection. Do not fire on a single remaining key when
+   * the user lifts only one finger from a multi-key hold.
+   */
+  if (gSimultaneousErrorActive)
+  {
+    if (pressedCount != 0U)
+    {
+      return;
+    }
+
+    KeyDetect_ReleaseAllKeys();
+    KeyDetect_ResetScanBuffer();
+    gSimultaneousErrorActive = false;
+
+    return;
+  }
+
   KeyDetect_UpdateScanBuffer(rawState);
 
   /*

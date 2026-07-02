@@ -139,8 +139,21 @@ void HidKeyboardConvert_Run(void)
     break;
 
   case KEY_EVENT_ERROR:
-    /* ErrorRollOver sequence deferred to a later milestone */
-    (void)KeyEventQueue_Pop(NULL);
+    if (event.keyLoc != KEY_LOC_ERROR_ROLLOVER)
+    {
+      /* Unknown error variant — drop to unblock queue */
+      (void)KeyEventQueue_Pop(NULL);
+      break;
+    }
+
+    HidKeyboardReport_SetErrorRollOver(&gReport);
+
+    if (UsbHidTransport_SendReport(HidKeyboardReport_GetData(&gReport)))
+    {
+      /* Pop only after ErrorRollOver is accepted, then release via null report */
+      (void)KeyEventQueue_Pop(NULL);
+      gNeedNullReport = true;
+    }
     break;
 
   default:
