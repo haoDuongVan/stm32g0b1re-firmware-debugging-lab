@@ -7,6 +7,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "hid_keyboard_app.h"
+#include "hid_keyboard_report.h"
+#include "key_table.h"
 #include "usbd_hid.h"
 #include "stm32g0xx_hal.h"
 
@@ -85,54 +87,41 @@ void UsbHidTransport_TxCpltCallback(void)
 }
 
 /*
- * One-shot keyboard test sequence driven from the main loop.
- * State 0: wait 2 s, send key-down for 'A' (HID usage 0x04).
- * State 1: hold for 50 ms, send key-release (all zeros).
- * State 2: done — stays idle.
- *
- * State transitions are gated on SendReport returning true so no report is
- * lost if the endpoint is still busy from the previous call.
+ * One-shot test: wait 2 s, send key 'a' (keyLoc = 4) via key table, release after 50 ms.
+ * State transitions are gated on SendReport returning true so no report is dropped
+ * if the endpoint is still busy. Replaced in M5 with ring buffer drainer.
  */
 void HID_Keyboard_App(void)
 {
-  uint32_t now;
-  uint8_t  report[USB_HID_KEYBOARD_REPORT_SIZE];
+  uint32_t               now;
+  HidKeyboardReport_t    report;
+  const KeyTableEntry_t *entry;
 
   now = HAL_GetTick();
 
   switch (testState) {
   case 0U:
-    /* Wait 2 s after power-on, then press 'A' (HID usage 0x04) */
+    /* Wait 2 s after power-on, then look up keyLoc 4 → 'a' and send key-down */
     if (now >= 2000U) {
-      report[0] = 0x00U;
-      report[1] = 0x00U;
-      report[2] = 0x04U;  /* keycode: A */
-      report[3] = 0x00U;
-      report[4] = 0x00U;
-      report[5] = 0x00U;
-      report[6] = 0x00U;
-      report[7] = 0x00U;
+      entry = KeyTable_Get(4U);
 
-      if (UsbHidTransport_SendReport(report)) {
-        testTick  = now;
-        testState = 1U;
+      if ((entry != NULL) && (entry->kind == KEY_KIND_NORMAL)) {
+        HidKeyboardReport_SetKey(&report, entry->modifier, entry->usage);
+
+        if (UsbHidTransport_SendReport(HidKeyboardReport_GetData(&report))) {
+          testTick  = now;
+          testState = 1U;
+        }
       }
     }
     break;
 
   case 1U:
-    /* Release the key after 50 ms */
+    /* Release all keys after 50 ms */
     if ((now - testTick) >= 50U) {
-      report[0] = 0x00U;
-      report[1] = 0x00U;
-      report[2] = 0x00U;
-      report[3] = 0x00U;
-      report[4] = 0x00U;
-      report[5] = 0x00U;
-      report[6] = 0x00U;
-      report[7] = 0x00U;
+      HidKeyboardReport_Clear(&report);
 
-      if (UsbHidTransport_SendReport(report)) {
+      if (UsbHidTransport_SendReport(HidKeyboardReport_GetData(&report))) {
         testState = 2U;
       }
     }
