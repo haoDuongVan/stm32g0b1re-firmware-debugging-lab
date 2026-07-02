@@ -69,6 +69,7 @@
 #define USBD_PRODUCT_STRING     "STM32 USB HID 4x4 Macro Keypad"
 #define USBD_CONFIGURATION_STRING     "HID Config"
 #define USBD_INTERFACE_STRING     "HID Interface"
+#define USBD_SERIALNUMBER_STRING  "000000000001"
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
 
@@ -287,7 +288,7 @@ uint8_t * USBD_HID_SerialStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length
   Get_SerialNum();
 
   /* USER CODE BEGIN USBD_HID_SerialStrDescriptor */
-
+  USBD_GetString((uint8_t *)USBD_SERIALNUMBER_STRING, USBD_StringSerial, length);
   /* USER CODE END USBD_HID_SerialStrDescriptor */
 
   return (uint8_t *) USBD_StringSerial;
