@@ -11,6 +11,7 @@
 #include "key_detect.h"
 #include "key_event_queue.h"
 #include "matrix_scan.h"
+#include "scan_scheduler.h"
 #include "usbd_hid.h"
 #include "stm32g0xx_hal.h"
 #include <stddef.h>
@@ -20,6 +21,7 @@ static volatile UsbHidTxState_t gHidTxState = USB_HID_TX_IDLE;
 
 /* External variables --------------------------------------------------------*/
 extern USBD_HandleTypeDef hUsbDeviceFS;
+extern TIM_HandleTypeDef  htim6;
 
 /* Function definitions ------------------------------------------------------*/
 
@@ -86,6 +88,15 @@ void UsbHidTransport_TxCpltCallback(void)
   gHidTxState = USB_HID_TX_IDLE;
 }
 
+// Forward TIM6 period-elapsed ticks to the scan scheduler
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if (htim->Instance == TIM6)
+  {
+    ScanScheduler_OnTimerTick();
+  }
+}
+
 /*
  * Initialise all keyboard subsystems.
  * Called once from main after MX_USB_Device_Init.
@@ -97,18 +108,23 @@ void HID_Keyboard_Init(void)
   HidKeyboardConvert_Init();
   MatrixScan_Init();
   KeyDetect_Init();
+  ScanScheduler_Init();
+  HAL_TIM_Base_Start_IT(&htim6);
 }
 
 /*
  * Main loop handler.
- * Scan the matrix, debounce, push events, then drain one event per call.
- * HAL_Delay(5) paces the scan to ~5 ms per iteration; 2-buffer debounce
- * therefore requires 2 consecutive stable reads (~10 ms) before a key
- * on/off is accepted.
+ * Drain all pending 5 ms timer ticks by running KeyDetect_Run once per tick,
+ * then call HidKeyboardConvert_Run unconditionally so reports are sent to the
+ * USB host as soon as the IN endpoint becomes idle — without waiting for the
+ * next scan tick.
  */
 void HID_Keyboard_App(void)
 {
-  KeyDetect_Run();
+  while (ScanScheduler_TakeRequest() != 0U)
+  {
+    KeyDetect_Run();
+  }
+
   HidKeyboardConvert_Run();
-  HAL_Delay(5U);
 }
