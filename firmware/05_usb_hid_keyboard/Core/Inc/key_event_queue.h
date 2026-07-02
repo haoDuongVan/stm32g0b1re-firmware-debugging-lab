@@ -37,6 +37,12 @@ typedef struct
   uint8_t        keyLoc;
 } KeyEvent_t;
 
+/*
+ * This queue is intended for main-loop use only.
+ * It is not protected against concurrent ISR access.
+ * The only ISR in this design (TIM6) writes to scan_scheduler, not to this queue.
+ */
+
 /* Function prototypes -------------------------------------------------------*/
 void    KeyEventQueue_Init(void);
 bool    KeyEventQueue_Push(const KeyEvent_t *event);

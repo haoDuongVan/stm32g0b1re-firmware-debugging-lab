@@ -42,7 +42,8 @@ void ScanScheduler_OnTimerTick(void)
 // Atomically consume one request; returns 1 if a request was pending, else 0
 uint8_t ScanScheduler_TakeRequest(void)
 {
-  uint8_t hasRequest = 0U;
+  uint8_t  hasRequest = 0U;
+  uint32_t primask    = __get_PRIMASK();
 
   __disable_irq();
 
@@ -52,7 +53,7 @@ uint8_t ScanScheduler_TakeRequest(void)
     hasRequest = 1U;
   }
 
-  __enable_irq();
+  if (primask == 0U) { __enable_irq(); }
 
   return hasRequest;
 }

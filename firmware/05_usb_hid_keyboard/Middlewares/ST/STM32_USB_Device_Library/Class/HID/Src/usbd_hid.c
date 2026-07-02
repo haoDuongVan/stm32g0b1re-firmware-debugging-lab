@@ -143,9 +143,9 @@ __ALIGN_BEGIN static uint8_t USBD_HID_CfgDesc[USB_HID_CONFIG_DESC_SIZ] __ALIGN_E
   0x00,                                               /* iConfiguration: Index of string descriptor
                                                          describing the configuration */
 #if (USBD_SELF_POWERED == 1U)
-  0xE0,                                               /* bmAttributes: Bus Powered according to user configuration */
+  0xC0,                                               /* bmAttributes: Self-powered */
 #else
-  0xA0,                                               /* bmAttributes: Bus Powered according to user configuration */
+  0x80,                                               /* bmAttributes: Bus-powered */
 #endif /* USBD_SELF_POWERED */
   USBD_MAX_POWER,                                     /* MaxPower (mA) */
 
@@ -166,7 +166,7 @@ __ALIGN_BEGIN static uint8_t USBD_HID_CfgDesc[USB_HID_CONFIG_DESC_SIZ] __ALIGN_E
   HID_DESCRIPTOR_TYPE,                                /* bDescriptorType: HID */
   0x11,                                               /* bcdHID: HID Class Spec release number */
   0x01,
-  0x0F,                                               /* bCountryCode: Hardware target country */
+  0x00,                                               /* bCountryCode: Not localized */
   0x01,                                               /* bNumDescriptors: Number of HID class descriptors to follow */
   0x22,                                               /* bDescriptorType */
   HID_KEYBOARD_REPORT_DESC_SIZE,                      /* wItemLength: Total length of Report descriptor */
@@ -178,7 +178,7 @@ __ALIGN_BEGIN static uint8_t USBD_HID_CfgDesc[USB_HID_CONFIG_DESC_SIZ] __ALIGN_E
 
   HID_EPIN_ADDR,                                      /* bEndpointAddress: Endpoint Address (IN) */
   0x03,                                               /* bmAttributes: Interrupt endpoint */
-  HID_EPIN_SIZE,                                      /* wMaxPacketSize: 4 Bytes max */
+  HID_EPIN_SIZE,                                      /* wMaxPacketSize: 8 bytes */
   0x00,
   HID_FS_BINTERVAL,                                   /* bInterval: Polling Interval */
   /* 34 */
@@ -193,7 +193,7 @@ __ALIGN_BEGIN static uint8_t USBD_HID_Desc[USB_HID_DESC_SIZ] __ALIGN_END =
   HID_DESCRIPTOR_TYPE,                                /* bDescriptorType: HID */
   0x11,                                               /* bcdHID: HID Class Spec release number */
   0x01,
-  0x0F,                                               /* bCountryCode: Hardware target country */
+  0x00,                                               /* bCountryCode: Not localized */
   0x01,                                               /* bNumDescriptors: Number of HID class descriptors to follow */
   0x22,                                               /* bDescriptorType */
   HID_KEYBOARD_REPORT_DESC_SIZE,                      /* wItemLength: Total length of Report descriptor */

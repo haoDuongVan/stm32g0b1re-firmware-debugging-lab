@@ -57,25 +57,27 @@ bool UsbHidTransport_SendReport(const uint8_t report[USB_HID_KEYBOARD_REPORT_SIZ
     return false;
   }
 
+  uint32_t primask = __get_PRIMASK();
   __disable_irq();
 
   if (gHidTxState != USB_HID_TX_IDLE)
   {
-    __enable_irq();
+    if (primask == 0U) { __enable_irq(); }
     return false;
   }
 
   gHidTxState = USB_HID_TX_BUSY;
 
-  __enable_irq();
+  if (primask == 0U) { __enable_irq(); }
 
   if (USBD_HID_SendReport(&hUsbDeviceFS,
                           (uint8_t *)report,
                           USB_HID_KEYBOARD_REPORT_SIZE) != USBD_OK)
   {
+    uint32_t pm2 = __get_PRIMASK();
     __disable_irq();
     gHidTxState = USB_HID_TX_IDLE;
-    __enable_irq();
+    if (pm2 == 0U) { __enable_irq(); }
     return false;
   }
 

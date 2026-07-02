@@ -158,11 +158,11 @@ static void HidKeyboardConvert_RunMacroSequence(void)
 
   if (!HidKeyboardConvert_BuildMacroReport(gMacroId, gMacroStep, &gReport, &isLastStep))
   {
-    /* Step out of range — abort and send a null report to be safe */
-    gMacroActive = false;
-    gMacroId     = MACRO_NONE;
-    gMacroStep   = 0U;
-    HidKeyboardReport_Clear(&gReport);
+    /* Step out of range — abort and schedule a null report to release any held keys */
+    gMacroActive    = false;
+    gMacroId        = MACRO_NONE;
+    gMacroStep      = 0U;
+    gNeedNullReport = true;
     return;
   }
 
@@ -265,14 +265,24 @@ void HidKeyboardConvert_Run(void)
 
     if (entry->kind == KEY_KIND_MACRO)
     {
-      /* Pop immediately — macro state machine owns the sequence from here */
-      (void)KeyEventQueue_Pop(NULL);
-
       gMacroActive = true;
       gMacroId     = entry->macroId;
       gMacroStep   = 0U;
 
       HidKeyboardConvert_RunMacroSequence();
+
+      /*
+       * Pop only after the first macro step is accepted.
+       * If SendReport returned false (USB busy), gMacroStep is still 0
+       * and gMacroActive is still true; the event stays in the queue and
+       * will be re-peeked next call, where the macro branch will be skipped
+       * because gMacroActive is already set.
+       * Once gMacroStep > 0 the sequence owns the state, so pop now.
+       */
+      if (gMacroStep > 0U || !gMacroActive)
+      {
+        (void)KeyEventQueue_Pop(NULL);
+      }
 
       return;
     }
