@@ -593,6 +593,15 @@ static uint8_t *USBD_HID_GetOtherSpeedCfgDesc(uint16_t *length)
 #endif /* USE_USBD_COMPOSITE  */
 
 /**
+  * @brief  UsbHidTransport_TxCpltCallback
+  *         Weak hook called when a HID IN transfer completes.
+  *         Override in hid_keyboard_app.c to release the transport TX state.
+  */
+__weak void UsbHidTransport_TxCpltCallback(void)
+{
+}
+
+/**
   * @brief  USBD_HID_DataIn
   *         handle data IN Stage
   * @param  pdev: device instance
@@ -602,9 +611,17 @@ static uint8_t *USBD_HID_GetOtherSpeedCfgDesc(uint16_t *length)
 static uint8_t USBD_HID_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
   UNUSED(epnum);
-  /* Ensure that the FIFO is empty before a new transfer, this condition could
-  be caused by  a new transfer before the end of the previous transfer */
-  ((USBD_HID_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId])->state = USBD_HID_IDLE;
+
+  USBD_HID_HandleTypeDef *hhid = (USBD_HID_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
+
+  /* Ensure the FIFO is marked idle before the next transfer */
+  if (hhid != NULL)
+  {
+    hhid->state = USBD_HID_IDLE;
+  }
+
+  /* Notify the application transport layer that the endpoint is free */
+  UsbHidTransport_TxCpltCallback();
 
   return (uint8_t)USBD_OK;
 }
