@@ -8,6 +8,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "hid_keyboard_app.h"
 #include "hid_keyboard_convert.h"
+#include "key_detect.h"
 #include "key_event_queue.h"
 #include "matrix_scan.h"
 #include "usbd_hid.h"
@@ -16,9 +17,6 @@
 
 /* Private variables ---------------------------------------------------------*/
 static volatile UsbHidTxState_t gHidTxState = USB_HID_TX_IDLE;
-
-static uint8_t  testState = 0U;
-static uint8_t  testSent  = 0U;  /* guard: ON+OFF events pushed for current press */
 
 /* External variables --------------------------------------------------------*/
 extern USBD_HandleTypeDef hUsbDeviceFS;
@@ -98,59 +96,19 @@ void HID_Keyboard_Init(void)
   KeyEventQueue_Init();
   HidKeyboardConvert_Init();
   MatrixScan_Init();
+  KeyDetect_Init();
 }
 
 /*
- * Main loop handler — M6 raw matrix scan test.
- * State 0: wait 2 s for USB enumeration.
- * State 1: scan keypad; track keyLoc 4 ('a') press/release; convert and send.
+ * Main loop handler.
+ * Scan the matrix, debounce, push events, then drain one event per call.
+ * HAL_Delay(5) paces the scan to ~5 ms per iteration; 2-buffer debounce
+ * therefore requires 2 consecutive stable reads (~10 ms) before a key
+ * on/off is accepted.
  */
 void HID_Keyboard_App(void)
 {
-  uint16_t   rawState;
-  KeyEvent_t event;
-
-  switch (testState) {
-  case 0U:
-    /* Give USB host 2 s to enumerate before sending the first report */
-    if (HAL_GetTick() >= 2000U)
-    {
-      testState = 1U;
-    }
-    break;
-
-  case 1U:
-    rawState = MatrixScan_ReadRaw();
-
-    /* Watch keyLoc 4 (row 1, col 0 → bit 4) */
-    if ((rawState & (1U << 4U)) != 0U)
-    {
-      /* Key is held down — push ON+OFF once per press */
-      if (testSent == 0U)
-      {
-        event.type   = KEY_EVENT_ON;
-        event.keyLoc = 4U;
-        (void)KeyEventQueue_Push(&event);
-
-        event.type   = KEY_EVENT_OFF;
-        event.keyLoc = 4U;
-        (void)KeyEventQueue_Push(&event);
-
-        testSent = 1U;
-      }
-    }
-    else
-    {
-      /* Key released — allow the next press to generate events */
-      testSent = 0U;
-    }
-
-    HidKeyboardConvert_Run();
-
-    HAL_Delay(5U);  /* ~5 ms pacing between scans */
-    break;
-
-  default:
-    break;
-  }
+  KeyDetect_Run();
+  HidKeyboardConvert_Run();
+  HAL_Delay(5U);
 }
