@@ -408,7 +408,7 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
   hpcd_USB_DRD_FS.Init.Host_channels = 8;
   hpcd_USB_DRD_FS.Init.speed = PCD_SPEED_FULL;
   hpcd_USB_DRD_FS.Init.phy_itface = PCD_PHY_EMBEDDED;
-  hpcd_USB_DRD_FS.Init.Sof_enable = DISABLE;
+  hpcd_USB_DRD_FS.Init.Sof_enable = ENABLE;
   hpcd_USB_DRD_FS.Init.low_power_enable = DISABLE;
   hpcd_USB_DRD_FS.Init.lpm_enable = DISABLE;
   hpcd_USB_DRD_FS.Init.battery_charging_enable = DISABLE;
@@ -441,12 +441,42 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
   /* USER CODE END RegisterCallBackSecondPart */
 #endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
   /* USER CODE BEGIN EndPoint_Configuration */
-  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x00 , PCD_SNG_BUF, 0x18);
-  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x80 , PCD_SNG_BUF, 0x58);
+
+  /*
+   * PMA (Packet Memory Area) layout — STM32G0B1 USB DRD, 2 KB total.
+   *
+   * USB_DRD_PMABuffDescTypeDef = TXBD(4B) + RXBD(4B) = 8 bytes per endpoint.
+   * BDT (Buffer Descriptor Table) = dev_endpoints(8) × 8 B = 64 B = 0x40.
+   * EP data buffers start immediately after the BDT.
+   *
+   * Offset  Size  Description
+   * 0x000   0x40  BDT — reserved by hardware (8 endpoints × 8 bytes)
+   * 0x040   0x40  EP0 OUT  0x00  control OUT   64 B
+   * 0x080   0x40  EP0 IN   0x80  control IN    64 B
+   * 0x0C0   0x08  EP1 IN   0x81  HID interrupt IN   8 B
+   * 0x0C8   0x08  EP2 IN   0x82  CDC notification interrupt IN   8 B
+   * 0x0D0   0x40  EP3 OUT  0x03  CDC data bulk OUT  64 B
+   * 0x110   0x40  EP3 IN   0x83  CDC data bulk IN   64 B
+   * 0x150   —     first free byte (336 B used of 2048 B)
+   */
+
+  /* EP0 — control (64 bytes each direction) */
+  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData, 0x00, PCD_SNG_BUF, 0x040);
+  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData, 0x80, PCD_SNG_BUF, 0x080);
+
+  /* EP1 IN — HID Keyboard interrupt IN (8 bytes) */
+  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData, 0x81, PCD_SNG_BUF, 0x0C0);
+
+  /* EP2 IN — CDC Notification interrupt IN (8 bytes) */
+  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData, 0x82, PCD_SNG_BUF, 0x0C8);
+
+  /* EP3 OUT — CDC Data bulk OUT (64 bytes) */
+  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData, 0x03, PCD_SNG_BUF, 0x0D0);
+
+  /* EP3 IN  — CDC Data bulk IN  (64 bytes) */
+  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData, 0x83, PCD_SNG_BUF, 0x110);
+
   /* USER CODE END EndPoint_Configuration */
-  /* USER CODE BEGIN EndPoint_Configuration_HID */
-  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x81 , PCD_SNG_BUF, 0x100);
-  /* USER CODE END EndPoint_Configuration_HID */
 
   return USBD_OK;
 }

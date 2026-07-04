@@ -13,6 +13,7 @@
 #include "matrix_scan.h"
 #include "scan_scheduler.h"
 #include "usbd_composite.h"
+#include "cdc_log.h"
 #include "stm32g0xx_hal.h"
 #include <stddef.h>
 
@@ -111,6 +112,7 @@ void HID_Keyboard_Init(void)
   MatrixScan_Init();
   KeyDetect_Init();
   ScanScheduler_Init();
+  CdcLog_Init();
   HAL_TIM_Base_Start_IT(&htim6);
 }
 
@@ -129,4 +131,5 @@ void HID_Keyboard_App(void)
   }
 
   HidKeyboardConvert_Run();
+  CdcLog_Run();
 }
