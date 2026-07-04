@@ -2,17 +2,15 @@
 
 ## 1. Project Goal
 
-Project 05 implements a USB HID keyboard / macro keypad firmware on STM32 using a 4x4 matrix keypad module as the input device.
+Project 05 implements a USB HID keyboard / macro keypad firmware on STM32G0B1RE using a 4x4 matrix keypad module as the input device.
 
-The firmware scans the keypad matrix, debounces key states, detects key on / key off / repeat / simultaneous-key error, converts key events into USB HID boot keyboard reports, and sends those reports directly to the host PC through USB HID.
+The firmware scans the keypad matrix, debounces key states, detects key on / key off / repeat / simultaneous-key error, converts key events into USB HID boot keyboard reports, and sends those reports to the host PC through USB HID.
 
 This project is not intended to be a full mechanical keyboard or NKRO keyboard. The goal is to build a small but realistic embedded firmware design with product-like input scanning, error handling, HID report conversion, and USB callback sequencing.
 
 ---
 
-## 2. Current Target Board
-
-Initial target board:
+## 2. Target Board
 
 ```txt
 Board       : NUCLEO-G0B1RE
@@ -24,33 +22,30 @@ Input       : 4x4 matrix keypad module
 
 Important board notes:
 
-- The onboard Micro-B connector `CN2` is the ST-LINK USB connector.
-- `CN2` is used for programming, debugging, ST-LINK Virtual COM Port, and board power.
-- `CN2` is not directly connected to the USB peripheral pins of the STM32G0B1RE target MCU.
-- To make the target MCU enumerate as a USB HID keyboard, connect a separate USB cable/breakout to the target MCU USB pins:
+- The onboard Micro-B connector `CN2` is the ST-LINK USB connector used for programming, debugging, Virtual COM Port, and board power.
+- `CN2` is not connected to the USB peripheral pins of the STM32G0B1RE target MCU.
+- To enumerate the target MCU as a USB HID keyboard, connect a separate USB cable or breakout to the target MCU USB pins:
   - `PA11` = USB DM / D-
   - `PA12` = USB DP / D+
   - `GND`  = USB ground
-- During initial bring-up, power the board from ST-LINK `CN2` and connect only `D-`, `D+`, and `GND` for the target USB HID cable. Do not connect USB VBUS/5V at first.
-
-Recommended USB wiring during bring-up:
+- During initial bring-up, power the board from ST-LINK `CN2` and connect only D-, D+, and GND for the HID cable. Do not connect USB VBUS/5V initially.
 
 ```txt
 USB-A cable / breakout       NUCLEO-G0B1RE target MCU
 -----------------------------------------------------
-D-                            PA11 / USB_DM / Pin 43
-D+                            PA12 / USB_DP / Pin 44
+D-                            PA11 / USB_DM
+D+                            PA12 / USB_DP
 GND                           GND
 5V / VBUS                     Not connected initially
 ```
 
-If the board is powered from ST-LINK while the target USB HID cable only provides D+/D-/GND, configure USB as a self-powered device for this bring-up setup.
+Configure USB as self-powered in CubeMX when the board is powered from ST-LINK while VBUS is not connected.
 
 ---
 
-## 3. Current CubeMX USB Configuration
+## 3. CubeMX Configuration
 
-The current CubeMX configuration is:
+### USB
 
 ```txt
 USB peripheral:
@@ -62,52 +57,61 @@ USB_DEVICE middleware:
   Class For FS IP = Human Interface Device Class (HID)
 ```
 
-Device descriptor parameters:
+### Device Descriptor
 
 ```txt
-VID                      = 1155 decimal = 0x0483
-PID                      = 22315 decimal = 0x572B
-LANGID_STRING             = English (United States)
+VID                       = 0x0483  (1155 decimal)
+PID                       = 0x572B  (22315 decimal)
 MANUFACTURER_STRING       = Hao Embedded Lab
 PRODUCT_STRING            = STM32 USB HID 4x4 Macro Keypad
 CONFIGURATION_STRING      = HID Config
 INTERFACE_STRING          = HID Interface
+LANGID_STRING             = English (United States)
 ```
 
-USB_DEVICE class/basic parameters:
+### HID Parameters
 
 ```txt
-HID_FS_BINTERVAL          = 0x0A    // 10 ms polling interval
+HID_FS_BINTERVAL          = 0x0A    (10 ms polling interval)
 USBD_MAX_NUM_INTERFACES   = 1
 USBD_MAX_NUM_CONFIGURATION= 1
 USBD_MAX_STR_DESC_SIZ     = 512 bytes
 USBD_DEBUG_LEVEL          = 0
+USBD_SELF_POWERED         = Enabled
+USBD_LPM_ENABLED          = Disabled
+VBUS sensing              = Disabled
 ```
 
-Bring-up recommendations:
+### TIM6
+
+TIM6 is used to generate a 5 ms scan request tick. Enable TIM6 NVIC interrupt in CubeMX.
+
+Actual configuration used in this project (TIM6 input clock = 48 MHz):
 
 ```txt
-USBD_SELF_POWERED         = Enabled, if powered from ST-LINK CN2
-USBD_LPM_ENABLED          = Disabled for first bring-up
-VBUS sensing              = Disabled for first bring-up if VBUS is not connected
+Prescaler    = 48 - 1   →  timer tick = 1 MHz
+Period       = 5000 - 1 →  update event every 5 ms
 ```
 
-The current VID/PID is acceptable for local development and personal testing. For a production product, use a properly assigned VID/PID.
+For a different system clock, recalculate:
+
+```txt
+Prescaler = (TIM6 input clock / 1,000,000) - 1
+Period    = 5000 - 1
+```
+
+The generated `MX_TIM6_Init()` and `htim6` handle are used by `HID_Keyboard_Init()` via `HAL_TIM_Base_Start_IT(&htim6)`.
 
 ---
 
-## 4. Matrix GPIO Assignment for NUCLEO-G0B1RE
+## 4. Matrix GPIO Assignment
 
-For clean and fast register-based scanning, all matrix lines are assigned to GPIOB.
-
-Logical assignment:
+All matrix lines are assigned to GPIOB for fast register-based scanning.
 
 ```txt
 Rows    : PB0 PB1 PB2 PB3
 Columns : PB4 PB5 PB6 PB7
 ```
-
-Board pin mapping from the NUCLEO-G0B1RE I/O assignment:
 
 ```txt
 Matrix line    STM32 GPIO    Board pin / label
@@ -123,14 +127,6 @@ COL2           PB6           Pin 60 / IO
 COL3           PB7           Pin 61 / IO
 ```
 
-Reason for this pin plan:
-
-- All 8 matrix lines are on GPIOB.
-- Row driving can use `GPIOB->BSRR`.
-- Column reading can use `GPIOB->IDR`.
-- Bit masks are simple and fast.
-- USB pins, SWD pins, ST-LINK VCP pins, LED pin, and user button pin are avoided.
-
 Reserved / avoided pins:
 
 ```txt
@@ -145,52 +141,28 @@ PF0  / PF1  : HSE oscillator pins
 
 ---
 
-## 5. CubeMX GPIO Setup for the 4x4 Matrix
+## 5. CubeMX GPIO Setup
 
-Set the following 8 GPIO pins in CubeMX.
-
-### 5.1 Row pins
-
-Rows are output pins. They are normally inactive high. During scanning, one selected row is driven low.
+### Row pins — GPIO Output
 
 ```txt
-GPIO    User Label    Mode           Output Level    Pull       Speed
----------------------------------------------------------------------
-PB0     MATRIX_ROW0   GPIO_Output    High            No pull    Low
-PB1     MATRIX_ROW1   GPIO_Output    High            No pull    Low
-PB2     MATRIX_ROW2   GPIO_Output    High            No pull    Low
-PB3     MATRIX_ROW3   GPIO_Output    High            No pull    Low
+GPIO    User Label      Mode           Output Level    Pull       Speed
+-----------------------------------------------------------------------
+PB0     MATRIX_ROW0     GPIO_Output    High            No pull    Low
+PB1     MATRIX_ROW1     GPIO_Output    High            No pull    Low
+PB2     MATRIX_ROW2     GPIO_Output    High            No pull    Low
+PB3     MATRIX_ROW3     GPIO_Output    High            No pull    Low
 ```
 
-Recommended output configuration:
+### Column pins — GPIO Input
 
 ```txt
-GPIO mode           : Output Push Pull
-GPIO output level   : High
-GPIO pull-up/down   : No pull-up and no pull-down
-Maximum output speed: Low
-```
-
-If oscilloscope measurement shows that the row signal edges are too slow for the selected wiring, change speed to Medium. For a keypad scan at 5 ms period, Low speed should be enough in most cases.
-
-### 5.2 Column pins
-
-Columns are input pins with internal pull-up enabled.
-
-```txt
-GPIO    User Label    Mode         Pull-up/Pull-down
-----------------------------------------------------
-PB4     MATRIX_COL0   GPIO_Input   Pull-up
-PB5     MATRIX_COL1   GPIO_Input   Pull-up
-PB6     MATRIX_COL2   GPIO_Input   Pull-up
-PB7     MATRIX_COL3   GPIO_Input   Pull-up
-```
-
-Recommended input configuration:
-
-```txt
-GPIO mode           : Input mode
-GPIO pull-up/down   : Pull-up
+GPIO    User Label      Mode          Pull-up/Pull-down
+-------------------------------------------------------
+PB4     MATRIX_COL0     GPIO_Input    Pull-up
+PB5     MATRIX_COL1     GPIO_Input    Pull-up
+PB6     MATRIX_COL2     GPIO_Input    Pull-up
+PB7     MATRIX_COL3     GPIO_Input    Pull-up
 ```
 
 Scan polarity:
@@ -198,51 +170,48 @@ Scan polarity:
 ```txt
 Row inactive = High
 Row active   = Low
-Column idle  = High
-Pressed key  = Column reads Low
+Column idle  = High (pull-up)
+Key pressed  = Column reads Low
 ```
 
 ---
 
 ## 6. 4x4 Keymap
 
-The 4x4 keypad is mapped as follows:
-
 ```txt
-1       2       3          4
-a       b       c          d
-Enter   Space   Backspace  Tab
-Ctrl+C  Ctrl+V  Ctrl+S     Alt+Tab
+Row 0:  1       2       3          4
+Row 1:  a       b       c          d
+Row 2:  Enter   Space   Backspace  Tab
+Row 3:  Ctrl+C  Ctrl+V  Ctrl+S     Alt+Tab
 ```
 
-Key location rule:
+Physical key location:
 
 ```c
-keyLoc = row * 4 + col;
+keyLoc = row * 4 + col   // range: 0..15
 ```
 
 Examples:
 
 ```txt
-Row 0 Col 0 -> keyLoc 0  -> 1
-Row 0 Col 1 -> keyLoc 1  -> 2
-Row 1 Col 0 -> keyLoc 4  -> a
-Row 2 Col 0 -> keyLoc 8  -> Enter
-Row 3 Col 0 -> keyLoc 12 -> Ctrl+C
-Row 3 Col 3 -> keyLoc 15 -> Alt+Tab
+Row 0 Col 0 → keyLoc  0 → 1
+Row 1 Col 0 → keyLoc  4 → a
+Row 2 Col 0 → keyLoc  8 → Enter
+Row 3 Col 0 → keyLoc 12 → Ctrl+C
+Row 3 Col 3 → keyLoc 15 → Alt+Tab
 ```
 
-The scan layer only stores `keyLoc`. It does not store ASCII characters and does not store HID reports.
+The scan layer stores only `keyLoc`. It does not store ASCII or HID usages.
 
 ---
 
 ## 7. USB HID Report Format
 
-Use the standard USB HID boot keyboard report format:
+Standard USB HID boot keyboard 8-byte report:
 
 ```txt
 Byte 0 : Modifier
-Byte 1 : Reserved
+Byte 1 : Reserved (always 0x00)
 Byte 2 : Keycode 1
 Byte 3 : Keycode 2
 Byte 4 : Keycode 3
@@ -251,799 +220,438 @@ Byte 6 : Keycode 5
 Byte 7 : Keycode 6
 ```
 
-Examples:
+Report examples:
 
 ```txt
-a:
-00 00 04 00 00 00 00 00
-
-1:
-00 00 1E 00 00 00 00 00
-
-Enter:
-00 00 28 00 00 00 00 00
-
-Ctrl+C:
-01 00 06 00 00 00 00 00
-
-Alt+Tab:
-04 00 2B 00 00 00 00 00
-
-ErrorRollOver:
-00 00 01 01 01 01 01 01
-
-Null report:
-00 00 00 00 00 00 00 00
+a           : 00 00 04 00 00 00 00 00
+1           : 00 00 1E 00 00 00 00 00
+Enter       : 00 00 28 00 00 00 00 00
+Ctrl+C      : 01 00 06 00 00 00 00 00
+Alt only    : 04 00 00 00 00 00 00 00
+Alt+Tab     : 04 00 2B 00 00 00 00 00
+ErrorRollOver: 00 00 01 01 01 01 01 01
+Null report : 00 00 00 00 00 00 00 00
 ```
 
-The ErrorRollOver report is used when the firmware detects an unsafe multi-key condition on the diode-less 4x4 matrix.
+This firmware uses a single-key boot keyboard report. Bytes 3–7 are always 0x00.
 
 ---
 
-## 8. GPIO Scan Design
-
-The matrix scan function should not use HAL GPIO calls in the critical scan path.
-
-Use direct GPIO registers:
+## 8. Module Structure
 
 ```txt
-GPIOB->BSRR : atomic set/reset row pins
-GPIOB->IDR  : read column pins
+Core/Src/main.c                 — CubeMX generated; only HID_Keyboard_Init / HID_Keyboard_App
+Core/Src/hid_keyboard_app.c     — transport layer + app entry points + TIM6 callback
+Core/Src/hid_keyboard_convert.c — key event → HID report sequence
+Core/Src/hid_keyboard_report.c  — 8-byte report builder
+Core/Src/key_detect.c           — debounce + key on/off/repeat + simultaneous error
+Core/Src/key_event_queue.c      — circular queue of key events
+Core/Src/key_table.c            — keyLoc → HID usage / macro / repeat policy
+Core/Src/matrix_scan.c          — register-based GPIO matrix scan
+Core/Src/scan_scheduler.c       — 5 ms timer request counter
+
+Core/Inc/hid_keyboard_app.h
+Core/Inc/hid_keyboard_convert.h
+Core/Inc/hid_keyboard_report.h
+Core/Inc/key_detect.h
+Core/Inc/key_event_queue.h
+Core/Inc/key_table.h
+Core/Inc/matrix_scan.h
+Core/Inc/scan_scheduler.h
 ```
 
-Initial GPIO design:
+Module roles:
 
 ```txt
-Rows:
-  output push-pull
-  default High
-  active Low
+matrix_scan.c
+  GPIOB register-based matrix scan (BSRR + IDR, no HAL GPIO calls)
+  Returns a 16-bit raw state word; bit N = keyLoc N pressed
+  MatrixScan_CountPressed() for simultaneous-key detection
 
-Columns:
-  input pull-up
-  idle High
-  pressed Low
+scan_scheduler.c
+  Incremented every 5 ms by TIM6 period-elapsed ISR
+  main loop drains with ScanScheduler_TakeRequest()
+  Counter capped at 10 to absorb temporary main loop delays
+
+key_detect.c
+  4-sample shift register debounce
+  Strict simultaneous-key latch (releases all keys on 2+ press, waits for full release)
+  Per-key repeat tick counter; KEY_EVENT_REPEAT every 200 ms
+  Detection order: CheckKeyOff → CheckRepeat → CheckKeyOn
+
+key_event_queue.c
+  Circular queue (32 entries) of KeyEvent_t {type, keyLoc}
+  Peek-then-Pop pattern: convert pops only after send is accepted
+
+key_table.c
+  16-entry const table; keyLoc → {kind, modifier, usage, macroId, repeatEnable}
+  Normal keys: repeatEnable = 1
+  Macro keys:  repeatEnable = 0, kind = KEY_KIND_MACRO
+
+hid_keyboard_report.c
+  Builds 8-byte boot keyboard report struct
+  SetKey / Clear / SetErrorRollOver / GetData
+
+hid_keyboard_convert.c
+  Priority: null report → macro sequence → queue event
+  Tap-style output: every ON/REPEAT sends key-down then null report
+  Macro sequences driven by gMacroActive / gMacroId / gMacroStep
+  KEY_EVENT_OFF is dropped (key state tracked in key_detect.c)
+  KEY_EVENT_ERROR (KEY_LOC_ERROR_ROLLOVER) sends ErrorRollOver then null
+
+hid_keyboard_app.c
+  UsbHidTransport_* — TX state machine, critical section on Cortex-M0+
+  HAL_TIM_PeriodElapsedCallback — forwards TIM6 tick to scan_scheduler
+  HID_Keyboard_Init — inits all subsystems, starts TIM6
+  HID_Keyboard_App — scan/detect loop + convert run (no HAL_Delay)
 ```
-
-Scan flow:
-
-```txt
-1. Set all rows inactive High.
-2. For each row:
-   - Drive selected row Low.
-   - Wait for GPIO/line settling using NOP.
-   - Read all column pins from GPIOB->IDR.
-   - Convert column state to raw matrix bitmap.
-   - Drive selected row back High.
-3. Leave all rows inactive High after scan.
-```
-
-The NOP delay after changing a row is required when using direct register access. It does not need to be exposed as a macro in the first version. A few explicit `__NOP()` instructions are enough as a visible placeholder in the scan code.
-
-Example:
-
-```c
-__NOP();
-__NOP();
-__NOP();
-__NOP();
-```
-
-The exact number of NOPs is a hardware timing parameter. It should be adjusted only after checking the row-to-column settling time with an oscilloscope or logic analyzer.
-
-For measurement, a debug GPIO may be toggled around the settle delay:
-
-```txt
-debug pin high
-row active
-NOP settle delay
-read columns
-debug pin low
-```
-
-This makes the scan timing visible on an oscilloscope.
 
 ---
 
-## 9. Scan Timing
+## 9. main.c Convention
 
-A hardware timer runs every 5 ms.
-
-The timer interrupt does not scan the matrix directly. It only increases a scan request counter:
+All application logic is contained in `HID_Keyboard_Init()` and `HID_Keyboard_App()`. The `main.c` user code sections contain only:
 
 ```c
-static volatile uint8_t gScanRequestCount;
-```
+/* USER CODE BEGIN 2 */
+HID_Keyboard_Init();
+/* USER CODE END 2 */
 
-Timer callback:
-
-```c
-if (gScanRequestCount < 10U) {
-  gScanRequestCount++;
-}
-```
-
-Main scan-detect loop:
-
-```c
-void MainScanDetect_Run(void)
+/* USER CODE BEGIN WHILE */
+while (1)
 {
-  while (gScanRequestCount != 0U) {
-    __disable_irq();
-    gScanRequestCount--;
-    __enable_irq();
+  /* USER CODE END WHILE */
 
-    MatrixScanDetect_Run5ms();
-  }
+  /* USER CODE BEGIN 3 */
+  HID_Keyboard_App();
 }
+/* USER CODE END 3 */
 ```
-
-A counter is used instead of a single flag to avoid losing scan ticks when the main loop is temporarily busy.
 
 ---
 
-## 10. Scan Buffers and Debounce
+## 10. Scan and Debounce
 
-Use 4 scan buffers. Each buffer stores one 5 ms matrix scan result.
-
-```c
-#define MATRIX_SCAN_BUFFER_COUNT  4U
-#define MATRIX_KEY_COUNT          16U
-#define MATRIX_KEY_BYTE_COUNT     2U
-```
-
-Recommended state storage:
+TIM6 fires every 5 ms and increments `gScanRequestCount` (capped at 10). The main loop drains all pending ticks:
 
 ```c
-typedef struct {
-  uint8_t scanBuffer[MATRIX_SCAN_BUFFER_COUNT][MATRIX_KEY_BYTE_COUNT];
-  uint8_t stableKeyState[MATRIX_KEY_BYTE_COUNT];
-  uint8_t previousKeyState[MATRIX_KEY_BYTE_COUNT];
-} MatrixKeyState_t;
+while (ScanScheduler_TakeRequest() != 0U)
+{
+    KeyDetect_Run();
+}
+HidKeyboardConvert_Run();
 ```
 
-Buffer meaning:
+`HidKeyboardConvert_Run()` runs outside the scan loop so USB reports are sent immediately when the endpoint becomes idle, without waiting for the next 5 ms tick.
+
+`KeyDetect_Run()` maintains a 4-slot scan history but the current debounce decision uses only the 2 newest samples:
 
 ```txt
-scanBuffer[0] = newest scan
-scanBuffer[1] = previous scan
-scanBuffer[2] = older scan
-scanBuffer[3] = oldest scan
-
-stableKeyState = current stable key state
+stable ON  = scanBuffer[0] & scanBuffer[1]    (2 of 2 newest agree pressed)
+stable OFF = ~(scanBuffer[0] | scanBuffer[1]) (2 of 2 newest agree released)
 ```
 
-Normal debounce path:
-
-```txt
-new_on  = scanBuffer[0] & scanBuffer[1]
-new_off = ~(scanBuffer[0] | scanBuffer[1])
-```
-
-Meaning:
-
-```txt
-2 consecutive ON samples  -> accept ON
-2 consecutive OFF samples -> accept OFF
-```
-
-With a 5 ms scan period, the normal debounce path reacts in about 10 ms. The recovery path uses all 4 buffers for a stricter check.
+With a 5 ms scan period, debounce reacts in ~10 ms. The older slots (`scanBuffer[2]`, `scanBuffer[3]`) are kept as reserved history for optional stricter debounce policies.
 
 ---
 
 ## 11. Key Detection Order
 
-In the normal path, the detection order is fixed:
+Detection order is fixed inside `KeyDetect_Run()`:
 
 ```txt
-CheckKeyOff()
-CheckRepeat()
-CheckKeyOn()
-```
-
-Reason:
-
-```txt
-CheckKeyOff first:
-  A released key must be handled before repeat processing.
-
-CheckRepeat second:
-  Only keys that remain stable pressed can repeat.
-
-CheckKeyOn last:
-  A newly pressed key must not repeat in the same scan cycle.
-```
-
-Normal scan-detect flow:
-
-```c
-void MatrixScanDetect_Run5ms(void)
-{
-  ScanMatrix();
-  CheckSimultaneousKey();
-
-  if (gSimultaneousNow != 0U) {
-    HandleSimultaneousError();
-    return;
-  }
-
-  if (gSimultaneousError != 0U) {
-    ErrorRecoveryCheck();
-    return;
-  }
-
-  UpdateDebounceState();
-
-  CheckKeyOff();
-  CheckRepeat();
-  CheckKeyOn();
-}
+1. CheckKeyOff   — released keys must be cleared before repeat is checked
+2. CheckRepeat   — only keys already in pressed state can repeat
+3. CheckKeyOn    — a newly detected key must not repeat in the same cycle
 ```
 
 ---
 
 ## 12. Simultaneous Key Error Policy
 
-Because the 4x4 matrix module has no per-key diode, the firmware uses a strict safety policy:
+The 4x4 matrix has no per-key diode. Strict all-release latch is used:
 
 ```txt
-If one raw scan detects two or more pressed keys:
-  set gSimultaneousNow
-  set gSimultaneousError
-  put KEY_EVENT_ERROR + KEY_LOC_ERROR_ROLLOVER into the ring buffer
-  skip CheckKeyOff()
-  skip CheckRepeat()
-  skip CheckKeyOn()
+Raw scan detects >= 2 keys pressed:
+  → push KEY_EVENT_ERROR (KEY_LOC_ERROR_ROLLOVER) to queue
+  → cancel all currently held keys (push KEY_EVENT_OFF for each)
+  → reset scan buffer and repeat counters
+  → set gSimultaneousErrorActive = true
+  → skip all normal detection
+
+While gSimultaneousErrorActive:
+  → ignore all key input regardless of how many keys are pressed
+  → exit only when rawState == 0 (every key physically released)
+  → then reset scan buffer, repeat counters, key status
 ```
 
-The standard USB HID boot keyboard ErrorRollOver report is:
+This means: holding A, accidentally touching B, then releasing B still keeps the error latch active until both A and B are released. A single remaining key after releasing one finger does not resume detection.
 
-```txt
-00 00 01 01 01 01 01 01
-```
+---
 
-After ErrorRollOver, the firmware sends a null report:
+## 13. Repeat Design
 
-```txt
-00 00 00 00 00 00 00 00
-```
-
-Error sequence:
-
-```txt
-Step 0: ErrorRollOver report
-Step 1: Null report
-```
-
-Ring buffer special key locations:
+Repeat state is stored per `keyLoc` as a 16-entry tick counter array:
 
 ```c
+static uint16_t gRepeatTick[MATRIX_KEY_NUM];
+```
+
+Constants:
+
+```c
+#define KEY_DETECT_SCAN_PERIOD_MS   5U
+#define KEY_REPEAT_INTERVAL_MS      200U
+#define KEY_REPEAT_INTERVAL_TICKS   (KEY_REPEAT_INTERVAL_MS / KEY_DETECT_SCAN_PERIOD_MS)  // = 40
+```
+
+A `KEY_EVENT_REPEAT` is generated every 200 ms for a key that is:
+
+- In `gKeyStatus` (confirmed pressed)
+- Still stable ON in the current debounce result
+- `repeatEnable = 1` in the key table
+- `kind = KEY_KIND_NORMAL`
+
+Macro keys (`KEY_KIND_MACRO`) have `repeatEnable = 0` and are excluded from repeat.
+
+The tick counter resets when a key is first pressed, released, or during simultaneous error recovery.
+
+---
+
+## 14. HID Convert Output Policy
+
+`hid_keyboard_convert.c` uses tap-style output to prevent OS typematic repeat:
+
+```txt
+KEY_EVENT_ON / KEY_EVENT_REPEAT:
+  Step 0: send key-down report
+  Step 1: send null report   ← gNeedNullReport flag
+
+KEY_EVENT_OFF:
+  Dropped here (key state already updated in key_detect.c)
+
+KEY_EVENT_ERROR (KEY_LOC_ERROR_ROLLOVER):
+  Step 0: send ErrorRollOver report (00 00 01 01 01 01 01 01)
+  Step 1: send null report
+```
+
+Each step waits for the USB endpoint to become idle before sending. The null report reuses `gNeedNullReport` in all cases.
+
+---
+
+## 15. Macro Sequences
+
+Macro steps are built by `HidKeyboardConvert_BuildMacroReport()`:
+
+```txt
+Ctrl+C   (MACRO_CTRL_C):
+  Step 0: 01 00 06 00 00 00 00 00
+  Step 1: 00 00 00 00 00 00 00 00
+
+Ctrl+V   (MACRO_CTRL_V):
+  Step 0: 01 00 19 00 00 00 00 00
+  Step 1: 00 00 00 00 00 00 00 00
+
+Ctrl+S   (MACRO_CTRL_S):
+  Step 0: 01 00 16 00 00 00 00 00
+  Step 1: 00 00 00 00 00 00 00 00
+
+Alt+Tab  (MACRO_ALT_TAB):
+  Step 0: 04 00 00 00 00 00 00 00   (Alt only)
+  Step 1: 04 00 2B 00 00 00 00 00   (Alt + Tab)
+  Step 2: 00 00 00 00 00 00 00 00   (null)
+```
+
+Macro state is tracked by three variables in `hid_keyboard_convert.c`:
+
+```c
+static bool      gMacroActive;
+static MacroId_t gMacroId;
+static uint8_t   gMacroStep;
+```
+
+When a macro event is accepted, the event is popped from the queue and the macro state machine owns the sequence from that point. The first step is attempted immediately, and if the USB endpoint is not ready to accept a report, the active macro state remains pending and is retried on the next USB-idle cycle. The sequence advances one step per accepted USB report.
+
+---
+
+## 16. USB Transport Layer
+
+The transport layer is implemented in `hid_keyboard_app.c`:
+
+```c
+typedef enum { USB_HID_TX_IDLE = 0, USB_HID_TX_BUSY } UsbHidTxState_t;
+
+static volatile UsbHidTxState_t gHidTxState;
+```
+
+`UsbHidTransport_SendReport()` uses a short PRIMASK-based critical section for atomic check-and-set. On Cortex-M0+, BASEPRI is not available, so PRIMASK is the simplest option for this short critical section.
+
+The `DataIn` callback in `usbd_hid.c` calls `UsbHidTransport_TxCpltCallback()` through a `__weak` symbol, which resets the TX state to `USB_HID_TX_IDLE`.
+
+---
+
+## 17. Key Event Queue
+
+`key_event_queue.c` implements a 32-entry circular queue:
+
+```c
+typedef enum { KEY_EVENT_ON, KEY_EVENT_OFF, KEY_EVENT_REPEAT, KEY_EVENT_ERROR } KeyEventType_t;
+
+typedef struct { KeyEventType_t type; uint8_t keyLoc; } KeyEvent_t;
+
+#define KEY_EVENT_QUEUE_SIZE    32U
 #define KEY_LOC_ERROR_ROLLOVER  0xFEU
 #define KEY_LOC_ALL_OFF         0xFFU
 ```
 
-The ring buffer does not store 8-byte HID reports. It only stores key event type and key location.
+For normal key events and ErrorRollOver events, the convert layer uses a peek-then-pop pattern: the event is peeked first, a report is built and sent, and the event is popped only after `UsbHidTransport_SendReport()` returns `true`. This ensures no event is silently lost when the USB endpoint is temporarily busy.
+
+For macro events, the queue event is popped after the converter accepts ownership of the macro. The remaining sequence is then tracked by `gMacroActive`, `gMacroId`, and `gMacroStep`, so the macro can continue across multiple USB-idle cycles without keeping the original event in the queue.
 
 ---
 
-## 13. Error Recovery Policy
+## 18. Key Table
 
-When the firmware is in simultaneous-key error mode, it does not process the matrix as a normal scan.
-
-Recovery uses a dedicated function:
+`key_table.c` maps each of the 16 `keyLoc` values to a `KeyTableEntry_t`:
 
 ```c
-void ErrorRecoveryCheck(void);
-```
-
-Recovery flow:
-
-```txt
-If gSimultaneousNow is still active:
-  return
-
-Step 1:
-  CheckKeyOff()
-  CheckRepeat()
-
-Step 2:
-  AND all 4 scan buffers to find a stable pressed key
-
-Step 3:
-  Compare with stableKeyState to find a new key press
-
-Step 4:
-  If a new key press exists:
-    apply recovery policy
-    if allowed, put keyLoc into the ring buffer
-```
-
-Recovery policy:
-
-```txt
-Normal key:
-  Can be accepted again if stable in all 4 scan buffers.
-
-Macro key:
-  Must not auto-fire after a simultaneous-key error.
-  The user must release all keys and press the macro key again.
-```
-
-Reason: macro keys such as `Ctrl+S`, `Ctrl+V`, and `Alt+Tab` can affect the host PC significantly, so they should not be triggered automatically after an error condition.
-
----
-
-## 14. Key Status Flags
-
-Use clear, separate flags for current scan state and latched error state.
-
-```c
-static uint8_t gSimultaneousNow;
-static uint8_t gSimultaneousError;
-static uint8_t gRecoveryActive;
-```
-
-Meaning:
-
-```txt
-gSimultaneousNow:
-  The current raw scan sees two or more pressed keys.
-
-gSimultaneousError:
-  The firmware is in simultaneous-key error mode and must run recovery.
-
-gRecoveryActive:
-  Optional flag for debugging or tracing the recovery path.
-```
-
-Do not use a single `Simul` flag for both meanings. If the same flag means both "current scan has error" and "system is in recovery mode", recovery can accidentally return forever.
-
----
-
-## 15. Key Ring Buffer
-
-The key ring buffer stores key events by key location. It does not store ASCII characters and does not store HID report bytes.
-
-```c
-typedef enum {
-  KEY_EVENT_ON,
-  KEY_EVENT_OFF,
-  KEY_EVENT_REPEAT,
-  KEY_EVENT_ERROR
-} KeyEventType_t;
-
 typedef struct {
-  KeyEventType_t type;
-  uint8_t keyLoc;
-} KeyEvent_t;
-```
-
-Examples:
-
-```txt
-KEY_EVENT_ON     + keyLoc 4  -> press key a
-KEY_EVENT_OFF    + keyLoc 4  -> release key a
-KEY_EVENT_REPEAT + keyLoc 4  -> repeat key a
-KEY_EVENT_ERROR  + 0xFE      -> ErrorRollOver sequence
-KEY_EVENT_OFF    + 0xFF      -> Null / all-off report
-```
-
-A struct-based ring buffer is preferred for the first implementation because it is easier to debug and log. A packed 1-byte format can be added later if needed.
-
----
-
-## 16. Key Table
-
-When the main convert loop gets an event from the ring buffer, it fetches the actual key definition from the key table using `keyLoc`.
-
-The scan layer does not know whether a key is `a`, `Enter`, `Ctrl+C`, or `Alt+Tab`. It only knows the physical key location.
-
-```c
-typedef enum {
-  KEY_KIND_NORMAL,
-  KEY_KIND_MACRO,
-  KEY_KIND_SPECIAL
-} KeyKind_t;
-
-typedef enum {
-  MACRO_NONE,
-  MACRO_CTRL_C,
-  MACRO_CTRL_V,
-  MACRO_CTRL_S,
-  MACRO_ALT_TAB
-} MacroId_t;
-
-typedef struct {
-  KeyKind_t kind;
-  uint8_t modifier;
-  uint8_t usage;
-  MacroId_t macroId;
-  uint8_t repeatEnable;
+  KeyKind_t  kind;
+  uint8_t    modifier;
+  uint8_t    usage;
+  MacroId_t  macroId;
+  uint8_t    repeatEnable;
 } KeyTableEntry_t;
 ```
 
-Key table:
-
-```c
-static const KeyTableEntry_t gKeyTable[16] = {
-  /* Row 0: 1 2 3 4 */
-  { KEY_KIND_NORMAL, 0x00U, 0x1EU, MACRO_NONE,    1U },
-  { KEY_KIND_NORMAL, 0x00U, 0x1FU, MACRO_NONE,    1U },
-  { KEY_KIND_NORMAL, 0x00U, 0x20U, MACRO_NONE,    1U },
-  { KEY_KIND_NORMAL, 0x00U, 0x21U, MACRO_NONE,    1U },
-
-  /* Row 1: a b c d */
-  { KEY_KIND_NORMAL, 0x00U, 0x04U, MACRO_NONE,    1U },
-  { KEY_KIND_NORMAL, 0x00U, 0x05U, MACRO_NONE,    1U },
-  { KEY_KIND_NORMAL, 0x00U, 0x06U, MACRO_NONE,    1U },
-  { KEY_KIND_NORMAL, 0x00U, 0x07U, MACRO_NONE,    1U },
-
-  /* Row 2: Enter Space Backspace Tab */
-  { KEY_KIND_NORMAL, 0x00U, 0x28U, MACRO_NONE,    1U },
-  { KEY_KIND_NORMAL, 0x00U, 0x2CU, MACRO_NONE,    1U },
-  { KEY_KIND_NORMAL, 0x00U, 0x2AU, MACRO_NONE,    1U },
-  { KEY_KIND_NORMAL, 0x00U, 0x2BU, MACRO_NONE,    1U },
-
-  /* Row 3: Ctrl+C Ctrl+V Ctrl+S Alt+Tab */
-  { KEY_KIND_MACRO,  0x00U, 0x00U, MACRO_CTRL_C,  0U },
-  { KEY_KIND_MACRO,  0x00U, 0x00U, MACRO_CTRL_V,  0U },
-  { KEY_KIND_MACRO,  0x00U, 0x00U, MACRO_CTRL_S,  0U },
-  { KEY_KIND_MACRO,  0x00U, 0x00U, MACRO_ALT_TAB,0U },
-};
-```
-
-`repeatEnable` is per key. Normal keys can repeat. Macro keys do not repeat.
-
----
-
-## 17. Repeat Design
-
-Repeat uses the 5 ms scan timer as the base tick.
-
-Repeat state is stored per key location:
-
-```c
-typedef struct {
-  uint16_t tickCount;
-} KeyRepeatState_t;
-
-static KeyRepeatState_t gRepeatState[16];
-```
-
-Repeat interval:
-
-```c
-#define MATRIX_SCAN_PERIOD_MS    5U
-#define REPEAT_INTERVAL_MS       200U
-#define REPEAT_INTERVAL_TICKS    (REPEAT_INTERVAL_MS / MATRIX_SCAN_PERIOD_MS)
-```
-
-Meaning:
-
 ```txt
-If a repeat-enabled key is held continuously,
-a KEY_EVENT_REPEAT is generated every 200 ms.
-```
-
-Pseudo logic:
-
-```c
-static void CheckRepeat(void)
-{
-  uint8_t keyLoc;
-
-  for (keyLoc = 0U; keyLoc < 16U; keyLoc++) {
-    if ((IsKeyStableHeld(keyLoc) != 0U) &&
-        (gKeyTable[keyLoc].repeatEnable != 0U)) {
-
-      gRepeatState[keyLoc].tickCount++;
-
-      if (gRepeatState[keyLoc].tickCount >= REPEAT_INTERVAL_TICKS) {
-        gRepeatState[keyLoc].tickCount = 0U;
-        KeyRingBuffer_Put(KEY_EVENT_REPEAT, keyLoc);
-      }
-    } else {
-      gRepeatState[keyLoc].tickCount = 0U;
-    }
-  }
-}
-```
-
-Macro repeat is disabled by key table policy.
-
----
-
-## 18. Macro Convert Design
-
-Macro keys are not handled in the scan layer.
-
-The scan layer only puts `keyLoc` into the ring buffer. The convert layer does:
-
-```txt
-keyLoc -> gKeyTable[keyLoc] -> CheckMacroKey() -> MacroConvert_Start()
-```
-
-Required functions:
-
-```c
-static uint8_t CheckMacroKey(const KeyTableEntry_t *key);
-static uint8_t MacroConvert_Start(MacroId_t macroId, uint8_t report[8]);
-static uint8_t MacroConvert_Next(uint8_t report[8]);
-```
-
-Macro sequences:
-
-```txt
-Ctrl+C:
-  Step 0: 01 00 06 00 00 00 00 00
-  Step 1: 00 00 00 00 00 00 00 00
-
-Ctrl+V:
-  Step 0: 01 00 19 00 00 00 00 00
-  Step 1: 00 00 00 00 00 00 00 00
-
-Ctrl+S:
-  Step 0: 01 00 16 00 00 00 00 00
-  Step 1: 00 00 00 00 00 00 00 00
-
-Alt+Tab:
-  Step 0: 04 00 00 00 00 00 00 00
-  Step 1: 04 00 2B 00 00 00 00 00
-  Step 2: 00 00 00 00 00 00 00 00
+keyLoc  Key          kind           modifier  usage   macroId       repeatEnable
+--------------------------------------------------------------------------------
+0       1            KEY_KIND_NORMAL  0x00    0x1E    MACRO_NONE    1
+1       2            KEY_KIND_NORMAL  0x00    0x1F    MACRO_NONE    1
+2       3            KEY_KIND_NORMAL  0x00    0x20    MACRO_NONE    1
+3       4            KEY_KIND_NORMAL  0x00    0x21    MACRO_NONE    1
+4       a            KEY_KIND_NORMAL  0x00    0x04    MACRO_NONE    1
+5       b            KEY_KIND_NORMAL  0x00    0x05    MACRO_NONE    1
+6       c            KEY_KIND_NORMAL  0x00    0x06    MACRO_NONE    1
+7       d            KEY_KIND_NORMAL  0x00    0x07    MACRO_NONE    1
+8       Enter        KEY_KIND_NORMAL  0x00    0x28    MACRO_NONE    1
+9       Space        KEY_KIND_NORMAL  0x00    0x2C    MACRO_NONE    1
+10      Backspace    KEY_KIND_NORMAL  0x00    0x2A    MACRO_NONE    1
+11      Tab          KEY_KIND_NORMAL  0x00    0x2B    MACRO_NONE    1
+12      Ctrl+C       KEY_KIND_MACRO   0x00    0x00    MACRO_CTRL_C  0
+13      Ctrl+V       KEY_KIND_MACRO   0x00    0x00    MACRO_CTRL_V  0
+14      Ctrl+S       KEY_KIND_MACRO   0x00    0x00    MACRO_CTRL_S  0
+15      Alt+Tab      KEY_KIND_MACRO   0x00    0x00    MACRO_ALT_TAB 0
 ```
 
 ---
 
-## 19. HID Convert State Machine
-
-The main convert loop starts a new event only when HID transmission is idle.
-
-State definitions:
-
-```c
-typedef enum {
-  HID_TX_IDLE,
-  HID_TX_BUSY
-} HidTxState_t;
-
-typedef enum {
-  HID_SEQUENCE_NONE,
-  HID_SEQUENCE_NORMAL,
-  HID_SEQUENCE_MACRO,
-  HID_SEQUENCE_ERROR,
-  HID_SEQUENCE_NULL
-} HidSequenceType_t;
-
-typedef struct {
-  HidSequenceType_t type;
-  MacroId_t macroId;
-  uint8_t step;
-  uint8_t active;
-} HidSequenceContext_t;
-```
-
-Main convert starts a new event only when:
+## 19. Bring-Up Milestones
 
 ```txt
-gHidTxState == HID_TX_IDLE
-gHidSequence.active == 0
-```
-
-Main convert responsibilities:
-
-```txt
-1. Pop key event from ring buffer.
-2. Fetch key table by keyLoc.
-3. Start normal / macro / error / null sequence.
-4. Send the first HID report.
-```
-
-USB HID DataIn callback responsibilities:
-
-```txt
-1. Do not pop a new key event.
-2. Call HidConvert_Next().
-3. If the current sequence has another report, send it.
-4. If the sequence is complete, clear HID busy state.
+M1:  Generate USB_DEVICE HID project; confirm build.
+M2:  Wire PA11/PA12/GND to external USB and confirm enumeration on host.
+M3:  USB HID transport state layer (IDLE/BUSY) in hid_keyboard_app.c.
+     DataIn weak callback in usbd_hid.c.
+M4:  Key table (key_table.h/.c) and HID report builder (hid_keyboard_report.h/.c).
+M5:  Key event queue (key_event_queue.h/.c) and HID convert layer (hid_keyboard_convert.h/.c).
+     Fixed test events; confirm 'a' key-down and null report reach host.
+M6:  Register-based matrix scan (matrix_scan.h/.c) on PB0-PB7.
+     Raw scan test for keyLoc 4 (a) using GPIOB->BSRR and GPIOB->IDR.
+M7:  Scan buffers + 2-of-2 debounce + key on/off detection (key_detect.h/.c).
+     Remove all test code; firmware detects real key presses.
+M8:  5 ms TIM6 scan request counter (scan_scheduler.h/.c).
+     Replace HAL_Delay(5) with timer-driven ScanScheduler_TakeRequest() loop.
+M9:  Simultaneous key detection + strict all-release latch + ErrorRollOver report.
+M10: Macro key sequences: Ctrl+C, Ctrl+V, Ctrl+S, Alt+Tab.
+M11: Firmware repeat: KEY_EVENT_REPEAT every 200 ms per key.
+     Normal keys only; macro keys excluded by key table policy.
 ```
 
 ---
 
-## 20. Race Protection Between Main Convert and DataIn Callback
+## 20. Evidence Assets
 
-Because the USB HID DataIn callback can run while the main loop is checking HID state, the main convert loop must use a short critical section when checking and setting HID state.
+Evidence files for this project are stored under the project-specific `assets` folders.
 
-Pseudo logic:
+```txt
+assets/diagrams/05_usb_hid_keyboard/
+  wiring-diagram.drawio
+  wiring-diagram.svg
 
-```c
-void MainConvert_Run(void)
-{
-  uint8_t canStart = 0U;
+assets/screenshots/05_usb_hid_keyboard/
+  prototype-wiring.png
+  usbview-hid-descriptor.png
+  wireshark-usb-enumeration-hid-descriptors.png
+  wireshark-usb-hid-report-when-press-1.png
+  wireshark-usb-hid-null-report.png
+  wireshark-usb-hid-report-when-press-Alt-Tab.png
+  wireshark-usb-hid-rollover-report.png
 
-  __disable_irq();
+assets/logs/05_usb_hid_keyboard/
+  05_usb_hid_keyboard_WireShark_enum_reports_macros.txt
+  05_usb_hid_keyboard_usvView_device_descriptor.txt
 
-  if ((gHidTxState == HID_TX_IDLE) && (gHidSequence.active == 0U)) {
-    gHidTxState = HID_TX_BUSY;
-    gHidSequence.active = 1U;
-    canStart = 1U;
-  }
-
-  __enable_irq();
-
-  if (canStart == 0U) {
-    return;
-  }
-
-  /* Pop key event, convert first report, send. */
-  /* If no event exists, restore HID state to idle. */
-}
+assets/reports/05_usb_hid_keyboard/
+  05_usb_hid_keyboard.pdf
+  05_usb_hid_keyboard.txt
 ```
 
-The callback never takes a new event from the ring buffer. It only continues the current HID sequence.
+Evidence purpose:
+
+```txt
+wiring-diagram.svg
+  Shows the intended wiring between the USB breakout, keypad module, and NUCLEO-G0B1RE.
+
+prototype-wiring.png
+  Shows the real breadboard setup used during bring-up.
+
+usbview-hid-descriptor.png
+  Confirms the device enumerates as a USB HID keyboard and exposes the expected HID interface / endpoint.
+
+wireshark-usb-enumeration-hid-descriptors.png
+  Shows the host reading Device, Configuration, HID, and HID Report descriptors.
+
+wireshark-usb-hid-report-when-press-1.png
+wireshark-usb-hid-null-report.png
+  Confirm key-down followed by null report.
+
+wireshark-usb-hid-report-when-press-Alt-Tab.png
+  Confirms the Alt+Tab macro sequence.
+
+wireshark-usb-hid-rollover-report.png
+  Confirms the ErrorRollOver report for simultaneous-key error handling.
+```
+
+### USBPcap capture scope
+
+Wireshark USBPcap captures USB transfers at the Windows host / URB level. It is useful for confirming descriptor requests and HID report payloads, but it is not a replacement for a hardware USB protocol analyzer.
+
+This project uses USBPcap evidence to confirm:
+
+```txt
+- GET_DESCRIPTOR / SET_CONFIGURATION / SET_IDLE
+- HID Report Descriptor request
+- Interrupt IN endpoint 0x81
+- 8-byte HID keyboard reports
+- key-down followed by null report
+- macro sequences
+- ErrorRollOver report
+```
+
+USBPcap evidence is not used to analyze low-level bus packets such as SOF, ACK, NAK, STALL timing, or DATA0 / DATA1 toggle behavior.
 
 ---
 
-## 21. Main Loop Structure
-
-Final main loop structure:
-
-```c
-while (1) {
-  MainScanDetect_Run();
-  MainConvert_Run();
-}
-```
-
-`MainScanDetect_Run()` handles pending 5 ms scan requests:
-
-```c
-void MainScanDetect_Run(void)
-{
-  while (gScanRequestCount != 0U) {
-    __disable_irq();
-    gScanRequestCount--;
-    __enable_irq();
-
-    MatrixScanDetect_Run5ms();
-  }
-}
-```
-
-`MainConvert_Run()` handles one HID event if the USB HID transmit state is idle.
-
-The USB DataIn callback handles the remaining reports of the current sequence.
-
----
-
-## 22. Suggested Module Structure
+## 21. Current Limitations
 
 ```txt
-Core/Src/main.c
-Core/Src/matrix_scan.c
-Core/Src/key_detect.c
-Core/Src/key_ring_buffer.c
-Core/Src/key_table.c
-Core/Src/hid_keyboard_convert.c
-Core/Src/usb_hid_transport.c
-
-Core/Inc/matrix_scan.h
-Core/Inc/key_detect.h
-Core/Inc/key_ring_buffer.h
-Core/Inc/key_table.h
-Core/Inc/hid_keyboard_convert.h
-Core/Inc/usb_hid_transport.h
-```
-
-Module roles:
-
-```txt
-matrix_scan.c:
-  GPIOB register-based matrix scan
-  scan buffer update
-  raw simultaneous-key detection
-
-key_detect.c:
-  CheckKeyOff
-  CheckRepeat
-  CheckKeyOn
-  ErrorRecoveryCheck
-
-key_ring_buffer.c:
-  key event put/get
-
-key_table.c:
-  keyLoc -> HID usage / macro id / repeat policy
-
-hid_keyboard_convert.c:
-  key event -> HID report sequence
-
-usb_hid_transport.c:
-  USB HID SendReport wrapper
-  HID transmit state
-  DataIn callback bridge
-```
-
----
-
-## 23. Bring-Up Milestones
-
-```txt
-M1: Generate USB_DEVICE HID project and build successfully.
-M2: Wire target USB D-/D+/GND to PA11/PA12/GND and confirm enumeration.
-M3: Convert CubeMX HID mouse/template descriptor into keyboard report descriptor.
-M4: Send fixed report: A down + null report.
-M5: Configure PB0-PB7 GPIO labels/modes for 4x4 matrix.
-M6: Implement register-based ScanMatrix() using GPIOB->BSRR and GPIOB->IDR.
-M7: Implement 5 ms timer scan request counter.
-M8: Implement 4 scan buffers and normal debounce path.
-M9: Implement CheckKeyOff -> CheckRepeat -> CheckKeyOn.
-M10: Implement key ring buffer storing event + keyLoc.
-M11: Implement key table and normal key conversion.
-M12: Implement macro sequences Ctrl+C / Ctrl+V / Ctrl+S / Alt+Tab.
-M13: Implement simultaneous-key ErrorRollOver report.
-M14: Implement ErrorRecoveryCheck.
-M15: Add README evidence logs, screenshots, and project page.
-```
-
----
-
-## 24. Final Design Summary
-
-```txt
-Input:
-  4x4 matrix keypad without per-key diode
-
-USB:
-  USB_DEVICE HID class
-  Target USB pins PA11/PA12 connected to external USB D-/D+
-  Board powered from ST-LINK CN2 during bring-up
-
-GPIO:
-  Rows    PB0-PB3, output push-pull, default High
-  Columns PB4-PB7, input pull-up
-
-Scan:
-  Timer period 5 ms
-  Main scans only when scan request counter is non-zero
-  GPIO access by register, not HAL
-  Row settle delay by a few explicit __NOP() instructions
-  The exact NOP count should be verified by oscilloscope or logic analyzer
-
-Debounce:
-  4 scan buffers
-  Normal path uses 2 newest buffers
-  Recovery path uses all 4 buffers
-
-Detection order:
-  CheckKeyOff()
-  CheckRepeat()
-  CheckKeyOn()
-
-Error:
-  If >= 2 keys are detected in the same raw scan:
-    set simultaneous error
-    enqueue ErrorRollOver event
-    skip key off / repeat / key on for that scan
-
-Recovery:
-  If simultaneous condition remains, return
-  Otherwise run recovery-specific key off / repeat / stable key check
-  Normal key may be accepted after strict 4-buffer stability
-  Macro key must be released and pressed again
-
-Ring buffer:
-  Stores key event + keyLoc only
-  Does not store ASCII
-  Does not store HID report bytes
-
-Convert:
-  Main convert pops key event
-  Fetches key info from key table
-  Starts normal / macro / error sequence
-  Sends first report
-
-USB DataIn callback:
-  Does not pop new key event
-  Sends next report of current sequence only
-  Clears HID busy when sequence ends
+- Board is powered through ST-LINK CN2 during bring-up.
+- Target USB breakout currently uses D-, D+, and GND only.
+- USB VBUS / 5V from the target USB cable is not connected in this project setup.
+- Keymap is fixed at build time.
+- Matrix keypad has no per-key diode, so firmware uses a single-key / all-release error policy instead of NKRO.
+- ErrorRollOver has no LED or buzzer feedback in this project.
+- Evidence was captured on Windows 11.
 ```

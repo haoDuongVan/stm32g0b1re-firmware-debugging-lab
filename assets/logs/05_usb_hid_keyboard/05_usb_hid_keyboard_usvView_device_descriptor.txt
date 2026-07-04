@@ -1,0 +1,86 @@
+Is Port Debug Capable:            no
+Companion Port Number:            26
+Companion Hub Symbolic Link Name: USB#ROOT_HUB30#4&10ea92fe&0&0#{f18a0e88-c30c-11d0-8815-00a0c906bed8}
+Protocols Supported:
+ USB 1.1:                         yes
+ USB 2.0:                         yes
+ USB 3.0:                         no
+
+Device Power State:               PowerDeviceD0
+
+       ---===>Device Information<===---
+English product name: "STM32 USB HID 4x4 Macro Keypad"
+
+ConnectionStatus:                  
+Current Config Value:              0x01  -> Device Bus Speed: Full (is not SuperSpeed or higher capable)
+Device Address:                    0x2D
+Open Pipes:                           1
+
+          ===>Device Descriptor<===
+bLength:                           0x12
+bDescriptorType:                   0x01
+bcdUSB:                          0x0200
+bDeviceClass:                      0x00  -> This is an Interface Class Defined Device
+bDeviceSubClass:                   0x00
+bDeviceProtocol:                   0x00
+bMaxPacketSize0:                   0x40 = (64) Bytes
+idVendor:                        0x0483 = STMicroelectronics
+idProduct:                       0x572B
+bcdDevice:                       0x0200
+iManufacturer:                     0x01
+     English (United States)  "Hao Embedded Lab"
+iProduct:                          0x02
+     English (United States)  "STM32 USB HID 4x4 Macro Keypad"
+iSerialNumber:                     0x03
+     English (United States)  "000000000001"
+bNumConfigurations:                0x01
+
+          ---===>Open Pipes<===---
+
+          ===>Endpoint Descriptor<===
+bLength:                           0x07
+bDescriptorType:                   0x05
+bEndpointAddress:                  0x81  -> Direction: IN - EndpointID: 1
+bmAttributes:                      0x03  -> Interrupt Transfer Type
+wMaxPacketSize:                  0x0008 = 0x08 bytes
+bInterval:                         0x0A
+
+       ---===>Full Configuration Descriptor<===---
+
+          ===>Configuration Descriptor<===
+bLength:                           0x09
+bDescriptorType:                   0x02
+wTotalLength:                    0x0022  -> Validated
+bNumInterfaces:                    0x01
+bConfigurationValue:               0x01
+iConfiguration:                    0x00
+bmAttributes:                      0xC0  -> Self Powered
+MaxPower:                          0x32 = 100 mA
+
+          ===>Interface Descriptor<===
+bLength:                           0x09
+bDescriptorType:                   0x04
+bInterfaceNumber:                  0x00
+bAlternateSetting:                 0x00
+bNumEndpoints:                     0x01
+bInterfaceClass:                   0x03  -> HID Interface Class
+bInterfaceSubClass:                0x01
+bInterfaceProtocol:                0x01
+iInterface:                        0x00
+
+          ===>HID Descriptor<===
+bLength:                           0x09
+bDescriptorType:                   0x21
+bcdHID:                          0x0111
+bCountryCode:                      0x00
+bNumDescriptors:                   0x01
+bDescriptorType:                   0x22 (Report Descriptor)
+wDescriptorLength:               0x002D
+
+          ===>Endpoint Descriptor<===
+bLength:                           0x07
+bDescriptorType:                   0x05
+bEndpointAddress:                  0x81  -> Direction: IN - EndpointID: 1
+bmAttributes:                      0x03  -> Interrupt Transfer Type
+wMaxPacketSize:                  0x0008 = 0x08 bytes
+bInterval:                         0x0A

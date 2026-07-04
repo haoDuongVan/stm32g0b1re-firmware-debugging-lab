@@ -1,0 +1,104 @@
+Configuration	05_usb_hid_keyboard
+STM32CubeMX 	6.14.0
+Date	07/04/2026
+MCU	STM32G0B1RETx
+
+
+
+PERIPHERALS	MODES	FUNCTIONS	PINS
+RCC	BYPASS Clock Source	RCC_OSC_IN	PF0-OSC_IN (PF0)
+RCC	Crystal/Ceramic Resonator	RCC_OSC32_IN	PC14-OSC32_IN (PC14)
+RCC	Crystal/Ceramic Resonator	RCC_OSC32_OUT	PC15-OSC32_OUT (PC15)
+SYS	Serial Wire	SYS_SWCLK	PA14-BOOT0
+SYS	Serial Wire	SYS_SWDIO	PA13
+SYS	SysTick	SYS_VS_Systick	VP_SYS_VS_Systick
+SYS	Dead Battery Signals disabled	SYS_VS_DBSignals	VP_SYS_VS_DBSignals
+USART2	Asynchronous	USART2_RX	PA3
+USART2	Asynchronous	USART2_TX	PA2
+USB_DRD_FS	Device_Only_FS	USB_DM	PA11 [PA9]
+USB_DRD_FS	Device_Only_FS	USB_DP	PA12 [PA10]
+
+
+
+Pin Nb	PINs	FUNCTIONs	LABELs
+3	PC13	GPIO_EXTI13	B1 [blue push button]
+4	PC14-OSC32_IN (PC14)	RCC_OSC32_IN	
+5	PC15-OSC32_OUT (PC15)	RCC_OSC32_OUT	
+10	PF0-OSC_IN (PF0)	RCC_OSC_IN	MCO
+19	PA2	USART2_TX	USART2_TX [STLK_TX]
+20	PA3	USART2_RX	USART2_RX [STLK_RX]
+22	PA5	GPIO_Output	LED_GREEN
+27	PB0	GPIO_Output	MATRIX_ROW0
+28	PB1	GPIO_Output	MATRIX_ROW1
+29	PB2	GPIO_Output	MATRIX_ROW2
+43	PA11 [PA9]	USB_DM	
+44	PA12 [PA10]	USB_DP	
+45	PA13	SYS_SWDIO	TMS
+46	PA14-BOOT0	SYS_SWCLK	TCK
+57	PB3	GPIO_Output	MATRIX_ROW3
+58	PB4	GPIO_Input	MATRIX_COL0
+59	PB5	GPIO_Input	MATRIX_COL1
+60	PB6	GPIO_Input	MATRIX_COL2
+61	PB7	GPIO_Input	MATRIX_COL3
+PERIPHERALS	MODES	FUNCTIONS	PINS
+RCC	BYPASS Clock Source	RCC_OSC_IN	PF0-OSC_IN (PF0)
+RCC	Crystal/Ceramic Resonator	RCC_OSC32_IN	PC14-OSC32_IN (PC14)
+RCC	Crystal/Ceramic Resonator	RCC_OSC32_OUT	PC15-OSC32_OUT (PC15)
+SYS	Serial Wire	SYS_SWCLK	PA14-BOOT0
+SYS	Serial Wire	SYS_SWDIO	PA13
+SYS	SysTick	SYS_VS_Systick	VP_SYS_VS_Systick
+SYS	Dead Battery Signals disabled	SYS_VS_DBSignals	VP_SYS_VS_DBSignals
+USART2	Asynchronous	USART2_RX	PA3
+USART2	Asynchronous	USART2_TX	PA2
+USB_DRD_FS	Device_Only_FS	USB_DM	PA11 [PA9]
+USB_DRD_FS	Device_Only_FS	USB_DP	PA12 [PA10]
+
+
+
+Pin Nb	PINs	FUNCTIONs	LABELs
+3	PC13	GPIO_EXTI13	B1 [blue push button]
+4	PC14-OSC32_IN (PC14)	RCC_OSC32_IN	
+5	PC15-OSC32_OUT (PC15)	RCC_OSC32_OUT	
+10	PF0-OSC_IN (PF0)	RCC_OSC_IN	MCO
+19	PA2	USART2_TX	USART2_TX [STLK_TX]
+20	PA3	USART2_RX	USART2_RX [STLK_RX]
+22	PA5	GPIO_Output	LED_GREEN
+27	PB0	GPIO_Output	MATRIX_ROW0
+28	PB1	GPIO_Output	MATRIX_ROW1
+29	PB2	GPIO_Output	MATRIX_ROW2
+43	PA11 [PA9]	USB_DM	
+44	PA12 [PA10]	USB_DP	
+45	PA13	SYS_SWDIO	TMS
+46	PA14-BOOT0	SYS_SWCLK	TCK
+57	PB3	GPIO_Output	MATRIX_ROW3
+58	PB4	GPIO_Input	MATRIX_COL0
+59	PB5	GPIO_Input	MATRIX_COL1
+60	PB6	GPIO_Input	MATRIX_COL2
+61	PB7	GPIO_Input	MATRIX_COL3
+
+
+
+SOFTWARE PROJECT
+
+Project Settings : 
+Project Name : 05_usb_hid_keyboard
+Project Folder : C:\Users\haodu\dev\embedded\repo\stm32g0b1re-firmware-debugging-lab\firmware\05_usb_hid_keyboard
+Toolchain / IDE : STM32CubeIDE
+Firmware Package Name and Version : STM32Cube FW_G0 V1.6.3
+
+
+Code Generation Settings : 
+STM32Cube MCU packages and embedded software packs : Copy only the necessary library files
+Generate peripheral initialization as a pair of '.c/.h' files per peripheral : No
+Backup previously generated files when re-generating : No
+Delete previously generated files when not re-generated : Yes
+Set all free pins as analog (to optimize the power consumption) : No
+
+
+Toolchains Settings : 
+Compiler Optimizations : 
+
+
+
+
+

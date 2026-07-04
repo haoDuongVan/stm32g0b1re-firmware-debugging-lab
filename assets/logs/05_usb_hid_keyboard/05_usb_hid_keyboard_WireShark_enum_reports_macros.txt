@@ -1,0 +1,2622 @@
+No.     Time           Source                Destination           Protocol Length Info
+      1 0.000000       host                  1.23.0                USB      36     GET DESCRIPTOR Request DEVICE
+
+Frame 1: 36 bytes on wire (288 bits), 36 bytes captured (288 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffbc082324f010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_GET_DESCRIPTOR_FROM_DEVICE (0x000b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x80, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0000 = Endpoint number: 0
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 8
+    [Response in: 2]
+    Control transfer stage: Setup (0)
+Setup Data
+
+No.     Time           Source                Destination           Protocol Length Info
+      2 0.000378       1.23.0                host                  USB      46     GET DESCRIPTOR Response DEVICE
+
+Frame 2: 46 bytes on wire (368 bits), 46 bytes captured (368 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffbc082324f010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x80, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0000 = Endpoint number: 0
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 18
+    [Request in: 1]
+    [Time from request: 0.000378000 seconds]
+    Control transfer stage: Complete (3)
+DEVICE DESCRIPTOR
+
+No.     Time           Source                Destination           Protocol Length Info
+      3 0.000432       host                  1.23.0                USB      36     GET DESCRIPTOR Request CONFIGURATION
+
+Frame 3: 36 bytes on wire (288 bits), 36 bytes captured (288 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffbc0832686010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_GET_DESCRIPTOR_FROM_DEVICE (0x000b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x80, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0000 = Endpoint number: 0
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 8
+    [Response in: 4]
+    Control transfer stage: Setup (0)
+Setup Data
+
+No.     Time           Source                Destination           Protocol Length Info
+      4 0.000667       1.23.0                host                  USB      37     GET DESCRIPTOR Response CONFIGURATION
+
+Frame 4: 37 bytes on wire (296 bits), 37 bytes captured (296 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffbc0832686010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x80, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0000 = Endpoint number: 0
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 9
+    [Request in: 3]
+    [Time from request: 0.000235000 seconds]
+    Control transfer stage: Complete (3)
+CONFIGURATION DESCRIPTOR
+
+No.     Time           Source                Destination           Protocol Length Info
+      5 0.000727       host                  1.23.0                USB      36     GET DESCRIPTOR Request CONFIGURATION
+
+Frame 5: 36 bytes on wire (288 bits), 36 bytes captured (288 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffbc0822f6e010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_GET_DESCRIPTOR_FROM_DEVICE (0x000b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x80, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0000 = Endpoint number: 0
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 8
+    [Response in: 6]
+    Control transfer stage: Setup (0)
+Setup Data
+
+No.     Time           Source                Destination           Protocol Length Info
+      6 0.000961       1.23.0                host                  USB      62     GET DESCRIPTOR Response CONFIGURATION
+
+Frame 6: 62 bytes on wire (496 bits), 62 bytes captured (496 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffbc0822f6e010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x80, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0000 = Endpoint number: 0
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 34
+    [Request in: 5]
+    [Time from request: 0.000234000 seconds]
+    Control transfer stage: Complete (3)
+CONFIGURATION DESCRIPTOR
+INTERFACE DESCRIPTOR (0.0): class HID
+HID DESCRIPTOR
+ENDPOINT DESCRIPTOR
+
+No.     Time           Source                Destination           Protocol Length Info
+      7 0.001009       host                  1.23.0                USB      36     SET CONFIGURATION Request
+
+Frame 7: 36 bytes on wire (288 bits), 36 bytes captured (288 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffbc0820bee010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_SELECT_CONFIGURATION (0x0000)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x00, Direction: OUT
+        0... .... = Direction: OUT (0)
+        .... 0000 = Endpoint number: 0
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 8
+    [Response in: 8]
+    Control transfer stage: Setup (0)
+Setup Data
+
+No.     Time           Source                Destination           Protocol Length Info
+      8 0.001963       1.23.0                host                  USB      28     SET CONFIGURATION Response
+
+Frame 8: 28 bytes on wire (224 bits), 28 bytes captured (224 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffbc0820bee010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_SELECT_CONFIGURATION (0x0000)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x00, Direction: OUT
+        0... .... = Direction: OUT (0)
+        .... 0000 = Endpoint number: 0
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 0
+    [Request in: 7]
+    [Time from request: 0.000954000 seconds]
+    Control transfer stage: Complete (3)
+
+No.     Time           Source                Destination           Protocol Length Info
+      9 0.001985       host                  1.23.0                USBHID   36     SET_IDLE Request
+
+Frame 9: 36 bytes on wire (288 bits), 36 bytes captured (288 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffbc07d4089010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x00, Direction: OUT
+        0... .... = Direction: OUT (0)
+        .... 0000 = Endpoint number: 0
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 8
+    [Response in: 10]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+
+No.     Time           Source                Destination           Protocol Length Info
+     10 0.002180       1.23.0                host                  USBHID   28     SET_IDLE Response
+
+Frame 10: 28 bytes on wire (224 bits), 28 bytes captured (224 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffbc07d4089010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x00, Direction: OUT
+        0... .... = Direction: OUT (0)
+        .... 0000 = Endpoint number: 0
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 0
+    [Request in: 9]
+    [Time from request: 0.000195000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     11 0.002591       host                  1.23.0                USBHID   36     GET DESCRIPTOR Request HID Report
+
+Frame 11: 36 bytes on wire (288 bits), 36 bytes captured (288 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffbc0829984010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_GET_DESCRIPTOR_FROM_INTERFACE (0x0028)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x80, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0000 = Endpoint number: 0
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 8
+    [Response in: 12]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+
+No.     Time           Source                Destination           Protocol Length Info
+     12 0.002824       1.23.0                host                  USBHID   73     GET DESCRIPTOR Response HID Report
+
+Frame 12: 73 bytes on wire (584 bits), 73 bytes captured (584 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffbc0829984010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x80, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0000 = Endpoint number: 0
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 45
+    [Request in: 11]
+    [Time from request: 0.000233000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+HID Report
+
+No.     Time           Source                Destination           Protocol Length Info
+     13 0.005952       host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 13: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 15]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     14 0.006045       host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 14: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 17]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     15 16.762943      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 15: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 13]
+    [Time from request: 16.756991000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 00001e0000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 1e0000000000
+        0001 1110 = Usage: Keyboard 1 and ! (0x0007, 0x001e)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     16 16.762977      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 16: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 19]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     17 16.770904      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 17: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 14]
+    [Time from request: 16.764859000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     18 16.770930      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 18: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 21]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     19 17.346920      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 19: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 16]
+    [Time from request: 0.583943000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 00001f0000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 1f0000000000
+        0001 1111 = Usage: Keyboard 2 and @ (0x0007, 0x001f)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     20 17.346985      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 20: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 23]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     21 17.354915      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 21: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 18]
+    [Time from request: 0.583985000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     22 17.354962      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 22: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 25]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     23 17.954910      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 23: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 20]
+    [Time from request: 0.607925000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000200000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 200000000000
+        0010 0000 = Usage: Keyboard 3 and # (0x0007, 0x0020)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     24 17.954961      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 24: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 27]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     25 17.962909      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 25: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 22]
+    [Time from request: 0.607947000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     26 17.962935      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 26: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 29]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     27 18.578926      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 27: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 24]
+    [Time from request: 0.623965000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000210000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 210000000000
+        0010 0001 = Usage: Keyboard 4 and $ (0x0007, 0x0021)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     28 18.579007      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 28: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 31]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     29 18.586918      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 29: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 26]
+    [Time from request: 0.623983000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     30 18.586955      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 30: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 33]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     31 20.186906      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 31: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 28]
+    [Time from request: 1.607899000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000040000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 040000000000
+        0000 0100 = Usage: Keyboard a and A (0x0007, 0x0004)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     32 20.186945      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 32: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 35]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     33 20.194913      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 33: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 30]
+    [Time from request: 1.607958000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     34 20.194943      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 34: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 37]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     35 20.658953      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 35: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 32]
+    [Time from request: 0.472008000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000050000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 050000000000
+        0000 0101 = Usage: Keyboard b and B (0x0007, 0x0005)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     36 20.659003      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 36: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 39]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     37 20.666913      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 37: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 34]
+    [Time from request: 0.471970000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     38 20.666948      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 38: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 41]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     39 21.114935      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 39: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 36]
+    [Time from request: 0.455932000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000060000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 060000000000
+        0000 0110 = Usage: Keyboard c and C (0x0007, 0x0006)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     40 21.115030      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 40: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 43]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     41 21.122906      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 41: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 38]
+    [Time from request: 0.455958000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     42 21.122942      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 42: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 45]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     43 21.642921      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 43: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 40]
+    [Time from request: 0.527891000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000070000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 070000000000
+        0000 0111 = Usage: Keyboard d and D (0x0007, 0x0007)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     44 21.642994      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 44: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 47]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     45 21.650907      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 45: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 42]
+    [Time from request: 0.527965000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     46 21.650942      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 46: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 49]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     47 22.738902      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 47: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 44]
+    [Time from request: 1.095908000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000280000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 280000000000
+        0010 1000 = Usage: Keyboard Return (ENTER) (0x0007, 0x0028)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     48 22.738931      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 48: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 51]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     49 22.746912      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 49: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 46]
+    [Time from request: 1.095970000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     50 22.746944      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 50: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 53]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     51 23.154902      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 51: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 48]
+    [Time from request: 0.415971000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 00002c0000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 2c0000000000
+        0010 1100 = Usage: Keyboard Spacebar (0x0007, 0x002c)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     52 23.154931      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 52: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 55]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     53 23.162907      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 53: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 50]
+    [Time from request: 0.415963000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     54 23.162936      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 54: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 57]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     55 23.530924      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 55: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 52]
+    [Time from request: 0.375993000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 00002a0000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 2a0000000000
+        0010 1010 = Usage: Keyboard DELETE (Backspace) (0x0007, 0x002a)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     56 23.531006      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 56: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 59]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     57 23.538923      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 57: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 54]
+    [Time from request: 0.375987000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     58 23.538953      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 58: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 61]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     59 23.858906      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 59: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 56]
+    [Time from request: 0.327900000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 00002b0000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 2b0000000000
+        0010 1011 = Usage: Keyboard Tab (0x0007, 0x002b)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     60 23.858953      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 60: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 63]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     61 23.866911      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 61: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 58]
+    [Time from request: 0.327958000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     62 23.866928      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 62: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 65]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     63 24.434918      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 63: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 60]
+    [Time from request: 0.575965000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0100060000000000
+    .... ...1 = Key: LeftControl (0xe0): DOWN
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 060000000000
+        0000 0110 = Usage: Keyboard c and C (0x0007, 0x0006)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     64 24.434974      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 64: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 67]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     65 24.442909      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 65: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 62]
+    [Time from request: 0.575981000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     66 24.442938      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 66: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 69]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     67 24.866922      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 67: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 64]
+    [Time from request: 0.431948000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0100190000000000
+    .... ...1 = Key: LeftControl (0xe0): DOWN
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 190000000000
+        0001 1001 = Usage: Keyboard v and V (0x0007, 0x0019)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     68 24.867003      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 68: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 71]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     69 24.874914      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 69: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 66]
+    [Time from request: 0.431976000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     70 24.874962      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 70: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 73]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     71 25.674913      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 71: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 68]
+    [Time from request: 0.807910000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0100160000000000
+    .... ...1 = Key: LeftControl (0xe0): DOWN
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 160000000000
+        0001 0110 = Usage: Keyboard s and S (0x0007, 0x0016)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     72 25.674976      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 72: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 75]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     73 25.682905      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 73: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 70]
+    [Time from request: 0.807943000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     74 25.682934      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 74: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 77]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     75 29.434929      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 75: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 72]
+    [Time from request: 3.759953000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0400000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .1.. = Key: LeftAlt (0xe2): DOWN
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     76 29.435002      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 76: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 79]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     77 29.442910      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 77: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 74]
+    [Time from request: 3.759976000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 04002b0000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .1.. = Key: LeftAlt (0xe2): DOWN
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 2b0000000000
+        0010 1011 = Usage: Keyboard Tab (0x0007, 0x002b)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     78 29.442956      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 78: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 81]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     79 29.450909      1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 79: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 76]
+    [Time from request: 0.015907000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     80 29.450941      host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 80: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 83]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     81 264.194965     1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 81: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 78]
+    [Time from request: 234.752009000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0100160000000000
+    .... ...1 = Key: LeftControl (0xe0): DOWN
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 160000000000
+        0001 0110 = Usage: Keyboard s and S (0x0007, 0x0016)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     82 264.195006     host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 82: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 85]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     83 264.202965     1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 83: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 80]
+    [Time from request: 234.752024000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     84 264.202998     host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 84: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Response in: 87]
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     85 264.730961     1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 85: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 82]
+    [Time from request: 0.535955000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000010101010101
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 010101010101
+        0000 0001 = Usage: Keyboard ErrorRollOver (0x0007, 0x0001)
+        0000 0001 = Usage: Keyboard ErrorRollOver (0x0007, 0x0001)
+        0000 0001 = Usage: Keyboard ErrorRollOver (0x0007, 0x0001)
+        0000 0001 = Usage: Keyboard ErrorRollOver (0x0007, 0x0001)
+        0000 0001 = Usage: Keyboard ErrorRollOver (0x0007, 0x0001)
+        0000 0001 = Usage: Keyboard ErrorRollOver (0x0007, 0x0001)
+
+No.     Time           Source                Destination           Protocol Length Info
+     86 264.730996     host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 86: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc08294ea760
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [bInterfaceClass: HID (0x03)]
+
+No.     Time           Source                Destination           Protocol Length Info
+     87 264.738969     1.23.1                host                  USB      35     URB_INTERRUPT in
+
+Frame 87: 35 bytes on wire (280 bits), 35 bytes captured (280 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: 1.23.1]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 8
+    [Request in: 84]
+    [Time from request: 0.535971000 seconds]
+    [bInterfaceClass: HID (0x03)]
+HID Data: 0000000000000000
+    .... ...0 = Key: LeftControl (0xe0): UP
+    .... ..0. = Key: LeftShift (0xe1): UP
+    .... .0.. = Key: LeftAlt (0xe2): UP
+    .... 0... = Key: LeftGUI (0xe3): UP
+    ...0 .... = Key: RightControl (0xe4): UP
+    ..0. .... = Key: RightShift (0xe5): UP
+    .0.. .... = Key: RightAlt (0xe6): UP
+    0... .... = Key: RightGUI (0xe7): UP
+    Padding: 00
+    Array: 000000000000
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+        0000 0000 = Usage: Reserved (no event indicated) (0x0007, 0x0000)
+
+No.     Time           Source                Destination           Protocol Length Info
+     88 264.739015     host                  1.23.1                USB      27     URB_INTERRUPT in
+
+Frame 88: 27 bytes on wire (216 bits), 27 bytes captured (216 bits) on interface \\.\USBPcap1, id 0
+USB URB
+    [Source: host]
+    [Destination: 1.23.1]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffbc0823240010
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 23
+    Endpoint: 0x81, Direction: IN
+        1... .... = Direction: IN (1)
+        .... 0001 = Endpoint number: 1
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [bInterfaceClass: HID (0x03)]
