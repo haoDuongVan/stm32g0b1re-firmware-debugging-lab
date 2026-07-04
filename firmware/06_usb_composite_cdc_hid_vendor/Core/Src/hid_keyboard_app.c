@@ -12,7 +12,7 @@
 #include "key_event_queue.h"
 #include "matrix_scan.h"
 #include "scan_scheduler.h"
-#include "usbd_hid.h"
+#include "usbd_composite.h"
 #include "stm32g0xx_hal.h"
 #include <stddef.h>
 
@@ -70,9 +70,9 @@ bool UsbHidTransport_SendReport(const uint8_t report[USB_HID_KEYBOARD_REPORT_SIZ
 
   if (primask == 0U) { __enable_irq(); }
 
-  if (USBD_HID_SendReport(&hUsbDeviceFS,
-                          (uint8_t *)report,
-                          USB_HID_KEYBOARD_REPORT_SIZE) != USBD_OK)
+  if (USBD_COMPOSITE_HID_SendReport(&hUsbDeviceFS,
+                                    (uint8_t *)report,
+                                    USB_HID_KEYBOARD_REPORT_SIZE) != USBD_OK)
   {
     uint32_t pm2 = __get_PRIMASK();
     __disable_irq();
