@@ -246,7 +246,7 @@ void HidKeyboardConvert_Run(void)
     }
 
     entry = KeyTable_Get(event.keyLoc);
-    CdcLog_Printf("[KEY] loc=%u event=%d usage=0x%02X\r\n",
+    CdcLog_Printf("[HID] keyLoc=%u event=%d usage=0x%02X\r\n",
                   event.keyLoc, event.type,
                   (entry != NULL) ? entry->usage : 0U);
 

@@ -5,14 +5,16 @@
  *      Author: haodu
  *
  * EP0 vendor request handler.
- * All requests use bmRequestType = 0xC0 (GET, device→host)
- * or 0x40 (SET, host→device) with recipient = Device.
+ * All requests use bmRequestType = 0xC0 (control IN, device→host).
+ * Parameters are carried in wValue / wIndex; firmware always returns a
+ * response struct so the host knows immediately whether the command succeeded.
  *
  * Request table:
- *   0x01  GET_FIRMWARE_INFO  GET  → 16-byte VendorFwInfo_t
- *   0x02  SET_REPEAT_ENABLE  SET  wValue: 0 = disable, 1 = enable key repeat
- *   0x03  SET_LED_MODE       SET  wValue: 0 = off, 1 = on, 2 = blink
- *   0x04  START_RAM_DUMP     GET  → 8-byte VendorRamDumpInfo_t (addr + size)
+ *   bReq  Name               wValue          wIndex   Response
+ *   0x01  GET_FIRMWARE_INFO  -               -        FirmwareInfo_t
+ *   0x02  SET_REPEAT_ENABLE  0=off 1=on      -        VendorResponse_t
+ *   0x03  SET_LED_MODE       0–3 (see enum)  -        VendorResponse_t
+ *   0x04  START_RAM_DUMP     -               -        VendorDumpResponse_t
  */
 
 #ifndef INC_VENDOR_CMD_H_
@@ -30,47 +32,87 @@
 #define VENDOR_REQ_SET_LED_MODE        0x03U
 #define VENDOR_REQ_START_RAM_DUMP      0x04U
 
+/* Firmware feature flags reported in FirmwareInfo_t.featureFlags */
+#define FW_FEATURE_HID_KEYBOARD        (1UL << 0)
+#define FW_FEATURE_CDC_LOG             (1UL << 1)
+#define FW_FEATURE_VENDOR_BULK         (1UL << 2)
+#define FW_FEATURE_REPEAT_CONTROL      (1UL << 3)
+
+/* Magic word embedded in FirmwareInfo_t to let the tool validate the response */
+#define FW_INFO_MAGIC                  0x43363050UL  /* "P06C" little-endian */
+
+/* Status codes returned in VendorResponse_t.status / VendorDumpResponse_t.status */
+#define VENDOR_STATUS_OK               0U
+#define VENDOR_STATUS_ERROR            1U
+
 /* Exported types ------------------------------------------------------------*/
 
 typedef enum
 {
-  LED_MODE_OFF   = 0U,
-  LED_MODE_ON    = 1U,
-  LED_MODE_BLINK = 2U,
+  LED_MODE_OFF        = 0U,
+  LED_MODE_ON         = 1U,
+  LED_MODE_BLINK_SLOW = 2U,
+  LED_MODE_BLINK_FAST = 3U,
 } VendorLedMode_t;
 
-/* GET_FIRMWARE_INFO response — 16 bytes */
+/*
+ * Common response for SET commands (SET_REPEAT_ENABLE, SET_LED_MODE).
+ * status: 0 = success, 1 = failure.
+ * request: echoed bRequest so the host can match response to command.
+ */
 typedef struct __attribute__((packed))
 {
-  uint8_t major;
-  uint8_t minor;
-  uint8_t patch;
-  uint8_t reserved;
-  char    name[12];   /* null-padded ASCII, e.g. "CompositeKbd" */
-} VendorFwInfo_t;
+  uint8_t status;
+  uint8_t request;
+} VendorResponse_t;
 
-/* START_RAM_DUMP response — 8 bytes */
+/*
+ * Response for START_RAM_DUMP.
+ * On success, acceptedLength tells the host exactly how many bytes to read
+ * from the Vendor Bulk IN endpoint.  On failure, acceptedLength = 0.
+ */
 typedef struct __attribute__((packed))
 {
-  uint32_t addr;
-  uint32_t size;
-} VendorRamDumpInfo_t;
+  uint8_t  status;
+  uint8_t  request;
+  uint32_t acceptedLength;
+} VendorDumpResponse_t;
+
+/*
+ * Response for GET_FIRMWARE_INFO - fixed-size struct, no length prefix.
+ * The host validates the response by checking magic == FW_INFO_MAGIC.
+ */
+typedef struct __attribute__((packed))
+{
+  uint32_t magic;               /* FW_INFO_MAGIC */
+  uint16_t versionMajor;
+  uint16_t versionMinor;
+  uint32_t featureFlags;        /* FW_FEATURE_* bitmask */
+  uint8_t  hidInterface;        /* interface number: 0 */
+  uint8_t  cdcControlInterface; /* interface number: 1 */
+  uint8_t  cdcDataInterface;    /* interface number: 2 */
+  uint8_t  vendorInterface;     /* interface number: 3 */
+  uint8_t  hidInEp;             /* 0x81 */
+  uint8_t  cdcLogInEp;          /* 0x83 */
+  uint8_t  vendorBulkInEp;      /* 0x84 */
+  uint8_t  reserved;
+} FirmwareInfo_t;
 
 /* Exported functions --------------------------------------------------------*/
 
-// Reset state to defaults and drive LED off; call once from HID_Keyboard_Init
+/* Reset state to defaults and drive LED off; call once from HID_Keyboard_Init */
 void VendorCmd_Init(void);
 
-// Return true when key repeat events should be forwarded to HID
+/* Return true when key repeat events should be forwarded to HID */
 bool VendorCmd_GetRepeatEnable(void);
 
-// Return the currently active LED mode
+/* Return the currently active LED mode */
 VendorLedMode_t VendorCmd_GetLedMode(void);
 
 /*
  * Drive the LED pin to match the current LED mode.
- * BLINK: toggles every 250 ms; call from the main loop at high rate.
- * OFF / ON: sets the pin immediately; idempotent on repeated calls.
+ * BLINK_SLOW toggles every 500 ms, BLINK_FAST every 125 ms.
+ * Call from the main loop at high rate; idempotent for OFF/ON.
  */
 void VendorCmd_UpdateLed(void);
 
@@ -81,16 +123,16 @@ void VendorCmd_UpdateLed(void);
 uint8_t VendorCmd_HandleSetup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
 
 /*
- * Called from Composite_DataIn when EP4 IN completes a transfer.
+ * Called from Composite_DataIn (ISR) when EP4 IN completes a transfer.
  * Queues the next chunk immediately to keep the bulk pipeline full.
- * Safe to call from interrupt context — does not touch CDC log.
+ * Does not touch CDC log - ISR-safe.
  */
 void VendorDump_OnTxCplt(USBD_HandleTypeDef *pdev);
 
 /*
  * Called every iteration of HID_Keyboard_App (main loop).
- * Handles non-ISR work: logging the "done" message after the dump finishes.
- * Also queues the very first chunk when a dump is freshly armed.
+ * Kicks the first chunk after START_RAM_DUMP arms the dump, and logs
+ * completion once the ISR signals gDumpDone.
  */
 void VendorDump_Run(USBD_HandleTypeDef *pdev);
 
