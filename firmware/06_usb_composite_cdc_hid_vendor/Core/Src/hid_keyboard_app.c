@@ -14,6 +14,7 @@
 #include "scan_scheduler.h"
 #include "usbd_composite.h"
 #include "cdc_log.h"
+#include "vendor_cmd.h"
 #include "stm32g0xx_hal.h"
 #include <stddef.h>
 
@@ -113,6 +114,7 @@ void HID_Keyboard_Init(void)
   KeyDetect_Init();
   ScanScheduler_Init();
   CdcLog_Init();
+  VendorCmd_Init();
   HAL_TIM_Base_Start_IT(&htim6);
 }
 
@@ -132,4 +134,5 @@ void HID_Keyboard_App(void)
 
   HidKeyboardConvert_Run();
   CdcLog_Run();
+  VendorCmd_UpdateLed();
 }

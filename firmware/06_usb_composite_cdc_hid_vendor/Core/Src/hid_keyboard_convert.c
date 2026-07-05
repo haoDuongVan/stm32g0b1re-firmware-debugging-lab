@@ -9,6 +9,7 @@
 #include "hid_keyboard_convert.h"
 
 #include "cdc_log.h"
+#include "vendor_cmd.h"
 #include "hid_keyboard_app.h"
 #include "hid_keyboard_report.h"
 #include "key_event_queue.h"
@@ -238,6 +239,12 @@ void HidKeyboardConvert_Run(void)
   {
   case KEY_EVENT_ON:
   case KEY_EVENT_REPEAT:
+    if ((event.type == KEY_EVENT_REPEAT) && !VendorCmd_GetRepeatEnable())
+    {
+      (void)KeyEventQueue_Pop(NULL);
+      return;
+    }
+
     entry = KeyTable_Get(event.keyLoc);
     CdcLog_Printf("[KEY] loc=%u event=%d usage=0x%02X\r\n",
                   event.keyLoc, event.type,
