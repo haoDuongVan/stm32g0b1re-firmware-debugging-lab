@@ -642,7 +642,12 @@ uint8_t USBD_COMPOSITE_HID_SendReport(USBD_HandleTypeDef *pdev,
 
   hcomp->hidTxBusy = true;
 
-  (void)USBD_LL_Transmit(pdev, COMP_HID_EPIN_ADDR, report, len);
+  uint8_t ret = USBD_LL_Transmit(pdev, COMP_HID_EPIN_ADDR, report, len);
+  if (ret != (uint8_t)USBD_OK)
+  {
+    hcomp->hidTxBusy = false;
+    return ret;
+  }
 
   return (uint8_t)USBD_OK;
 }
@@ -677,7 +682,12 @@ uint8_t USBD_COMPOSITE_CDC_Transmit(USBD_HandleTypeDef *pdev,
   hcomp->cdcTxLen  = len;
   hcomp->cdcTxBusy = true;
 
-  (void)USBD_LL_Transmit(pdev, COMP_CDC_DATA_IN_EP_ADDR, hcomp->cdcTxBuf, len);
+  uint8_t ret = USBD_LL_Transmit(pdev, COMP_CDC_DATA_IN_EP_ADDR, hcomp->cdcTxBuf, len);
+  if (ret != (uint8_t)USBD_OK)
+  {
+    hcomp->cdcTxBusy = false;
+    return ret;
+  }
 
   return (uint8_t)USBD_OK;
 }
@@ -735,7 +745,12 @@ uint8_t USBD_COMPOSITE_VENDOR_Transmit(USBD_HandleTypeDef *pdev,
   (void)memcpy(hcomp->vendorTxBuf, buf, len);
   hcomp->vendorTxBusy = true;
 
-  (void)USBD_LL_Transmit(pdev, COMP_VENDOR_DATA_IN_EP_ADDR, hcomp->vendorTxBuf, len);
+  uint8_t ret = USBD_LL_Transmit(pdev, COMP_VENDOR_DATA_IN_EP_ADDR, hcomp->vendorTxBuf, len);
+  if (ret != (uint8_t)USBD_OK)
+  {
+    hcomp->vendorTxBusy = false;
+    return ret;
+  }
 
   return (uint8_t)USBD_OK;
 }
