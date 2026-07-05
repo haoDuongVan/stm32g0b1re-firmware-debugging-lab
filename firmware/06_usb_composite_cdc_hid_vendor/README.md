@@ -166,8 +166,9 @@ Typical log examples:
 [HID] repeat enabled
 [VREQ] GET_FIRMWARE_INFO SUCCESS
 [VREQ] SET_REPEAT_ENABLE value=0 SUCCESS
-[VREQ] START_RAM_DUMP offset=0 len=256 SUCCESS
-[BULK] RAM dump complete len=256
+[VREQ] START_RAM_DUMP len=147456 SUCCESS
+[BULK] RAM dump started len=147456
+[BULK] RAM dump complete len=147456
 [ERR] simultaneous key detected
 ```
 
@@ -221,31 +222,31 @@ Firmware info response:
 
 typedef struct __attribute__((packed))
 {
-    uint32_t magic;
-    uint16_t versionMajor;
-    uint16_t versionMinor;
-    uint32_t featureFlags;
+    uint32_t magic;              /* offset  0: magic word, must equal FW_INFO_MAGIC */
+    uint16_t versionMajor;       /* offset  4 */
+    uint16_t versionMinor;       /* offset  6 */
+    uint32_t featureFlags;       /* offset  8: bitmask, see FW_FEATURE_* defines */
 
-    uint8_t  hidInterface;
-    uint8_t  cdcControlInterface;
-    uint8_t  cdcDataInterface;
-    uint8_t  vendorInterface;
+    uint8_t  hidInterface;       /* offset 12 */
+    uint8_t  cdcControlInterface;/* offset 13 */
+    uint8_t  cdcDataInterface;   /* offset 14 */
+    uint8_t  vendorInterface;    /* offset 15 */
 
-    uint8_t  hidInEp;
-    uint8_t  cdcLogInEp;
-    uint8_t  vendorBulkInEp;
-    uint8_t  reserved;
-} FirmwareInfo_t;
+    uint8_t  hidInEp;            /* offset 16 */
+    uint8_t  cdcLogInEp;         /* offset 17 */
+    uint8_t  vendorBulkInEp;     /* offset 18 */
+    uint8_t  reserved;           /* offset 19 */
+} FirmwareInfo_t; /* total: 20 bytes */
 ```
 
 Command table:
 
 | Command | bRequest | Direction | wValue | wIndex | EP0 response |
 |---|---:|---|---:|---:|---|
-| GET_FIRMWARE_INFO | 0x01 | IN `0xC0` | 0 | 0 | `FirmwareInfo_t` |
+| GET_FIRMWARE_INFO | 0x01 | IN `0xC0` | 0 | 0 | `FirmwareInfo_t` (20 byte) |
 | SET_REPEAT_ENABLE | 0x02 | IN `0xC0` | 0=disable, 1=enable | 0 | `VendorResponse_t` |
-| START_RAM_DUMP | 0x03 | IN `0xC0` | offset | length | `VendorDumpResponse_t` |
-| SET_LED_MODE | 0x04 | IN `0xC0` | 0=off, 1=on, 2=blink slow, 3=blink fast | 0 | `VendorResponse_t` |
+| SET_LED_MODE | 0x03 | IN `0xC0` | 0=off, 1=on, 2=blink slow, 3=blink fast | 0 | `VendorResponse_t` |
+| START_RAM_DUMP | 0x04 | IN `0xC0` | 0 | 0 | `VendorDumpResponse_t` |
 
 SET-like commands use control IN because parameters fit in `wValue`/`wIndex` and the host tool needs a direct success/failure response from the device.
 
@@ -258,20 +259,16 @@ EP0 starts a dump request. The actual dump payload is transferred through Vendor
 Dump flow:
 
 ```txt
-1. Host sends START_RAM_DUMP through EP0 vendor request.
-2. Firmware validates offset and length.
-3. Firmware prepares a dump state.
-4. EP0 returns VendorDumpResponse_t.
-5. Host reads acceptedLength bytes from Vendor Bulk IN.
+1. Host sends START_RAM_DUMP via EP0 vendor request (no wValue/wIndex needed).
+2. Firmware sets dump source to SRAM1 base (0x20000000) and size (144 KB).
+3. EP0 returns VendorDumpResponse_t with acceptedLength = 147456.
+4. Host reads exactly acceptedLength bytes from Vendor Bulk IN (EP4).
+5. DataIn callback drives the stream — 64 bytes per packet until done.
 ```
 
-The dump source is a validated debug buffer or a validated RAM range. Arbitrary memory access is not used in this project.
-
-Example debug buffer:
-
-```c
-static uint8_t gDebugDumpBuffer[256];
-```
+The dump always covers the full SRAM1 region (144 KB). The host does not pass
+an arbitrary address or length — firmware sets both to avoid reading invalid
+memory. Throughput measured at ~421 KB/s on USB Full Speed.
 
 ---
 
@@ -565,8 +562,11 @@ USBView shows multiple interfaces in one USB device.
 
 ```txt
 - CDC OUT endpoint exists for standard CDC ACM behavior, but command control uses EP0 vendor requests.
-- Vendor interface on Windows may require WinUSB/libusb binding through Zadig.
-- RAM dump uses a validated debug buffer or validated RAM range, not arbitrary memory access.
+- Vendor interface on Windows requires libusbK/WinUSB binding via Zadig before the Python tool can use IF3.
+- RAM dump always covers the full SRAM1 region (144 KB fixed). The host cannot pass a custom address or length.
+- USBD_MAX_NUM_INTERFACES is set to 3U in usbd_conf.h (HID+CDC_Comm+CDC_Data). The Vendor interface (IF3)
+  has no ST class driver entry, so the macro is not incremented for it. This is intentional but should be
+  noted if the ST middleware is updated.
 - Bus-powered standalone mode is not in the main scope.
 - Persistent config in flash is not in the main scope.
 - FreeRTOS and UART DMA logger are not in the main scope.
