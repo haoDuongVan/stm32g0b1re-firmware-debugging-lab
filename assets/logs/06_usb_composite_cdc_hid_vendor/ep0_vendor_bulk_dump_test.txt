@@ -1,0 +1,25 @@
+PS C:\Users\haodu\dev\embedded\repo\stm32g0b1re-firmware-debugging-lab\tools> python .\vendor_test.py
+Found: 'Hao Embedded Lab' / 'STM32 USB Composite Keypad+CDC'  [0x0483:0x572b]
+
+[1] GET_FIRMWARE_INFO
+  firmware: v0.6.0  name='CompositeKB'
+
+[2] SET_LED_MODE: ON for 1 s, then BLINK for 3 s, then OFF
+  led_mode → ON
+  led_mode → BLINK
+  led_mode → OFF
+
+[3] SET_REPEAT_ENABLE = False
+  repeat_enable → False
+     Hold any keypad key for 2 s - repeat should NOT fire.
+
+[4] SET_REPEAT_ENABLE = True
+  repeat_enable → True
+     Hold any keypad key for 2 s - repeat should fire again.
+
+[5] START_RAM_DUMP: bulk stream to ram_dump.bin
+  ram_dump: addr=0x20000000  size=147456 bytes (144 KB)
+  147456/147456 bytes (100%)
+  saved to 'ram_dump.bin'
+
+All tests passed.
