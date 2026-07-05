@@ -11,6 +11,7 @@
  *   EP2 IN  0x82  CDC Notification  IN        8 bytes  16 ms
  *   EP3 OUT 0x03  CDC Data OUT               64 bytes
  *   EP3 IN  0x83  CDC Data IN                64 bytes
+ *   EP4 IN  0x84  Vendor Bulk IN             64 bytes  (RAM dump stream)
  */
 
 #ifndef USB_DEVICE_APP_USBD_COMPOSITE_H_
@@ -23,12 +24,16 @@
 /* Exported defines ----------------------------------------------------------*/
 
 /* Configuration descriptor total length */
-#define USBD_COMPOSITE_CFG_DESC_SIZE   100U
+#define USBD_COMPOSITE_CFG_DESC_SIZE   116U
 
 /* HID sub-class */
 #define COMP_HID_EPIN_ADDR             0x81U
 #define COMP_HID_EPIN_SIZE             0x08U
 #define COMP_HID_FS_BINTERVAL          0x0AU   /* 10 ms */
+
+/* Vendor bulk sub-class */
+#define COMP_VENDOR_DATA_IN_EP_ADDR    0x84U
+#define COMP_VENDOR_DATA_EP_SIZE       0x40U   /* 64 bytes */
 
 /* CDC sub-class */
 #define COMP_CDC_CMD_EPIN_ADDR         0x82U
@@ -82,6 +87,10 @@ typedef struct
   uint32_t                   hidProtocol;
   uint32_t                   hidIdleState;
   volatile bool              hidTxBusy;
+
+  /* Vendor bulk IN state */
+  volatile bool              vendorTxBusy;
+  uint8_t                    vendorTxBuf[COMP_VENDOR_DATA_EP_SIZE];
 } USBD_Composite_HandleTypeDef;
 
 /* Exported variables --------------------------------------------------------*/
@@ -111,5 +120,16 @@ bool USBD_COMPOSITE_CDC_IsHostConnected(USBD_HandleTypeDef *pdev);
 
 /* Return true when the CDC IN endpoint is free */
 bool USBD_COMPOSITE_CDC_IsTxIdle(USBD_HandleTypeDef *pdev);
+
+/*
+ * Transmit one chunk of vendor bulk data on EP4 IN.
+ * Returns USBD_OK if accepted, USBD_BUSY if a previous TX is pending.
+ */
+uint8_t USBD_COMPOSITE_VENDOR_Transmit(USBD_HandleTypeDef *pdev,
+                                        const uint8_t *buf,
+                                        uint16_t len);
+
+/* Return true when the vendor bulk IN endpoint is free */
+bool USBD_COMPOSITE_VENDOR_IsTxIdle(USBD_HandleTypeDef *pdev);
 
 #endif /* USB_DEVICE_APP_USBD_COMPOSITE_H_ */

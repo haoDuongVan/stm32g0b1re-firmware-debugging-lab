@@ -80,4 +80,18 @@ void VendorCmd_UpdateLed(void);
  */
 uint8_t VendorCmd_HandleSetup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
 
+/*
+ * Called from Composite_DataIn when EP4 IN completes a transfer.
+ * Queues the next chunk immediately to keep the bulk pipeline full.
+ * Safe to call from interrupt context — does not touch CDC log.
+ */
+void VendorDump_OnTxCplt(USBD_HandleTypeDef *pdev);
+
+/*
+ * Called every iteration of HID_Keyboard_App (main loop).
+ * Handles non-ISR work: logging the "done" message after the dump finishes.
+ * Also queues the very first chunk when a dump is freshly armed.
+ */
+void VendorDump_Run(USBD_HandleTypeDef *pdev);
+
 #endif /* INC_VENDOR_CMD_H_ */

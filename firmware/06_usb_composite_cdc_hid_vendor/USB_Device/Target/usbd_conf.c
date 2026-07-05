@@ -456,8 +456,9 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
    * 0x0C0   0x08  EP1 IN   0x81  HID interrupt IN   8 B
    * 0x0C8   0x08  EP2 IN   0x82  CDC notification interrupt IN   8 B
    * 0x0D0   0x40  EP3 OUT  0x03  CDC data bulk OUT  64 B
-   * 0x110   0x40  EP3 IN   0x83  CDC data bulk IN   64 B
-   * 0x150   —     first free byte (336 B used of 2048 B)
+   * 0x110   0x40  EP3 IN   0x83  CDC data bulk IN      64 B
+   * 0x150   0x40  EP4 IN   0x84  Vendor data bulk IN   64 B
+   * 0x190   —     first free byte (400 B used of 2048 B)
    */
 
   /* EP0 — control (64 bytes each direction) */
@@ -475,6 +476,9 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
 
   /* EP3 IN  — CDC Data bulk IN  (64 bytes) */
   HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData, 0x83, PCD_SNG_BUF, 0x110);
+
+  /* EP4 IN  — Vendor Data bulk IN (64 bytes) */
+  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData, 0x84, PCD_SNG_BUF, 0x150);
 
   /* USER CODE END EndPoint_Configuration */
 

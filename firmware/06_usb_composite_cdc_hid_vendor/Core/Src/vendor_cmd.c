@@ -10,6 +10,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "vendor_cmd.h"
+#include "usbd_composite.h"
 #include "cdc_log.h"
 #include "main.h"
 #include "usbd_ctlreq.h"
@@ -38,12 +39,27 @@ static VendorLedMode_t gLedMode;
 static VendorFwInfo_t      gFwInfo;
 static VendorRamDumpInfo_t gRamDumpInfo;
 
+/*
+ * RAM dump state machine.
+ * gDumpActive  — set by START_RAM_DUMP, cleared from DataIn once all bytes sent.
+ * gDumpOffset  — bytes queued so far; advanced inside the DataIn callback.
+ * gDumpDone    — set from DataIn when the last chunk is transmitted;
+ *                read and cleared by VendorDump_Run in the main loop so the
+ *                CDC log call stays out of interrupt context.
+ */
+static bool            gDumpActive;
+static uint32_t        gDumpOffset;
+static volatile bool   gDumpDone;
+
 /* Function definitions ------------------------------------------------------*/
 
 void VendorCmd_Init(void)
 {
   gRepeatEnable = true;
   gLedMode      = LED_MODE_OFF;
+  gDumpActive   = false;
+  gDumpOffset   = 0U;
+  gDumpDone     = false;
 
   (void)memset(&gFwInfo, 0, sizeof(gFwInfo));
   gFwInfo.major = FW_MAJOR;
@@ -142,7 +158,10 @@ uint8_t VendorCmd_HandleSetup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *re
       len = (uint16_t)MIN(sizeof(gRamDumpInfo), req->wLength);
       pbuf = (const uint8_t *)&gRamDumpInfo;
       (void)USBD_CtlSendData(pdev, (uint8_t *)pbuf, len);
-      CdcLog_Printf("[VND] ram_dump addr=0x%08lX size=%lu\r\n",
+      /* Arm the bulk stream - VendorDump_Run() will feed EP4 IN each loop */
+      gDumpActive = true;
+      gDumpOffset = 0U;
+      CdcLog_Printf("[VND] ram_dump start addr=0x%08lX size=%lu\r\n",
                     (unsigned long)gRamDumpInfo.addr,
                     (unsigned long)gRamDumpInfo.size);
       break;
@@ -153,4 +172,62 @@ uint8_t VendorCmd_HandleSetup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *re
   }
 
   return (uint8_t)USBD_OK;
+}
+
+/* Private helper — queue one chunk; call from ISR or main loop */
+static void VendorDump_SendNextChunk(USBD_HandleTypeDef *pdev)
+{
+  uint32_t remaining = gRamDumpInfo.size - gDumpOffset;
+  uint16_t chunkLen  = (remaining > COMP_VENDOR_DATA_EP_SIZE)
+                       ? (uint16_t)COMP_VENDOR_DATA_EP_SIZE
+                       : (uint16_t)remaining;
+
+  const uint8_t *src = (const uint8_t *)(uintptr_t)(gRamDumpInfo.addr + gDumpOffset);
+
+  if (USBD_COMPOSITE_VENDOR_Transmit(pdev, src, chunkLen) == (uint8_t)USBD_OK)
+  {
+    gDumpOffset += chunkLen;
+
+    if (gDumpOffset >= gRamDumpInfo.size)
+    {
+      gDumpActive = false;
+      gDumpDone   = true;   /* signal main loop to log — not safe here */
+    }
+  }
+}
+
+/*
+ * Called from Composite_DataIn (ISR context) when EP4 IN transfer completes.
+ * Immediately queues the next chunk to keep the pipeline full.
+ * No CDC log here — ISR must not touch the ring buffer.
+ */
+void VendorDump_OnTxCplt(USBD_HandleTypeDef *pdev)
+{
+  if (!gDumpActive)
+  {
+    return;
+  }
+
+  VendorDump_SendNextChunk(pdev);
+}
+
+/*
+ * Called every main loop iteration.
+ * Kicks off the very first chunk after START_RAM_DUMP arms the dump,
+ * and prints the completion log once gDumpDone is set by the ISR.
+ */
+void VendorDump_Run(USBD_HandleTypeDef *pdev)
+{
+  if (gDumpDone)
+  {
+    gDumpDone = false;
+    CdcLog_Printf("[VND] ram_dump done\r\n");
+    return;
+  }
+
+  /* Send the first chunk — subsequent chunks are driven by VendorDump_OnTxCplt */
+  if (gDumpActive && (gDumpOffset == 0U) && USBD_COMPOSITE_VENDOR_IsTxIdle(pdev))
+  {
+    VendorDump_SendNextChunk(pdev);
+  }
 }
