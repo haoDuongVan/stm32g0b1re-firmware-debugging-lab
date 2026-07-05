@@ -317,6 +317,7 @@ void HidKeyboardConvert_Run(void)
       break;
     }
 
+    CdcLog_Printf("[ERR] simultaneous key detected — ErrorRollOver\r\n");
     HidKeyboardReport_SetErrorRollOver(&gReport);
 
     if (UsbHidTransport_SendReport(HidKeyboardReport_GetData(&gReport)))
