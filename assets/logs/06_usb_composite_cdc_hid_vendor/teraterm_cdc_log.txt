@@ -1,0 +1,16 @@
+[BOOT] Project06 composite firmware started
+[VREQ] GET_FIRMWARE_INFO SUCCESS
+[VREQ] SET_LED_MODE mode=1 SUCCESS
+[VREQ] SET_LED_MODE mode=2 SUCCESS
+[VREQ] SET_LED_MODE mode=3 SUCCESS
+[VREQ] SET_LED_MODE mode=0 SUCCESS
+[VREQ] SET_REPEAT_ENABLE value=0 SUCCESS
+[VREQ] SET_REPEAT_ENABLE value=1 SUCCESS
+[VREQ] START_RAM_DUMP len=147456 SUCCESS
+[BULK] RAM dump started len=147456
+[BULK] RAM dump complete len=147456
+[HID] keyLoc=0 event=0 usage=0x1E
+[HID] keyLoc=1 event=0 usage=0x1F
+[HID] keyLoc=12 event=0 usage=0x00
+[HID] keyLoc=13 event=0 usage=0x00
+[HID] keyLoc=11 event=0 usage=0x2B
