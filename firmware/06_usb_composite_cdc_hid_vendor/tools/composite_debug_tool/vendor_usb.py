@@ -108,24 +108,35 @@ class VendorUsb:
     # ── Vendor commands ───────────────────────────────────────────────────────
 
     def get_firmware_info(self) -> dict | None:
-        """Send GET_FIRMWARE_INFO and parse the 16-byte FirmwareInfo_t response.
+        """Send GET_FIRMWARE_INFO and parse the 20-byte FirmwareInfo_t response.
 
-        Layout: magic(4) vMajor(2) vMinor(2) features(4)
-                hidIf(1) cdcCtrlIf(1) cdcDataIf(1) vendorIf(1)
-                hidEp(1) cdcEp(1) bulkEp(1) reserved(1)
+        Layout (packed, little-endian):
+            offset  0: magic        uint32  (4 bytes)  — must equal FW_INFO_MAGIC
+            offset  4: versionMajor uint16  (2 bytes)
+            offset  6: versionMinor uint16  (2 bytes)
+            offset  8: featureFlags uint32  (4 bytes)
+            offset 12: hidInterface       uint8
+            offset 13: cdcControlInterface uint8
+            offset 14: cdcDataInterface   uint8
+            offset 15: vendorInterface    uint8
+            offset 16: hidInEp            uint8
+            offset 17: cdcLogInEp         uint8
+            offset 18: vendorBulkInEp     uint8
+            offset 19: reserved           uint8
+        Total: 20 bytes — matches FirmwareInfo_t __attribute__((packed)) in vendor_cmd.h.
 
         Returns a dict with decoded fields, or None on failure/bad magic.
         """
-        data = self._ctrl(REQ_GET_FIRMWARE_INFO, length=16)
-        if data is None or len(data) < 16:
+        data = self._ctrl(REQ_GET_FIRMWARE_INFO, length=20)
+        if data is None or len(data) < 20:
             return None
 
         magic, v_major, v_minor, features = struct.unpack_from("<IHHI", data, 0)
         if magic != FW_INFO_MAGIC:
             return None   # wrong device or corrupted response
 
-        hid_if, cdc_ctrl_if, cdc_data_if, vendor_if = struct.unpack_from("BBBB", data, 8)
-        hid_ep, cdc_ep, bulk_ep, _rsv              = struct.unpack_from("BBBB", data, 12)
+        hid_if, cdc_ctrl_if, cdc_data_if, vendor_if = struct.unpack_from("BBBB", data, 12)
+        hid_ep, cdc_ep, bulk_ep, _rsv              = struct.unpack_from("BBBB", data, 16)
 
         feature_names = []
         if features & FW_FEATURE_HID_KEYBOARD: feature_names.append("HID")

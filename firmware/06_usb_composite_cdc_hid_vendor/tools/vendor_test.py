@@ -115,19 +115,21 @@ def check_vendor_response(data: bytes, expected_request: int) -> bool:
 
 
 def cmd_get_firmware_info(dev: usb.core.Device) -> None:
-    """GET_FIRMWARE_INFO - receive a 16-byte FirmwareInfo_t struct.
-    Validates the magic word and prints version, features, and EP map.
-    Layout: magic(4) versionMajor(2) versionMinor(2) featureFlags(4)
-            hidIf(1) cdcCtrlIf(1) cdcDataIf(1) vendorIf(1)
-            hidInEp(1) cdcLogInEp(1) vendorBulkInEp(1) reserved(1)
+    """GET_FIRMWARE_INFO - receive a 20-byte FirmwareInfo_t struct.
+    Validates the magic word and prints version, features, and EP/IF map.
+    Layout (packed, little-endian):
+        offset  0: magic(4) versionMajor(2) versionMinor(2) featureFlags(4)
+        offset 12: hidIf(1) cdcCtrlIf(1) cdcDataIf(1) vendorIf(1)
+        offset 16: hidInEp(1) cdcLogInEp(1) vendorBulkInEp(1) reserved(1)
+    Total: 20 bytes — matches FirmwareInfo_t __attribute__((packed)) in vendor_cmd.h.
     """
-    data = ctrl_get(dev, REQ_GET_FIRMWARE_INFO, length=16)
-    if len(data) < 16:
-        print(f"  [ERR] short response: {len(data)} bytes")
+    data = ctrl_get(dev, REQ_GET_FIRMWARE_INFO, length=20)
+    if len(data) < 20:
+        print(f"  [ERR] short response: {len(data)} bytes (expected 20)")
         return
     magic, v_major, v_minor, features = struct.unpack_from("<IHHI", data, 0)
-    hid_if, cdc_ctrl_if, cdc_data_if, vendor_if = struct.unpack_from("BBBB", data, 8)
-    hid_ep, cdc_ep, bulk_ep, _rsv              = struct.unpack_from("BBBB", data, 12)
+    hid_if, cdc_ctrl_if, cdc_data_if, vendor_if = struct.unpack_from("BBBB", data, 12)
+    hid_ep, cdc_ep, bulk_ep, _rsv              = struct.unpack_from("BBBB", data, 16)
 
     if magic != FW_INFO_MAGIC:
         print(f"  [ERR] bad magic: 0x{magic:08X} (expected 0x{FW_INFO_MAGIC:08X})")
