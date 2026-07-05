@@ -125,6 +125,7 @@ void CdcLog_Write(const char *buf, uint16_t len)
 void CdcLog_Printf(const char *fmt, ...)
 {
   char    scratch[CDC_LOG_PRINTF_MAX];
+  uint16_t outLen = 0U;
   va_list args;
 
   va_start(args, fmt);
@@ -133,6 +134,12 @@ void CdcLog_Printf(const char *fmt, ...)
 
   if (len > 0)
   {
-    CdcLog_Write(scratch, (uint16_t)len);
+    /* vsnprintf() returns the number of bytes that *would* have been written,
+     * which can exceed sizeof(scratch) when the formatted string is truncated.
+     * Clamp to the actual bytes present in scratch to avoid reading past the buffer. */
+    outLen = ((uint16_t)len < (uint16_t)sizeof(scratch))
+              ? (uint16_t)len
+              : (uint16_t)(sizeof(scratch) - 1U);
+    CdcLog_Write(scratch, outLen);
   }
 }
