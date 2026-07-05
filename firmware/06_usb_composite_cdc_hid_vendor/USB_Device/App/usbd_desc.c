@@ -66,7 +66,7 @@
 #define USBD_LANGID_STRING     1033
 #define USBD_MANUFACTURER_STRING      "Hao Embedded Lab"
 #define USBD_PID     22315
-#define USBD_PRODUCT_STRING           "STM32 USB Composite Keypad+CDC"
+#define USBD_PRODUCT_STRING           "STM32 USB Composite Keypad+CDC+Bulk"
 #define USBD_CONFIGURATION_STRING     "Composite Config"
 #define USBD_INTERFACE_STRING         "Composite Interface"
 #define USBD_SERIALNUMBER_STRING      "000000000001"

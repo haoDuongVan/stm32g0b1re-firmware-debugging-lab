@@ -1,5 +1,5 @@
 """
-vendor_test.py - EP0 vendor request smoke-test for STM32 USB Composite Keypad+CDC.
+vendor_test.py - EP0 vendor request smoke-test for STM32 USB Composite Keypad+CDC+Bulk.
 
 Exercises all four vendor commands implemented in firmware:
   - GET_FIRMWARE_INFO  : read firmware info struct (magic, version, features, EP map)
@@ -40,7 +40,7 @@ import usb.backend.libusb1
 
 # Must match USBD_VID / USBD_PID in usbd_desc.c
 VID = 0x0483   # STMicroelectronics
-PID = 0x572B   # STM32 USB Composite Keypad+CDC
+PID = 0x572B   # STM32 USB Composite Keypad+CDC+Bulk
 
 # All vendor commands use control IN: Device→Host | Vendor | Device
 VENDOR_GET = 0xC0
