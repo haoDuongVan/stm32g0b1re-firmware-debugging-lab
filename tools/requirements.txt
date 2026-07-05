@@ -1,0 +1,15 @@
+# Python dependencies for all host-side tools in this repository.
+#
+# Install with:
+#     pip install -r requirements.txt
+#
+# On Windows, libusb-package bundles libusb1.dll so no separate driver
+# install is required for basic USB access.  If ctrl_transfer fails with
+# a pipe error, use Zadig to install the WinUSB driver for the target device.
+
+# project 04 — uart_bootloader tools
+pyserial
+
+# project 06 — usb_composite vendor test
+pyusb
+libusb-package
