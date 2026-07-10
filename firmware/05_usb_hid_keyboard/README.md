@@ -655,3 +655,22 @@ USBPcap evidence is not used to analyze low-level bus packets such as SOF, ACK, 
 - ErrorRollOver has no LED or buzzer feedback in this project.
 - Evidence was captured on Windows 11.
 ```
+
+## 22. Role in the USB Series
+
+Project 05 is the HID keyboard baseline for the STM32 USB series.
+
+It proves the complete keypad scan pipeline and HID boot keyboard report path on real
+hardware, with Wireshark and USBView evidence.
+
+Project 06 extends this baseline into a composite device by adding:
+
+```txt
+- CDC ACM log channel (realtime firmware log)
+- EP0 vendor control (GET_INFO, SET_REPEAT, SET_LED, START_DUMP)
+- Vendor Bulk IN (RAM dump, ~421 KB/s)
+- Python GUI debug tool
+```
+
+The HID keyboard engine in Project 06 is reused from Project 05 without changes.
+
