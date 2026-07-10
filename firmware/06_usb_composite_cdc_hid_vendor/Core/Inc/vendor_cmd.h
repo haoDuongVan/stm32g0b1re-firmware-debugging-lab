@@ -117,7 +117,15 @@ VendorLedMode_t VendorCmd_GetLedMode(void);
 void VendorCmd_UpdateLed(void);
 
 /*
+ * Flush any pending CDC log event that was deferred by VendorCmd_HandleSetup.
+ * Must be called from the main loop - not ISR-safe.
+ */
+void VendorCmd_FlushPendingLog(void);
+
+/*
  * Handle one EP0 vendor Setup request.
+ * Runs in USB stack context. Does not call CdcLog_Printf directly;
+ * sets a pending log flag for VendorCmd_FlushPendingLog to consume.
  * Returns USBD_OK, or USBD_FAIL after calling USBD_CtlError for unknown requests.
  */
 uint8_t VendorCmd_HandleSetup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);

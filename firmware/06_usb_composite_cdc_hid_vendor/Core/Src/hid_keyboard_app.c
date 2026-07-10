@@ -135,5 +135,6 @@ void HID_Keyboard_App(void)
   HidKeyboardConvert_Run();
   CdcLog_Run();
   VendorDump_Run(&hUsbDeviceFS);
+  VendorCmd_FlushPendingLog();
   VendorCmd_UpdateLed();
 }
